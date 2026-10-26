@@ -35,9 +35,13 @@ Overlayt piirretään Accessibility Servicen omaan ikkunaan, joten "Näytä muid
 ```
 app/src/main/java/io/github/jessesaarinen/distractionkiller/
   MainActivity.kt          # käynnistys, näkymien vaihto
-  ui/HomeScreen.kt         # kotinäkymä (N12: käyttöönotto-opas + tila)
+  ui/HomeScreen.kt         # kotinäkymä: tunnistuksen tila (N12: käyttöönotto-opas)
+  ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/theme/Theme.kt        # kaikki värit
-  detection/               # N4–N6: Accessibility Service, merkit, ajastin
+  detection/AppMarkers.kt          # valvotut sovellukset (N5: lyhytvideonäkymän merkit)
+  detection/ScrollWatcherService.kt # N4: Accessibility Service
+  detection/InspectorLog.kt        # N4: tarkastelun loki muistissa (ei tallennu)
+  detection/                       # N6: ajastin
   interrupt/               # N7–N9: taso 1 ja taso 2 overlayt, hälytys, tehtävät
   data/                    # N10–N11: asetukset, loki, vienti
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
@@ -49,12 +53,12 @@ app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **M0 – Repo ja APK-build (27.–28.10.)**
-- ◐ N1 Gradle-projektin runko, kotinäkymä, `CLAUDE.md`, `AGENTS.md`, `PLAN.md`
-- ◐ N2 GitHub Actions: APK-build, `latest`-julkaisu, kiinteä allekirjoitusavain
+- ☑ N1 Gradle-projektin runko, kotinäkymä, `CLAUDE.md`, `AGENTS.md`, `PLAN.md`
+- ☑ N2 GitHub Actions: APK-build, `latest`-julkaisu, kiinteä allekirjoitusavain
 - ☐ N3 Asennus S21:lle ja tarkistus, että uusi build asentuu vanhan päälle
 
 **M1 – Tunnistuksen tarkistuspiste (29.–31.10.)**
-- ☐ N4 Accessibility Service + tarkastelunäkymä, joka listaa paketit, näkymä-ID:t ja tapahtumatyypit
+- ☑ N4 Accessibility Service + tarkastelunäkymä, joka listaa paketit, näkymä-ID:t ja tapahtumatyypit
 - ☐ N5 Selataan jokaista sovellusta minuutti, valitaan merkit, tarkistetaan että pyyhkäisyt näkyvät
 - ☐ Päätös sovelluksittain: vain lyhytvideonäkymä vai koko sovellus
 
