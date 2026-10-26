@@ -13,6 +13,14 @@ on:
 permissions:
   contents: write
 
+# One build per branch at a time, so two quick merges to main cannot update
+# the "latest" release at the same moment. On main a new build waits for the
+# running one (if several wait, only the newest runs). In a pull request a new
+# push stops the old, unneeded build.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
