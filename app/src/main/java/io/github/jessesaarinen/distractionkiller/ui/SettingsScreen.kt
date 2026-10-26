@@ -1,6 +1,5 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -155,13 +154,6 @@ fun SettingsScreen() {
             }
         }
     }
-}
-
-@StringRes
-private fun taskLabel(task: TaskType): Int = when (task) {
-    TaskType.BREATHING -> R.string.task_breathing
-    TaskType.QUESTION -> R.string.task_question
-    TaskType.PHYSICAL -> R.string.task_physical
 }
 
 @Composable

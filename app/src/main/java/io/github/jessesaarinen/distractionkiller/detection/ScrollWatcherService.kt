@@ -36,7 +36,6 @@ class ScrollWatcherService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        SettingsStore.init(this)
         interrupts = InterruptController(this)
         handler.postDelayed(tickRunnable, TICK_MS)
     }

@@ -14,11 +14,13 @@ private val Ink = Color(0xFF1F2A2E)
 private val Petrol = Color(0xFF2F6F6A)
 private val Peach = Color(0xFFE8A87C)
 private val InkQuiet = Color(0xFF5B6669)
+private val Sand = Color(0xFFEAE3D8)
 
 private val DarkBackground = Color(0xFF151C1E)
 private val DarkInk = Color(0xFFE9E5DF)
 private val PetrolLight = Color(0xFF7FB8B2)
 private val DarkInkQuiet = Color(0xFFA9B2B4)
+private val DarkSand = Color(0xFF223033)
 
 private val LightColors = lightColorScheme(
     primary = Petrol,
@@ -29,6 +31,9 @@ private val LightColors = lightColorScheme(
     onBackground = Ink,
     surface = Background,
     onSurface = Ink,
+    // Stat boxes and switch tracks.
+    surfaceVariant = Sand,
+    surfaceContainerHighest = Sand,
     onSurfaceVariant = InkQuiet,
 )
 
@@ -41,6 +46,8 @@ private val DarkColors = darkColorScheme(
     onBackground = DarkInk,
     surface = DarkBackground,
     onSurface = DarkInk,
+    surfaceVariant = DarkSand,
+    surfaceContainerHighest = DarkSand,
     onSurfaceVariant = DarkInkQuiet,
 )
 

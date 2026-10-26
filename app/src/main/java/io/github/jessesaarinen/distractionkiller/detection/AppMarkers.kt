@@ -19,4 +19,7 @@ object AppMarkers {
     val labels: List<String> = apps.map { it.label }.distinct()
 
     fun find(packageName: String): WatchedApp? = apps.firstOrNull { it.packageName == packageName }
+
+    /** The app's name for the event log, or the package name for an unknown app. */
+    fun label(packageName: String): String = find(packageName)?.label ?: packageName
 }

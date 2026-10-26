@@ -30,6 +30,7 @@ fun HomeScreen(
     onOpenAccessibilitySettings: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenStats: () -> Unit,
     onOpenInspector: () -> Unit,
 ) {
     Scaffold { innerPadding ->
@@ -86,6 +87,12 @@ fun HomeScreen(
                 Text(stringResource(R.string.home_open_settings))
             }
             OutlinedButton(
+                onClick = onOpenStats,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            ) {
+                Text(stringResource(R.string.home_open_stats))
+            }
+            OutlinedButton(
                 onClick = onOpenInspector,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
             ) {
@@ -109,6 +116,7 @@ private fun HomeScreenPreview() {
             onOpenAccessibilitySettings = {},
             onOpenAppInfo = {},
             onOpenSettings = {},
+            onOpenStats = {},
             onOpenInspector = {},
         )
     }
