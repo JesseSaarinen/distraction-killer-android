@@ -67,7 +67,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   data/Stats.kt                    # N11: tilastojen laskenta lokista
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
-.github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
+.github/workflows/build.yml           # yksikkötestit, lint, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
 ```
 
@@ -102,7 +102,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 **Messuversio (13.–25.11.)**
 - ☐ N14 RT8-palautteen perusteella tehtävät muutokset
 - ☐ N15 Messutila: automaattinen nollaus, nopea vaihto demoaikoihin
-- ☐ N16 Viimeistely, saavutettavuus, tilastojen visualisointi
+- ◐ N16 Viimeistely, saavutettavuus, tilastojen visualisointi. Android lint ajetaan CI:ssä (löydökset buildin lokissa)
 - ☐ N17 Tagi `demo` 25.11.
 
 ## Riskit
