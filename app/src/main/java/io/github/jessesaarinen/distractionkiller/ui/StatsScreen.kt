@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
@@ -62,6 +64,7 @@ fun StatsScreen(onShare: () -> Unit) {
                 text = stringResource(R.string.stats_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() },
             )
             if (summary.rounds == 0) {
                 Text(
@@ -191,7 +194,8 @@ private fun StatBox(
     extra: @Composable () -> Unit = {},
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        // A screen reader reads the number and its label together.
+        modifier = modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
@@ -227,7 +231,7 @@ private fun SectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 12.dp),
+        modifier = Modifier.padding(top = 12.dp).semantics { heading() },
     )
 }
 
@@ -236,7 +240,11 @@ private fun SectionTitle(text: String) {
 private fun TableRow(label: String, numbers: List<String>, header: Boolean = false) {
     val style = if (header) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyLarge
     val color = if (header) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        // A screen reader reads the whole row at once.
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(text = label, style = style, color = color, modifier = Modifier.weight(1f))
         for (number in numbers) {
             Text(

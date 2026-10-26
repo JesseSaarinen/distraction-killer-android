@@ -55,6 +55,16 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
 
+## 7. Ruudunlukija (valinnainen, N16)
+
+Asetukset → Esteettömyys → TalkBack päälle. Liiku pyyhkäisemällä oikealle.
+
+- [ ] Kotinäkymä: vaiheen ympyrä luetaan "Vaihe 1" tai "Vaihe 1, tehty". Otsikot ovat otsikoita (TalkBackin otsikkonavigointi hyppää niihin).
+- [ ] Tilastot: laatikko luetaan kerralla, esim. "50 %, …", ja taulukon rivi kokonaisena.
+- [ ] Banneri ilmoitetaan, kun se tulee näkyviin.
+- [ ] Hengitysharjoitus: TalkBack sanoo "Hengitä sisään" ja "Hengitä ulos" niiden vaihtuessa.
+- [ ] Asetukset: kun yrität poistaa viimeisen tehtävän, TalkBack lukee "Valitse vähintään yksi tehtävä."
+
 ## Jos jokin ei toimi
 
 - **APK ei asennu:** Auto Blocker on päällä. Jos puhelin sanoo "Sovellusta ei asennettu", puhelimessa on uudempi versio kuin asennettava (esim. vanha PR-build uudemman päälle). Asenna uusin, tai poista sovellus ensin, jolloin tilastot ja asetukset häviävät.

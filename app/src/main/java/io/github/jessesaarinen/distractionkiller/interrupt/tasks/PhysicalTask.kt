@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +58,8 @@ fun PhysicalTask(onDone: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(text = stringResource(challenge.icon), fontSize = 72.sp)
+        // Only illustrates the text below, so a screen reader skips it.
+        Text(text = stringResource(challenge.icon), fontSize = 72.sp, modifier = Modifier.clearAndSetSemantics {})
         Text(
             text = stringResource(challenge.text),
             style = MaterialTheme.typography.titleLarge,
