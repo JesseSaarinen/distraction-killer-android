@@ -55,4 +55,11 @@ object ShortVideoClassifier {
         if (app.playerIds.isEmpty()) return null
         return visibleIds.any { it in app.playerIds }
     }
+
+    /**
+     * Whether the feed shows a different item than at the last check, which
+     * means the user swiped. With nothing to compare (null) it is not a swipe.
+     */
+    fun isNewItem(previous: String?, current: String?): Boolean =
+        previous != null && current != null && previous != current
 }

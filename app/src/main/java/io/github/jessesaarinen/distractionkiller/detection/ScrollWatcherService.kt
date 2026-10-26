@@ -1,6 +1,7 @@
 package io.github.jessesaarinen.distractionkiller.detection
 
 import android.accessibilityservice.AccessibilityService
+import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -33,6 +34,10 @@ class ScrollWatcherService : AccessibilityService() {
      * Instagram's home feed, or the player leaving the screen clears it.
      */
     private var shortVideoApp: String? = null
+
+    /** The feed item on screen at the last player check, like "item 12", and when that was. */
+    private var feedItem: String? = null
+    private var feedItemAt = 0L
 
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
@@ -130,6 +135,50 @@ class ScrollWatcherService : AccessibilityService() {
         }
         val onScreen = ShortVideoClassifier.isPlayerOnScreen(packageName, visibleIds) == true
         setInFront(now, packageName, onScreen, if (onScreen) "player on screen" else "player not on screen")
+        checkFeedItem(now, root, app, onScreen)
+    }
+
+    /**
+     * Notes when a new item of the feed is on screen. That is a swipe even if
+     * the app sent no scroll event for it, which YouTube's lists may not do.
+     */
+    private fun checkFeedItem(now: Long, root: AccessibilityNodeInfo, app: WatchedApp, playerOnScreen: Boolean) {
+        val item = if (playerOnScreen) visibleFeedItem(root, app) else null
+        // After a gap (another app, screen off, our banner) there is nothing to compare with.
+        val previous = if (now - feedItemAt <= 2 * TICK_MS) feedItem else null
+        feedItem = item
+        feedItemAt = now
+        if (!ShortVideoClassifier.isNewItem(previous, item)) return
+        ScrollTimer.onSwipe(now)
+        InspectorLog.add(
+            InspectorEntry(now, app.packageName, EventKind.ITEM, detail = "$item → swipe (new item on screen)")
+        )
+    }
+
+    /**
+     * The feed item that fills most of the screen, as a key that changes with
+     * every swipe: its place in the list if the list tells it, otherwise the view.
+     */
+    private fun visibleFeedItem(root: AccessibilityNodeInfo, app: WatchedApp): String? {
+        val feed = app.swipeIds
+            .flatMap { root.findAccessibilityNodeInfosByViewId("${app.packageName}:id/$it") }
+            .firstOrNull { it.isVisibleToUser } ?: return null
+        val feedBounds = Rect()
+        feed.getBoundsInScreen(feedBounds)
+        var best: AccessibilityNodeInfo? = null
+        var bestHeight = 0
+        for (i in 0 until feed.childCount) {
+            val child = feed.getChild(i) ?: continue
+            if (!child.isVisibleToUser) continue
+            val bounds = Rect()
+            child.getBoundsInScreen(bounds)
+            if (!bounds.intersect(feedBounds) || bounds.height() <= bestHeight) continue
+            best = child
+            bestHeight = bounds.height()
+        }
+        val item = best ?: return null
+        val row = item.collectionItemInfo?.rowIndex ?: -1
+        return if (row >= 0) "item $row" else "view ${item.hashCode()}"
     }
 
     /** Notes whether this app's short videos are in front. Changes show in the inspector. */

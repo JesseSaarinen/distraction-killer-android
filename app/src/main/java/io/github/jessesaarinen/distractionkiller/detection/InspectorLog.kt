@@ -16,10 +16,11 @@ import java.time.format.DateTimeFormatter
 
 /**
  * What an inspector entry is about: an accessibility event, a snapshot, the
- * short videos coming to or leaving the front, a reached level, an outcome,
- * a note about the app itself (started, log cleared) or a caught error.
+ * short videos coming to or leaving the front, a new item of the feed on
+ * screen, a reached level, an outcome, a note about the app itself (started,
+ * log cleared) or a caught error.
  */
-enum class EventKind { SCROLLED, WINDOW, CONTENT, SNAPSHOT, FRONT, LEVEL1, LEVEL2, OUTCOME, NOTE, ERROR }
+enum class EventKind { SCROLLED, WINDOW, CONTENT, SNAPSHOT, FRONT, ITEM, LEVEL1, LEVEL2, OUTCOME, NOTE, ERROR }
 
 /**
  * One line in the inspector. Only technical data: app package, event kind,
