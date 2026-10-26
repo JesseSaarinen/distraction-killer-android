@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
+import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
 
 // Inspector (task N4): lists what the scroll watcher sees, so we can find
 // the view IDs of the short-video screens (task N5). Back gesture returns home.
@@ -32,6 +33,7 @@ fun InspectorScreen(
 ) {
     val entries by InspectorLog.entries.collectAsState()
     val counts by InspectorLog.counts.collectAsState()
+    val timer by ScrollTimer.state.collectAsState()
 
     Scaffold { innerPadding ->
         LazyColumn(
@@ -71,6 +73,17 @@ fun InspectorScreen(
                     OutlinedButton(onClick = { InspectorLog.clear() }, modifier = Modifier.heightIn(min = 48.dp)) {
                         Text(stringResource(R.string.inspector_clear))
                     }
+                }
+            }
+            item {
+                Text(
+                    text = stringResource(R.string.inspector_timer, timer.activeSeconds, timer.phase.name),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            item {
+                OutlinedButton(onClick = { ScrollTimer.reset() }, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.inspector_reset_timer))
                 }
             }
             item {

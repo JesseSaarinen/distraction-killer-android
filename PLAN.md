@@ -17,7 +17,7 @@ Natiivi Android-sovellus, joka huomaa lyhytvideoiden selauksen TikTokissa, Insta
    | Instagram Reels | `com.instagram.android` | Reels-näkymän ID (ehdokas: sisältää `clips_viewer`) |
    | YouTube Shorts | `com.google.android.youtube` | Shorts-näkymän ID (ehdokas: alkaa `reel_`) |
 
-3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana.
+3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana. 10 minuutin tauko aloittaa laskennan alusta.
 4. **Taso 1**, kun väli täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s).
 5. **Taso 2**, jos selaus jatkuu bannerin jälkeen 30 s (demotila 10 s): koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike), *Ohita* 5 s jälkeen.
 6. **Lopetus** painaa Koti-näppäintä käyttäjän puolesta. Jatkaminen nollaa ajastimen.
@@ -35,13 +35,14 @@ Overlayt piirretään Accessibility Servicen omaan ikkunaan, joten "Näytä muid
 ```
 app/src/main/java/io/github/jessesaarinen/distractionkiller/
   MainActivity.kt          # käynnistys, näkymien vaihto
+  Config.kt                # kaikki ajat ja vaihtoehdot (vrt. web-demon config.js)
   ui/HomeScreen.kt         # kotinäkymä: tunnistuksen tila (N12: käyttöönotto-opas)
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/theme/Theme.kt        # kaikki värit
   detection/AppMarkers.kt          # valvotut sovellukset (N5: lyhytvideonäkymän merkit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
   detection/InspectorLog.kt        # N4: tarkastelun loki muistissa (ei tallennu)
-  detection/                       # N6: ajastin
+  detection/ScrollTimer.kt         # N6: aktiivisen ajan ajastin
   interrupt/               # N7–N9: taso 1 ja taso 2 overlayt, hälytys, tehtävät
   data/                    # N10–N11: asetukset, loki, vienti
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
@@ -63,7 +64,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☐ Päätös sovelluksittain: vain lyhytvideonäkymä vai koko sovellus
 
 **M2 – Ajastin ja taso 1 (1.–2.11.)**
-- ☐ N6 Aktiivisen ajan ajastin (60 s pyyhkäisysääntö)
+- ☑ N6 Aktiivisen ajan ajastin (60 s pyyhkäisysääntö)
 - ☐ N7 Tason 1 banneri + hälytys (ääni, värinä, molemmat kestot)
 - ☐ N8 *Lopeta tähän* → Koti, *Jatka* → tason 2 seuranta
 
