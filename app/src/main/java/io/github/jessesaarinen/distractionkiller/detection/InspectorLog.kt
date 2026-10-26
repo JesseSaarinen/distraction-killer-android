@@ -10,8 +10,11 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/** What an inspector entry is about: an accessibility event, a snapshot or a reached level. */
-enum class EventKind { SCROLLED, WINDOW, CONTENT, SNAPSHOT, LEVEL1, LEVEL2, OUTCOME }
+/**
+ * What an inspector entry is about: an accessibility event, a snapshot, the
+ * short videos coming to or leaving the front, a reached level or an outcome.
+ */
+enum class EventKind { SCROLLED, WINDOW, CONTENT, SNAPSHOT, FRONT, LEVEL1, LEVEL2, OUTCOME }
 
 /**
  * One line in the inspector. Only technical data: app package, event kind,

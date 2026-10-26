@@ -15,8 +15,9 @@ import io.github.jessesaarinen.distractionkiller.interrupt.InterruptController
  * Reads only the app's package name, view IDs, class names and scroll positions.
  * Never reads text, messages or video content.
  *
- * Swipes in the short-video feed (N5) feed the ScrollTimer (N6). Level 1
- * shows the banner (N7) and level 2 the calm full screen (N9).
+ * ShortVideoClassifier (N5) decides which scrolls are swipes in the
+ * short-video feed. They feed the ScrollTimer (N6). Level 1 shows the banner
+ * (N7) and level 2 the calm full screen (N9).
  */
 class ScrollWatcherService : AccessibilityService() {
 
@@ -27,8 +28,9 @@ class ScrollWatcherService : AccessibilityService() {
     private var awayTicks = 0
 
     /**
-     * The app whose short-video feed the user swiped last. Cleared when they
-     * scroll something else in that app, like Instagram's home feed.
+     * The app whose short videos are in front. A swipe in the feed or the
+     * player on screen sets it. A scroll somewhere else in that app, like
+     * Instagram's home feed, or the player leaving the screen clears it.
      */
     private var shortVideoApp: String? = null
 
@@ -55,11 +57,13 @@ class ScrollWatcherService : AccessibilityService() {
 
     private fun onTick() {
         val now = System.currentTimeMillis()
-        val foreground = foregroundWatchedApp()
+        val root = activeRoot()
+        val foreground = foregroundWatchedApp(root)
         // Like the web demo: the banner and alarm go away when the user leaves the app.
         // Two ticks in a row, so a short gap while the app changes screens does not count.
         awayTicks = if (foreground == null) awayTicks + 1 else 0
         if (awayTicks >= 2) interrupts?.dismissLevel1()
+        if (root != null && foreground != null) checkPlayer(now, root, foreground)
 
         val settings = SettingsStore.settings.value
         val level = ScrollTimer.tick(
@@ -80,14 +84,48 @@ class ScrollWatcherService : AccessibilityService() {
         }
     }
 
-    /** The watched app in front, if the screen is on. */
-    private fun foregroundWatchedApp(): String? {
+    /** The root of the window the user is in, or null when the screen is off. */
+    private fun activeRoot(): AccessibilityNodeInfo? {
         val power = getSystemService(PowerManager::class.java)
         if (power == null || !power.isInteractive) return null
-        val active = rootInActiveWindow?.packageName?.toString() ?: return null
+        return rootInActiveWindow
+    }
+
+    /** The watched app in front. */
+    private fun foregroundWatchedApp(root: AccessibilityNodeInfo?): String? {
+        val active = root?.packageName?.toString() ?: return null
         // The user is touching our own banner: the video app is still right behind it.
         if (active == packageName) return interrupts?.bannerApp
         return if (isWatched(active)) active else null
+    }
+
+    /**
+     * For an app with player views (YouTube Shorts), the player on screen
+     * decides whether the short videos are in front.
+     */
+    private fun checkPlayer(now: Long, root: AccessibilityNodeInfo, packageName: String) {
+        val app = AppMarkers.find(packageName) ?: return
+        if (app.playerIds.isEmpty()) return
+        // While the user touches our banner, the app's own window is not the active one.
+        if (root.packageName?.toString() != packageName) return
+        val visibleIds = app.playerIds.filter { id ->
+            root.findAccessibilityNodeInfosByViewId("$packageName:id/$id").any { it.isVisibleToUser }
+        }
+        val onScreen = ShortVideoClassifier.isPlayerOnScreen(packageName, visibleIds) == true
+        setInFront(now, packageName, onScreen, if (onScreen) "player on screen" else "player not on screen")
+    }
+
+    /** Notes whether this app's short videos are in front. Changes show in the inspector. */
+    private fun setInFront(now: Long, packageName: String, inFront: Boolean, reason: String) {
+        val new = when {
+            inFront -> packageName
+            shortVideoApp == packageName -> null
+            else -> shortVideoApp
+        }
+        if (new == shortVideoApp) return
+        shortVideoApp = new
+        val state = if (inFront) "short videos in front" else "short videos not in front"
+        InspectorLog.add(InspectorEntry(now, packageName, EventKind.FRONT, detail = "$state ($reason)"))
     }
 
     /** A watched app that the user has not turned off in the settings. */
@@ -115,9 +153,9 @@ class ScrollWatcherService : AccessibilityService() {
         val viewId = event.source?.viewIdResourceName?.let(::shortId)
         var detail: String? = null
         if (kind == EventKind.SCROLLED) {
-            // "swipe" marks the scrolls that count, so they can be checked in the inspector.
-            val swipe = onScroll(now, packageName, viewId, event)
-            detail = scrollDetail(event) + if (swipe) " swipe" else ""
+            // The verdict shows which scrolls count, so the markers can be checked in the inspector.
+            val result = onScroll(now, packageName, viewId, event)
+            detail = scrollDetail(event) + " → ${result.verdict.name.lowercase()} (${result.reason})"
         }
         InspectorLog.add(
             InspectorEntry(
@@ -136,27 +174,29 @@ class ScrollWatcherService : AccessibilityService() {
         // Nothing to stop: this service gives no spoken or haptic feedback.
     }
 
-    /**
-     * A swipe is a scroll that moved, in the app's short-video feed. It goes
-     * to the timer. Returns true for a swipe.
-     */
-    private fun onScroll(now: Long, packageName: String, viewId: String?, event: AccessibilityEvent): Boolean {
-        if (!moved(event)) return false
-        if (AppMarkers.isShortVideo(packageName, viewId)) {
-            shortVideoApp = packageName
-            ScrollTimer.onSwipe(now)
-            return true
-        }
-        // The user scrolls something else in the same app, so the short videos are no longer in front.
-        if (shortVideoApp == packageName) shortVideoApp = null
-        return false
-    }
-
-    /** A list also sends a scroll event when it only lays itself out. Then it does not move. */
-    private fun moved(event: AccessibilityEvent): Boolean {
+    /** Asks the classifier what the scroll means, and tells the timer about swipes. */
+    private fun onScroll(now: Long, packageName: String, viewId: String?, event: AccessibilityEvent): Classification {
         // Before Android 9 the event does not tell how far the view moved.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return true
-        return event.scrollDeltaX != 0 || event.scrollDeltaY != 0
+        val result = ShortVideoClassifier.classifyScroll(
+            packageName = packageName,
+            viewId = viewId,
+            dx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) event.scrollDeltaX else null,
+            dy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) event.scrollDeltaY else null,
+        )
+        when (result.verdict) {
+            ScrollVerdict.SWIPE -> {
+                setInFront(now, packageName, inFront = true, reason = "swipe")
+                ScrollTimer.onSwipe(now)
+            }
+            ScrollVerdict.OTHER -> {
+                // In an app with player views, the player check decides instead.
+                if (AppMarkers.find(packageName)?.playerIds.isNullOrEmpty()) {
+                    setInFront(now, packageName, inFront = false, reason = "scrolled ${viewId ?: "a view without an ID"}")
+                }
+            }
+            ScrollVerdict.LAYOUT, ScrollVerdict.IGNORED -> Unit
+        }
+        return result
     }
 
     /** Lists the view IDs on screen, at most once every 2 seconds per app. */
@@ -195,6 +235,7 @@ class ScrollWatcherService : AccessibilityService() {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             parts.add("dy=${event.scrollDeltaY}")
+            if (event.scrollDeltaX != 0) parts.add("dx=${event.scrollDeltaX}")
         }
         return parts.joinToString(" ")
     }

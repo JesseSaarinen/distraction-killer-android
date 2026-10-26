@@ -65,4 +65,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    // Unit tests for the plain Kotlin logic (detection, timer, stats). They run on the computer, not the phone.
+    testImplementation(libs.junit)
 }

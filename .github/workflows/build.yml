@@ -1,4 +1,4 @@
-# Builds the APK on every push and pull request.
+# Runs the unit tests and builds the APK on every push and pull request.
 # - Pushes to main update the "latest" pre-release, so the newest APK is always
 #   one tap away on the phone.
 # - Tags (for example rt8 and demo) get a permanent release of their own.
@@ -25,6 +25,9 @@ jobs:
           java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest
 
       - name: Build APK
         run: ./gradlew assembleDebug

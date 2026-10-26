@@ -13,11 +13,13 @@ Natiivi Android-sovellus, joka huomaa lyhytvideoiden selauksen TikTokissa, Insta
 
    | Sovellus | Paketti | Tunnistus |
    | --- | --- | --- |
-   | TikTok | `com.zhiliaoapp.musically` | Koko sovellus on lyhytvideosyöte (ei vielä tarkistettu) |
-   | Instagram Reels | `com.instagram.android` | Vain Reels: vieritys näkymässä `clips_viewer_view_pager` (tarkistettu 26.10.). Etusivun syöte `list` ei laske. |
-   | YouTube Shorts | `com.google.android.youtube` | Shorts-näkymän ID (ehdokas: alkaa `reel_`). Kunnes se on tarkistettu, koko sovellus laskee. |
+   | TikTok | `com.zhiliaoapp.musically` | Videosyöte: pystysuora vieritys näkymässä `viewpager`. Sivuttainen vieritys (välilehdet) ja muut listat eivät laske. |
+   | Instagram Reels | `com.instagram.android` | Vain Reels: vieritys näkymässä `clips_viewer_view_pager`. Etusivun syöte `list` ei laske. |
+   | YouTube Shorts | `com.google.android.youtube` | Vain Shorts: vieritys näkymässä `reel_recycler`. Shorts on edessä, kun `reel_recycler` tai `reel_watch_fragment_root` näkyy ruudulla. Etusivu ja tavallinen video eivät laske. |
 
-   Pyyhkäisy on vieritystapahtuma, jossa näkymä oikeasti liikkui. Lista lähettää vieritystapahtuman myös latautuessaan, mutta silloin siirtymä on nolla (`dy=0`), eikä sitä lasketa. Kun käyttäjä vierittää samassa sovelluksessa jotain muuta (esim. Instagramin etusivua), lyhytvideonäkymä ei ole enää edessä. Tarkastelunäkymä merkitsee lasketut pyyhkäisyt sanalla `swipe`.
+   Merkit on katsottu tarkastelun lokista Jessen S21:llä 26.10. Luokittelu on tiedostossa `detection/ShortVideoClassifier.kt`, ja sillä on yksikkötestit.
+
+   Pyyhkäisy on vieritystapahtuma lyhytvideosyötteessä. TikTok ja Instagram kertovat, paljonko näkymä liikkui: jos siirtymä on nolla (`dy=0`), lista vain latautui, eikä sitä lasketa. YouTuben listat ilmoittavat aina `dy=0`, joten YouTubessa jokainen `reel_recycler`-tapahtuma lasketaan. Kun käyttäjä vierittää samassa sovelluksessa jotain muuta (esim. Instagramin etusivua), lyhytvideot eivät ole enää edessä. YouTubessa sen ratkaisee Shorts-soitin ruudulla. Tarkastelunäkymä näyttää jokaisen vierityksen tuloksen (`→ swipe`, `→ other`, `→ layout`) ja `FRONT`-rivin, kun lyhytvideot tulevat eteen tai poistuvat.
 
 3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana. 10 minuutin tauko aloittaa laskennan alusta.
 4. **Taso 1**, kun väli täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s).
@@ -44,7 +46,8 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
   ui/theme/Theme.kt        # kaikki värit
-  detection/AppMarkers.kt          # valvotut sovellukset (N5: lyhytvideonäkymän merkit)
+  detection/AppMarkers.kt          # valvotut sovellukset ja niiden lyhytvideomerkit (N5)
+  detection/ShortVideoClassifier.kt # N5: mitä vieritystapahtuma tarkoittaa (yksikkötestit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
   detection/InspectorLog.kt        # N4: tarkastelun loki muistissa (ei tallennu)
   detection/ScrollTimer.kt         # N6: aktiivisen ajan ajastin
@@ -63,7 +66,8 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   data/EventLog.kt                 # N11: ainoa paikka, joka tallentaa lokin; JSON-vienti
   data/Stats.kt                    # N11: tilastojen laskenta lokista
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
-.github/workflows/build.yml           # APK-build ja julkaisut
+app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
+.github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
 ```
 
 ## Tehtävät
@@ -77,8 +81,8 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **M1 – Tunnistuksen tarkistuspiste (29.–31.10.)**
 - ☑ N4 Accessibility Service + tarkastelunäkymä, joka listaa paketit, näkymä-ID:t ja tapahtumatyypit
-- ◐ N5 Selataan jokaista sovellusta minuutti, valitaan merkit, tarkistetaan että pyyhkäisyt näkyvät. Instagram valmis, TikTok ja YouTube odottavat tarkastelun lokia
-- ◐ Päätös sovelluksittain: vain lyhytvideonäkymä vai koko sovellus. Instagram: vain Reels
+- ◐ N5 Selataan jokaista sovellusta minuutti, valitaan merkit, tarkistetaan että pyyhkäisyt näkyvät. Merkit valittu kaikille kolmelle. Puhelimella tarkistamatta: näkyvätkö Shortsin pyyhkäisyt `→ swipe`-riveinä
+- ☑ Päätös sovelluksittain: kaikissa kolmessa lasketaan vain lyhytvideosyöte (TikTokin videosyöte, Reels, Shorts)
 
 **M2 – Ajastin ja taso 1 (1.–2.11.)**
 - ☑ N6 Aktiivisen ajan ajastin (60 s pyyhkäisysääntö)
