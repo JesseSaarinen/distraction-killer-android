@@ -1,6 +1,7 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
+import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
 
-// Inspector (task N4): lists what the scroll watcher sees, so we can find
-// the view IDs of the short-video screens (task N5). Back gesture returns home.
+// Inspector (tasks N4 and N5): the scroll watcher's state right now, and a list
+// of what it sees, so the short-video markers can be found and checked.
+// Back gesture returns home.
 @Composable
 fun InspectorScreen(
     serviceEnabled: Boolean,
@@ -34,6 +37,7 @@ fun InspectorScreen(
     val entries by InspectorLog.entries.collectAsState()
     val counts by InspectorLog.counts.collectAsState()
     val timer by ScrollTimer.state.collectAsState()
+    val status by InspectorLog.status.collectAsState()
 
     Scaffold { innerPadding ->
         LazyColumn(
@@ -76,10 +80,38 @@ fun InspectorScreen(
                 }
             }
             item {
-                Text(
-                    text = stringResource(R.string.inspector_timer, timer.activeSeconds, timer.phase.name),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val started = status.serviceStartedAt
+                    StatusLine(
+                        if (started != null) {
+                            stringResource(R.string.inspector_status_running, InspectorLog.formatClock(started))
+                        } else {
+                            stringResource(R.string.inspector_status_stopped)
+                        }
+                    )
+                    val front = status.inFrontApp
+                    StatusLine(
+                        if (front != null) {
+                            stringResource(R.string.inspector_in_front, AppMarkers.label(front))
+                        } else {
+                            stringResource(R.string.inspector_not_in_front)
+                        }
+                    )
+                    StatusLine(stringResource(R.string.inspector_timer, timer.activeSeconds, timer.phase.name))
+                    val lastAt = status.lastEventAt
+                    StatusLine(
+                        if (lastAt != null) {
+                            stringResource(
+                                R.string.inspector_last_event,
+                                InspectorLog.formatClock(lastAt),
+                                AppMarkers.label(status.lastEventApp.orEmpty()),
+                            )
+                        } else {
+                            stringResource(R.string.inspector_last_event_none)
+                        }
+                    )
+                    status.lastScroll?.let { StatusLine(stringResource(R.string.inspector_last_scroll, InspectorLog.formatEntry(it))) }
+                }
             }
             item {
                 OutlinedButton(onClick = { ScrollTimer.reset() }, modifier = Modifier.heightIn(min = 48.dp)) {
@@ -123,4 +155,9 @@ fun InspectorScreen(
             }
         }
     }
+}
+
+@Composable
+private fun StatusLine(text: String) {
+    Text(text = text, style = MaterialTheme.typography.bodyMedium)
 }
