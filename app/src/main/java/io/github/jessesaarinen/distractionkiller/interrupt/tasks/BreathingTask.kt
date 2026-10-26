@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +37,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun BreathingTask(onDone: () -> Unit) {
     val currentOnDone by rememberUpdatedState(onDone)
-    var elapsed by remember { mutableIntStateOf(0) }
+    // Saved, so turning the phone does not start the exercise over.
+    var elapsed by rememberSaveable { mutableIntStateOf(0) }
     var started by remember { mutableStateOf(false) }
 
     val total = Config.BREATHING_SECONDS
