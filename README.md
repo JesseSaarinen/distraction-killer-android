@@ -18,12 +18,17 @@ Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ohjeet AI-agenteille: [CLAUDE.md]
 3. Sovelluksen tiedot → Akku → **Rajoittamaton**, jotta Samsung ei pysäytä tunnistusta taustalla.
 4. Auto Blockerin voi nyt kytkeä takaisin päälle.
 
-Sovelluksen kotinäkymässä on samat vaiheet, ja valmis vaihe saa ✓-merkin.
+Sovelluksen kotinäkymässä on samat vaiheet, ja valmis vaihe saa ✓-merkin. "Näytä muiden sovellusten päällä" -oikeutta ei tarvita, koska banneri piirretään tunnistuksen omaan ikkunaan.
 
 Tunnistus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä sovelluksella ole internet-oikeutta.
+
+## Testaus
+
+Puhelimella testattavat asiat ovat listana tiedostossa [TESTING.md](TESTING.md). Jos jokin ei toimi, avaa sovelluksessa *Tarkastelu (kehittäjille)* → *Jaa*. Jaetun tekstin alussa on tunnistuksen tila, asetukset ja versio.
 
 ## Kehitys
 
 - GitHub Actions rakentaa APK:n jokaisesta pull requestista (Actions-välilehti → ajo → Artifacts) ja päivittää `latest`-julkaisun aina, kun `main` muuttuu.
-- Paikallinen build: `./gradlew assembleDebug` (vaatii Android Studion tai Android SDK:n).
+- Paikallinen build: `./gradlew assembleDebug` (vaatii Android Studion tai Android SDK:n). Android Studion build on versio `0.1.dev`, joten se ei asennu GitHubin buildin päälle. Poista sovellus ensin, tai asenna GitHubin build.
+- Yksikkötestit: `./gradlew testDebugUnitTest`. Ne ajetaan myös GitHubissa ennen jokaista buildia.
 - Tagit `rt8` ja `demo` tekevät pysyvät julkaisut RT8-testeille ja messuille.

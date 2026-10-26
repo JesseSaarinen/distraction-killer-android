@@ -68,6 +68,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
 .github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
+TESTING.md                            # puhelimella testattavat asiat ennen tagia
 ```
 
 ## Tehtävät
@@ -77,7 +78,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 **M0 – Repo ja APK-build (27.–28.10.)**
 - ☑ N1 Gradle-projektin runko, kotinäkymä, `CLAUDE.md`, `AGENTS.md`, `PLAN.md`
 - ☑ N2 GitHub Actions: APK-build, `latest`-julkaisu, kiinteä allekirjoitusavain
-- ☐ N3 Asennus S21:lle ja tarkistus, että uusi build asentuu vanhan päälle
+- ◐ N3 Asennus S21:lle ja tarkistus, että uusi build asentuu vanhan päälle. Asennettu ja käytetty 26.10., päivitys vanhan päälle tarkistamatta (`TESTING.md`, kohta 1)
 
 **M1 – Tunnistuksen tarkistuspiste (29.–31.10.)**
 - ☑ N4 Accessibility Service + tarkastelunäkymä, joka listaa paketit, näkymä-ID:t ja tapahtumatyypit
@@ -96,7 +97,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**
-- ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta
+- ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**
 - ☐ N14 RT8-palautteen perusteella tehtävät muutokset
