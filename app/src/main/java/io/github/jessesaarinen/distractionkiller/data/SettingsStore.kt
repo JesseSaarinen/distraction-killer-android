@@ -29,7 +29,7 @@ object SettingsStore {
     private val _settings = MutableStateFlow(Settings())
     val settings: StateFlow<Settings> = _settings.asStateFlow()
 
-    /** Reads the saved settings once. MainActivity and the service call this when they start. */
+    /** Reads the saved settings once. DistractionKillerApp calls this when the app starts. */
     fun init(context: Context) {
         if (prefs != null) return
         val loaded = context.applicationContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)

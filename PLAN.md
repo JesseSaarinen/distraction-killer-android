@@ -28,17 +28,19 @@ Tason 1 banneri piirretään Accessibility Servicen omaan ikkunaan, joten "Näyt
 ## Asetukset ja tapahtumat
 
 - Asetukset: `{ intervalMin, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps }`. `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). Tallennus: `data/SettingsStore.kt` (SharedPreferences).
-- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|null, scrollSeconds, answer }`
+- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer }`. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
 
 ## Tiedostorakenne (kasvaa tehtävien mukana)
 
 ```
 app/src/main/java/io/github/jessesaarinen/distractionkiller/
+  DistractionKillerApp.kt  # N11: lataa asetukset ja lokin ennen muuta
   MainActivity.kt          # käynnistys, näkymien vaihto
   Config.kt                # kaikki ajat ja vaihtoehdot (vrt. web-demon config.js)
   ui/HomeScreen.kt         # kotinäkymä: tunnistuksen tila (N12: käyttöönotto-opas)
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
+  ui/StatsScreen.kt        # N11: tilastot ja lokin jako
   ui/theme/Theme.kt        # kaikki värit
   detection/AppMarkers.kt          # valvotut sovellukset (N5: lyhytvideonäkymän merkit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
@@ -55,7 +57,9 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/Format.kt                     # kestot tekstiksi ("1 min 30 s")
   data/Settings.kt                 # N10: asetukset ja oletusarvot
   data/SettingsStore.kt            # N10: ainoa paikka, joka tallentaa asetukset puhelimeen
-  data/                            # N11: loki ja vienti
+  data/LogEvent.kt                 # N11: yksi lokirivi
+  data/EventLog.kt                 # N11: ainoa paikka, joka tallentaa lokin; JSON-vienti
+  data/Stats.kt                    # N11: tilastojen laskenta lokista
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 .github/workflows/build.yml           # APK-build ja julkaisut
 ```
@@ -82,7 +86,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 **M3 – Taso 2, asetukset ja tilastot (3.–4.11.)**
 - ☑ N9 Taso 2: hengitys, kysymys, liike, *Ohita* 5 s jälkeen. Kiitosnäkymä, jonne myös tason 1 *Lopeta tähän* vie
 - ☑ N10 Asetukset: väli, tehtävät, hälytys, ääni, värinä, demotila, valvotut sovellukset
-- ☐ N11 Loki, tilastonäkymä, JSON-vienti jakovalikolla
+- ☑ N11 Loki, tilastonäkymä, JSON-vienti jakovalikolla
 - ☐ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**

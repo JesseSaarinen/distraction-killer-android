@@ -9,6 +9,7 @@
     <string name="home_restricted_hint">Jos kytkin on harmaana, avaa sovelluksen tiedot, paina ⋮ ja valitse Salli rajoitetut asetukset. Palaa sitten esteettömyysasetuksiin.</string>
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
     <string name="home_open_settings">Asetukset</string>
+    <string name="home_open_stats">Tilastot</string>
     <string name="home_open_inspector">Tarkastelu (kehittäjille)</string>
 
     <string name="settings_title">Asetukset</string>
@@ -32,6 +33,36 @@
     <string name="settings_demo">Demotila</string>
     <string name="settings_demo_hint">Keskeytys %1$d s jälkeen, kova keskeytys %2$d s myöhemmin</string>
     <string name="settings_test_alarm">🔔 Kokeile hälytystä</string>
+
+    <string name="stats_title">Tilastot</string>
+    <string name="stats_empty">Ei vielä keskeytyksiä. Scrollaa lyhytvideoita, niin näet tilastot täällä.</string>
+    <string name="stats_percent">%1$d %%</string>
+    <string name="stats_stop_rate">keskeytyksistä päättyi siihen, että lopetit scrollauksen</string>
+    <string name="stats_rounds">keskeytystä</string>
+    <string name="stats_stopped">kertaa lopetit</string>
+    <string name="stats_continued">kertaa jatkoit</string>
+    <string name="stats_skipped">kertaa ohitit</string>
+    <string name="stats_dismissed">kertaa poistuit sovelluksesta keskeytyksen aikana</string>
+    <string name="stats_avg_before_stop">scrollausta keskimäärin ennen lopettamista</string>
+    <string name="stats_where_title">Missä vaiheessa lopetit</string>
+    <string name="stats_where_level1">Kevyt keskeytys (banneri)</string>
+    <string name="stats_where_level2">Koko näytön keskeytys</string>
+    <string name="stats_tasks_title">Tehtävät</string>
+    <string name="stats_apps_title">Sovelluksittain</string>
+    <string name="stats_col_task">Tehtävä</string>
+    <string name="stats_col_app">Sovellus</string>
+    <string name="stats_col_times">Kertaa</string>
+    <string name="stats_col_stopped">Lopetit</string>
+    <string name="stats_answers_title">Mitä olit tekemässä</string>
+    <string name="stats_answer">• %1$s</string>
+    <string name="stats_testers_title">Testaajille</string>
+    <string name="stats_share">Jaa loki (JSON)</string>
+    <string name="stats_share_title">Jaa tapahtumaloki</string>
+    <string name="stats_share_subject">Distraction Killer -loki</string>
+    <string name="stats_clear">Tyhjennä tilastot</string>
+    <string name="stats_clear_confirm">Tyhjennetäänkö kaikki tilastot?</string>
+    <string name="stats_clear_yes">Tyhjennä</string>
+    <string name="stats_clear_no">Peruuta</string>
 
     <string name="accessibility_service_label">Distraction Killer: selauksen tunnistus</string>
     <string name="accessibility_service_description">Tunnistaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa. Sovellus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä mikään tieto lähde puhelimesta.</string>

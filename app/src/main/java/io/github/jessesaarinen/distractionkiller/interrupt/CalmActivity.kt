@@ -11,6 +11,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import io.github.jessesaarinen.distractionkiller.TaskType
+import io.github.jessesaarinen.distractionkiller.data.EventLog
+import io.github.jessesaarinen.distractionkiller.data.LogEvent
+import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.EventKind
 import io.github.jessesaarinen.distractionkiller.detection.InspectorEntry
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
@@ -28,13 +31,14 @@ class CalmActivity : ComponentActivity() {
     private var level2Open = false
     private var app = ""
     private var task = TaskType.BREATHING
+    private var scrollSeconds = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         app = intent.getStringExtra(EXTRA_APP).orEmpty()
         task = TaskType.fromId(intent.getStringExtra(EXTRA_TASK))
-        val scrollSeconds = intent.getIntExtra(EXTRA_SECONDS, 0)
+        scrollSeconds = intent.getIntExtra(EXTRA_SECONDS, 0)
         val startWithDone = intent.getBooleanExtra(EXTRA_DONE, false)
         level2Open = savedInstanceState?.getBoolean(STATE_LEVEL2_OPEN) ?: !startWithDone
 
@@ -80,7 +84,17 @@ class CalmActivity : ComponentActivity() {
         if (!level2Open) return
         level2Open = false
         ScrollTimer.reset()
-        // The real event log (with the answer) comes in N11.
+        EventLog.add(
+            LogEvent(
+                type = "outcome",
+                app = AppMarkers.label(app),
+                scrollSeconds = scrollSeconds,
+                level = 2,
+                task = task.id,
+                outcome = outcome,
+                answer = answer,
+            )
+        )
         val detail = "level2 ${task.id} $outcome" + if (answer != null) " answered" else ""
         InspectorLog.add(InspectorEntry(System.currentTimeMillis(), app, EventKind.OUTCOME, detail = detail))
     }

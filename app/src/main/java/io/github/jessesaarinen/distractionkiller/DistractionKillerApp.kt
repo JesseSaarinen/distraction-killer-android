@@ -1,0 +1,17 @@
+package io.github.jessesaarinen.distractionkiller
+
+import android.app.Application
+import io.github.jessesaarinen.distractionkiller.data.EventLog
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
+
+/**
+ * Starts before any screen and before the scroll watcher service, and loads
+ * the saved settings and event log once.
+ */
+class DistractionKillerApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        SettingsStore.init(this)
+        EventLog.init(this)
+    }
+}
