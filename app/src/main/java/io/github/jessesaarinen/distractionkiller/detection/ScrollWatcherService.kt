@@ -8,18 +8,23 @@ import android.os.PowerManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import io.github.jessesaarinen.distractionkiller.Config
+import io.github.jessesaarinen.distractionkiller.interrupt.InterruptController
 
 /**
  * Watches TikTok, Instagram and YouTube through Android's accessibility API.
  * Reads only the app's package name, view IDs, class names and scroll positions.
  * Never reads text, messages or video content.
  *
- * Swipes feed the ScrollTimer (N6). Reached levels are only logged to the
- * inspector for now; the banner and the calm overlay come in N7 and N9.
+ * Swipes feed the ScrollTimer (N6). Level 1 shows the banner (N7); the calm
+ * level 2 overlay comes in N9.
  */
 class ScrollWatcherService : AccessibilityService() {
 
     private val lastSnapshotAt = mutableMapOf<String, Long>()
+    private var interrupts: InterruptController? = null
+
+    /** Ticks in a row with no watched app in front. */
+    private var awayTicks = 0
 
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
@@ -31,17 +36,25 @@ class ScrollWatcherService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        interrupts = InterruptController(this)
         handler.postDelayed(tickRunnable, TICK_MS)
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(tickRunnable)
+        interrupts?.release()
+        interrupts = null
         super.onDestroy()
     }
 
     private fun onTick() {
         val now = System.currentTimeMillis()
         val foreground = foregroundWatchedApp()
+        // Like the web demo: the banner and alarm go away when the user leaves the app.
+        // Two ticks in a row, so a short gap while the app changes screens does not count.
+        awayTicks = if (foreground == null) awayTicks + 1 else 0
+        if (awayTicks >= 2) interrupts?.dismissLevel1()
+
         // Settings come in N10. Until then: default interval, no demo mode.
         val level = ScrollTimer.tick(
             nowMillis = now,
@@ -49,10 +62,17 @@ class ScrollWatcherService : AccessibilityService() {
             level1Seconds = Config.DEFAULT_INTERVAL_MIN * 60,
             level2DelaySeconds = Config.LEVEL2_DELAY_SECONDS,
         )
-        if (level != null && foreground != null) {
-            val kind = if (level == 1) EventKind.LEVEL1 else EventKind.LEVEL2
-            val seconds = ScrollTimer.state.value.activeSeconds
-            InspectorLog.add(InspectorEntry(now, foreground, kind, detail = "active=${seconds}s"))
+        if (level == null || foreground == null) return
+
+        val seconds = ScrollTimer.state.value.activeSeconds
+        if (level == 1) {
+            InspectorLog.add(InspectorEntry(now, foreground, EventKind.LEVEL1, detail = "active=${seconds}s"))
+            interrupts?.showLevel1(foreground, seconds)
+        } else {
+            InspectorLog.add(InspectorEntry(now, foreground, EventKind.LEVEL2, detail = "active=${seconds}s"))
+            interrupts?.dismissLevel1()
+            // Placeholder until the calm overlay (N9): start over.
+            ScrollTimer.reset()
         }
     }
 
@@ -63,8 +83,10 @@ class ScrollWatcherService : AccessibilityService() {
     private fun foregroundWatchedApp(): String? {
         val power = getSystemService(PowerManager::class.java)
         if (power == null || !power.isInteractive) return null
-        val packageName = rootInActiveWindow?.packageName?.toString() ?: return null
-        return if (AppMarkers.find(packageName) != null) packageName else null
+        val active = rootInActiveWindow?.packageName?.toString() ?: return null
+        // The user is touching our own banner: the video app is still right behind it.
+        if (active == packageName) return interrupts?.bannerApp
+        return if (AppMarkers.find(active) != null) active else null
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {

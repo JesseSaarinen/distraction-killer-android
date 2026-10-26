@@ -2,6 +2,9 @@
 <!-- No INTERNET permission on purpose: nothing can leave the phone. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Level 1 alarm vibration. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
