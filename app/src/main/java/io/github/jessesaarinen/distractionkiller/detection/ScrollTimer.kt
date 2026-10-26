@@ -51,13 +51,15 @@ object ScrollTimer {
      */
     fun tick(nowMillis: Long, shortVideoInFront: Boolean, level1Seconds: Int, level2DelaySeconds: Int): Int? {
         val current = _state.value
-        if (current.phase == TimerPhase.PAUSED) return null
 
+        // A long break starts over. This also ends a pause whose level 2 screen
+        // never got to call reset(), so the timer cannot get stuck.
         val lastActive = lastActiveAtMillis
         if (lastActive != null && nowMillis - lastActive >= Config.SESSION_BREAK_SECONDS * 1000L) {
             reset()
             return null
         }
+        if (current.phase == TimerPhase.PAUSED) return null
 
         val lastSwipe = lastSwipeAtMillis
         val recentlySwiped = lastSwipe != null && nowMillis - lastSwipe <= Config.SWIPE_WINDOW_SECONDS * 1000L

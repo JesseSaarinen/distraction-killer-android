@@ -22,6 +22,48 @@
     <string name="level1_stop">Lopeta tähän</string>
     <string name="level1_continue">Jatka</string>
 
+    <string name="level2_scrolled">Olet scrollannut %1$s</string>
+    <string name="level2_title">Pieni tauko</string>
+    <string name="level2_prompt">Mitä haluat tehdä nyt?</string>
+    <string name="level2_stop">Lopetan scrollauksen</string>
+    <string name="level2_continue">Jatka scrollausta</string>
+    <string name="level2_skip">Ohita</string>
+    <string name="level2_skip_wait">Ohita-nappi tulee näkyviin hetken kuluttua</string>
+    <string name="task_done_mark">✓</string>
+
+    <string name="breathing_intro">Seuraa ympyrää ja hengitä rauhassa.</string>
+    <string name="breathing_in">Hengitä sisään</string>
+    <string name="breathing_out">Hengitä ulos</string>
+    <string name="breathing_done">Hienoa.</string>
+
+    <string name="question_title">Mitä olit oikeasti tekemässä?</string>
+    <string-array name="question_options">
+        <item>Etsin jotain tiettyä</item>
+        <item>Tylsistyin</item>
+        <item>Vältin jotain tehtävää</item>
+        <item>Halusin rentoutua</item>
+        <item>En oikeastaan mitään</item>
+    </string-array>
+    <string name="question_own_words">Tai kirjoita omin sanoin…</string>
+    <string name="question_submit">Vastaa</string>
+    <string name="question_thanks">Kiitos vastauksesta</string>
+
+    <string name="physical_window_icon">🪟</string>
+    <string name="physical_window">Nouse ylös ja katso ikkunasta ulos.</string>
+    <string name="physical_stretch_icon">🙆</string>
+    <string name="physical_stretch">Venyttele kädet kohti kattoa.</string>
+    <string name="physical_water_icon">💧</string>
+    <string name="physical_water">Hae itsellesi lasi vettä.</string>
+    <string name="physical_eyes_icon">👀</string>
+    <string name="physical_eyes">Katso jotain kaukana olevaa ja anna silmien levätä.</string>
+    <string name="physical_done">Tehty</string>
+
+    <string name="done_icon">🌿</string>
+    <string name="done_title">Hienoa!</string>
+    <string name="done_text_seconds">Lopetit %1$s scrollauksen jälkeen. Tämä hetki on taas sinun.</string>
+    <string name="done_text">Lopetit scrollauksen. Tämä hetki on taas sinun.</string>
+    <string name="done_close">Sulje</string>
+
     <string name="inspector_title">Tarkastelu</string>
     <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Paina lopuksi Jaa ja lähetä teksti.</string>
     <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>

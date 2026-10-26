@@ -20,10 +20,10 @@ Natiivi Android-sovellus, joka huomaa lyhytvideoiden selauksen TikTokissa, Insta
 3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana. 10 minuutin tauko aloittaa laskennan alusta.
 4. **Taso 1**, kun väli täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s).
 5. **Taso 2**, jos selaus jatkuu bannerin jälkeen 30 s (demotila 10 s): koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike), *Ohita* 5 s jälkeen.
-6. **Lopetus** painaa Koti-näppäintä käyttäjän puolesta. Jatkaminen nollaa ajastimen.
+6. **Lopetus** (tasolla 1 tai 2) avaa kiitosnäkymän, ja *Sulje* vie puhelimen aloitusnäyttöön. Jatkaminen ja ohittaminen nollaavat ajastimen.
 7. **Loki** tallentuu puhelimeen. Tilastot ja JSON-vienti jakovalikon kautta.
 
-Overlayt piirretään Accessibility Servicen omaan ikkunaan, joten "Näytä muiden sovellusten päällä" -oikeutta ei tarvita.
+Tason 1 banneri piirretään Accessibility Servicen omaan ikkunaan, joten "Näytä muiden sovellusten päällä" -oikeutta ei tarvita. Taso 2 ja kiitosnäkymä ovat oma Activity (`CalmActivity`), jonka palvelu avaa: video pysähtyy taustalle ja näppäimistö toimii kysymystehtävässä.
 
 ## Asetukset ja tapahtumat
 
@@ -47,7 +47,10 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   interrupt/OverlayWindow.kt       # N7: Compose-ikkuna muiden sovellusten päälle
   interrupt/Level1Banner.kt        # N7: tason 1 banneri
   interrupt/Alarm.kt, Chime.kt     # N7: hälytys (värinä + koodissa tehty ääni)
-  interrupt/                       # N9: tason 2 overlay ja tehtävät
+  interrupt/CalmActivity.kt        # N9: tason 2 tauko ja kiitosnäkymä omana Activitynä
+  interrupt/Level2Screen.kt        # N9: tason 2 näkymä, Ohita 5 s jälkeen
+  interrupt/DoneScreen.kt          # N9: kiitosnäkymä lopettamisen jälkeen
+  interrupt/tasks/                 # N9: hengitys-, kysymys- ja liiketehtävä
   ui/Format.kt                     # kestot tekstiksi ("1 min 30 s")
   data/                    # N10–N11: asetukset, loki, vienti
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
@@ -74,7 +77,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N8 *Lopeta tähän* → Koti, *Jatka* → tason 2 seuranta
 
 **M3 – Taso 2, asetukset ja tilastot (3.–4.11.)**
-- ☐ N9 Tason 2 overlay: hengitys, kysymys, liike, *Ohita* 5 s jälkeen
+- ☑ N9 Taso 2: hengitys, kysymys, liike, *Ohita* 5 s jälkeen. Kiitosnäkymä, jonne myös tason 1 *Lopeta tähän* vie
 - ☐ N10 Asetukset: väli, tehtävät, hälytys, ääni, värinä, demotila, valvotut sovellukset
 - ☐ N11 Loki, tilastonäkymä, JSON-vienti jakovalikolla
 - ☐ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
@@ -92,6 +95,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 - **Aikataulu RT8:aan on tiukka.** Karsintajärjestys: tilastonäkymä, kysymys- ja liiketehtävä, asetukset. Hengitys + taso 1 riittää arvolupauksen testaamiseen.
 - **Sovelluspäivitys muuttaa näkymä-ID:t.** Automaattipäivitykset pois ennen 5.11. ja 25.11. Merkit ovat yhdessä tiedostossa.
+- **Taso 2 ei aukea**, jos Android estää taustalta avatun näkymän. Accessibility Service on sallittu poikkeus, ja varmuuden vuoksi ajastin palaa alkuun 10 minuutin tauon jälkeen myös tasolla 2.
 - **Samsung pysäyttää palvelun taustalla.** Akunkäyttö "Rajoittamaton", kotinäkymä näyttää palvelun tilan.
 - **Testaajat eivät voi asentaa omiin puhelimiinsa.** RT8-testit tehdään Jessen puhelimella.
 

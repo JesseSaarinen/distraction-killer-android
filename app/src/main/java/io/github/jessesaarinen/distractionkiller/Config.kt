@@ -9,6 +9,17 @@ enum class AlarmMode {
     TIMED,
 }
 
+/** The level 2 tasks. The id is what the event log stores, same as in the web demo. */
+enum class TaskType(val id: String) {
+    BREATHING("breathing"),
+    QUESTION("question"),
+    PHYSICAL("physical");
+
+    companion object {
+        fun fromId(id: String?): TaskType = entries.firstOrNull { it.id == id } ?: BREATHING
+    }
+}
+
 /** All timings and choices in one place, like config.js in the web demo. */
 object Config {
     /** Interval choices for level 1, in minutes. */
@@ -33,8 +44,20 @@ object Config {
     const val ALARM_VIBRATION_MS = 200L
     const val ALARM_TIMED_SECONDS = 15
 
+    /** Level 2 starts with one chime and this vibration pattern (pause, buzz, pause, buzz). */
+    val LEVEL2_VIBRATION_PATTERN = longArrayOf(0, 300, 150, 300)
+
+    /** The Ohita button appears after this long. */
+    const val SKIP_DELAY_SECONDS = 5
+
+    const val BREATHING_SECONDS = 15
+    const val BREATHING_PHASE_SECONDS = 4
+    const val PHYSICAL_SECONDS = 10
+    const val ANSWER_MAX_LENGTH = 120
+
     // Defaults until the settings screen exists (N10).
     val DEFAULT_ALARM_MODE = AlarmMode.UNTIL_DISMISSED
     const val DEFAULT_SOUND = true
     const val DEFAULT_VIBRATION = true
+    val DEFAULT_TASKS = TaskType.entries.toList()
 }

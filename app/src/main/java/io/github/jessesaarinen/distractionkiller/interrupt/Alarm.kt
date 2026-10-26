@@ -15,7 +15,8 @@ import io.github.jessesaarinen.distractionkiller.Config
 /**
  * The level 1 alarm, like startAlarm()/stopAlarm() in the web demo: a chime and
  * a short vibration every Config.ALARM_BEAT_MS until stop(), or for
- * Config.ALARM_TIMED_SECONDS in timed mode.
+ * Config.ALARM_TIMED_SECONDS in timed mode. Level 2 gets a single
+ * notifyLevel2(), like notify(2).
  */
 class Alarm(context: Context) {
     private val handler = Handler(Looper.getMainLooper())
@@ -50,6 +51,16 @@ class Alarm(context: Context) {
         }
     }
 
+    /** One chime and a stronger double buzz when level 2 starts. */
+    fun notifyLevel2(sound: Boolean, vibration: Boolean) {
+        stop()
+        if (vibration) vibrate(VibrationEffect.createWaveform(Config.LEVEL2_VIBRATION_PATTERN, -1))
+        if (sound) {
+            if (chime == null) chime = Chime()
+            chime?.play()
+        }
+    }
+
     fun stop() {
         handler.removeCallbacks(beat)
         handler.removeCallbacks(timeout)
@@ -62,9 +73,12 @@ class Alarm(context: Context) {
     }
 
     private fun vibrateOnce() {
+        vibrate(VibrationEffect.createOneShot(Config.ALARM_VIBRATION_MS, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+
+    private fun vibrate(effect: VibrationEffect) {
         val v = vibrator ?: return
         if (!v.hasVibrator()) return
-        val effect = VibrationEffect.createOneShot(Config.ALARM_VIBRATION_MS, VibrationEffect.DEFAULT_AMPLITUDE)
         // Alarm usage, so Android does not drop the vibration while another app is in front.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             v.vibrate(effect, VibrationAttributes.createForUsage(VibrationAttributes.USAGE_ALARM))
