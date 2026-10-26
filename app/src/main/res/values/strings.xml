@@ -127,7 +127,7 @@
     <string name="done_close">Sulje</string>
 
     <string name="inspector_title">Tarkastelu</string>
-    <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Paina lopuksi Jaa ja lähetä teksti.</string>
+    <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Rivit, joiden lopussa on swipe, kasvattavat ajastinta. Paina lopuksi Jaa ja lähetä teksti.</string>
     <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>
     <string name="inspector_share">Jaa</string>
     <string name="inspector_clear">Tyhjennä</string>
