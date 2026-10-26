@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
     private fun shareInspectorLog() {
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, InspectorLog.toShareText())
+            putExtra(Intent.EXTRA_TEXT, InspectorLog.toShareText(SettingsStore.settings.value))
         }
         startActivity(Intent.createChooser(send, getString(R.string.inspector_share_title)))
     }

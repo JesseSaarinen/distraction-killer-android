@@ -127,11 +127,18 @@
     <string name="done_close">Sulje</string>
 
     <string name="inspector_title">Tarkastelu</string>
-    <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Rivit, joissa on → swipe, kasvattavat ajastinta. FRONT kertoo, milloin lyhytvideot ovat edessä. Paina lopuksi Jaa ja lähetä teksti.</string>
+    <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Loki säilyy, vaikka sovellus suljetaan. Rivit, joissa on → swipe, kasvattavat ajastinta. FRONT kertoo, milloin lyhytvideot ovat edessä. Paina lopuksi Jaa ja lähetä teksti.</string>
     <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>
     <string name="inspector_share">Jaa</string>
     <string name="inspector_clear">Tyhjennä</string>
+    <string name="inspector_status_running">Tunnistus käynnissä klo %1$s alkaen</string>
+    <string name="inspector_status_stopped">Tunnistus ei ole käynnissä. Laita se päälle esteettömyysasetuksista.</string>
+    <string name="inspector_in_front">Edessä: lyhytvideot (%1$s)</string>
+    <string name="inspector_not_in_front">Edessä: ei lyhytvideoita</string>
     <string name="inspector_timer">Ajastin: %1$d s aktiivista selausta (%2$s)</string>
+    <string name="inspector_last_event">Viimeisin tapahtuma: %1$s %2$s</string>
+    <string name="inspector_last_event_none">Viimeisin tapahtuma: ei yhtään sovelluksen käynnistymisen jälkeen</string>
+    <string name="inspector_last_scroll">Viimeisin vieritys: %1$s</string>
     <string name="inspector_reset_timer">Nollaa ajastin</string>
     <string name="inspector_counts_title">Tapahtumia sovelluksittain</string>
     <string name="inspector_events_title">Uusimmat tapahtumat</string>

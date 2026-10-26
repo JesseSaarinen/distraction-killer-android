@@ -37,13 +37,20 @@ class ScrollWatcherService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
         override fun run() {
-            onTick()
+            try {
+                onTick()
+            } catch (e: Exception) {
+                // A bug must not stop the service. The error shows in the inspector.
+                InspectorLog.error("tick", e)
+            }
             handler.postDelayed(this, TICK_MS)
         }
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        InspectorLog.setServiceRunning(true)
+        InspectorLog.note("service started")
         interrupts = InterruptController(this)
         handler.postDelayed(tickRunnable, TICK_MS)
     }
@@ -52,6 +59,8 @@ class ScrollWatcherService : AccessibilityService() {
         handler.removeCallbacks(tickRunnable)
         interrupts?.release()
         interrupts = null
+        InspectorLog.setServiceRunning(false)
+        InspectorLog.note("service stopped")
         super.onDestroy()
     }
 
@@ -124,6 +133,7 @@ class ScrollWatcherService : AccessibilityService() {
         }
         if (new == shortVideoApp) return
         shortVideoApp = new
+        InspectorLog.setInFront(new)
         val state = if (inFront) "short videos in front" else "short videos not in front"
         InspectorLog.add(InspectorEntry(now, packageName, EventKind.FRONT, detail = "$state ($reason)"))
     }
@@ -135,6 +145,15 @@ class ScrollWatcherService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        try {
+            handleEvent(event)
+        } catch (e: Exception) {
+            // A bug must not stop the service. The error shows in the inspector.
+            InspectorLog.error("event", e)
+        }
+    }
+
+    private fun handleEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
         if (!isWatched(packageName)) return
 
