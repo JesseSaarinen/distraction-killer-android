@@ -11,7 +11,14 @@ Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ohjeet AI-agenteille: [CLAUDE.md]
 3. Salli Chromelle tuntemattomien sovellusten asennus, kun sitä kysytään. Jos Play Protect varoittaa, valitse "Asenna silti".
 4. Päivitykset asennetaan samalla tavalla vanhan version päälle. Lokit ja asetukset säilyvät.
 
-Valvonnan käyttöönotto-ohjeet (Esteettömyys-asetus ja akunkäyttö) tulevat tähän, kun Accessibility Service on mukana (tehtävä N4).
+## Selauksen tunnistuksen käyttöönotto
+
+1. Asetukset → Esteettömyys → Asennetut sovellukset → **Distraction Killer: selauksen tunnistus** → päälle. Sovelluksen kotinäkymän nappi vie suoraan esteettömyysasetuksiin.
+2. Jos kytkin on harmaana (Android 13+ sivuladatuille sovelluksille): Asetukset → Sovellukset → Distraction Killer → ⋮ → **Salli rajoitetut asetukset**, ja sitten kohta 1 uudelleen.
+3. Sovelluksen tiedot → Akku → **Rajoittamaton**, jotta Samsung ei pysäytä tunnistusta taustalla.
+4. Auto Blockerin voi nyt kytkeä takaisin päälle.
+
+Tunnistus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä sovelluksella ole internet-oikeutta.
 
 ## Kehitys
 

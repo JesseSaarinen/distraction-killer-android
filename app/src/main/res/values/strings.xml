@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Distraction Killer</string>
-    <string name="home_intro">Tervetuloa! Sovellus auttaa sinua huomaamaan, kun lyhytvideoiden selaus venyy. Valvonta tulee käyttöön pian.</string>
+    <string name="home_intro">Tervetuloa! Sovellus auttaa sinua huomaamaan, kun lyhytvideoiden selaus venyy. Keskeytykset tulevat käyttöön pian.</string>
     <string name="home_version">Versio %1$s</string>
+    <string name="home_service_on">Selauksen tunnistus on päällä.</string>
+    <string name="home_service_off">Selauksen tunnistus on pois päältä. Laita se päälle esteettömyysasetuksista: Asennetut sovellukset → Distraction Killer.</string>
+    <string name="home_open_accessibility">Avaa esteettömyysasetukset</string>
+    <string name="home_restricted_hint">Jos kytkin on harmaana, avaa sovelluksen tiedot, paina ⋮ ja valitse Salli rajoitetut asetukset. Palaa sitten esteettömyysasetuksiin.</string>
+    <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
+    <string name="home_open_inspector">Tarkastelu (kehittäjille)</string>
+
+    <string name="accessibility_service_label">Distraction Killer: selauksen tunnistus</string>
+    <string name="accessibility_service_description">Tunnistaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa. Sovellus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä mikään tieto lähde puhelimesta.</string>
+
+    <string name="inspector_title">Tarkastelu</string>
+    <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Paina lopuksi Jaa ja lähetä teksti.</string>
+    <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>
+    <string name="inspector_share">Jaa</string>
+    <string name="inspector_clear">Tyhjennä</string>
+    <string name="inspector_counts_title">Tapahtumia sovelluksittain</string>
+    <string name="inspector_events_title">Uusimmat tapahtumat</string>
+    <string name="inspector_empty">Ei vielä tapahtumia.</string>
+    <string name="inspector_share_title">Jaa tarkastelun loki</string>
 </resources>
