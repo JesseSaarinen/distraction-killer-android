@@ -1,6 +1,7 @@
 package io.github.jessesaarinen.distractionkiller.detection
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -57,6 +58,16 @@ class ShortVideoClassifierTest {
     fun youTubeHomeAndWatchPagesAreNotShorts() {
         assertEquals(false, ShortVideoClassifier.isPlayerOnScreen(YOUTUBE, YOUTUBE_HOME_SCREEN))
         assertEquals(false, ShortVideoClassifier.isPlayerOnScreen(YOUTUBE, YOUTUBE_WATCH_SCREEN))
+    }
+
+    @Test
+    fun newFeedItemOnScreenIsASwipe() {
+        // YouTube may send no scroll event for a Shorts swipe, but the next Short is on screen.
+        assertTrue(ShortVideoClassifier.isNewItem("item 3", "item 4"))
+        assertFalse(ShortVideoClassifier.isNewItem("item 4", "item 4"))
+        // Shorts just opened, or the player left the screen: nothing to compare with.
+        assertFalse(ShortVideoClassifier.isNewItem(null, "item 4"))
+        assertFalse(ShortVideoClassifier.isNewItem("item 4", null))
     }
 
     @Test

@@ -8,8 +8,10 @@ package io.github.jessesaarinen.distractionkiller.detection
  *
  * playerIds: views that are on screen only while the short-video player is
  * open. If the app has them, the service checks every second whether one is
- * visible, and that decides whether the short videos are in front. Without
- * them, the last scroll decides: a swipe in the feed, or a scroll somewhere else.
+ * visible, and that decides whether the short videos are in front. It also
+ * notes which item of the swipe feed is on screen: a new item is a swipe, even
+ * if the app sent no scroll event. Without player views, the last scroll
+ * decides: a swipe in the feed, or a scroll somewhere else.
  *
  * reportsDistance: false for an app whose lists always report dy=0. Then a
  * dy=0 event can be a real swipe, and every scroll event in the feed counts.
