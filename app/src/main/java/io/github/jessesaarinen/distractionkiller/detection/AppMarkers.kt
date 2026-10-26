@@ -15,5 +15,8 @@ object AppMarkers {
         WatchedApp("com.google.android.youtube", "YouTube"),
     )
 
+    /** One name per app for the settings ("TikTok" has two packages). */
+    val labels: List<String> = apps.map { it.label }.distinct()
+
     fun find(packageName: String): WatchedApp? = apps.firstOrNull { it.packageName == packageName }
 }

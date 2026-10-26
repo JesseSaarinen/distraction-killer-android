@@ -2,6 +2,7 @@ package io.github.jessesaarinen.distractionkiller.interrupt
 
 import android.accessibilityservice.AccessibilityService
 import io.github.jessesaarinen.distractionkiller.Config
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.EventKind
 import io.github.jessesaarinen.distractionkiller.detection.InspectorEntry
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
@@ -31,12 +32,8 @@ class InterruptController(private val service: AccessibilityService) {
                 onContinue = { finishLevel1("continued") },
             )
         }
-        // Settings come in N10. Until then the defaults from Config.
-        alarm.start(
-            sound = Config.DEFAULT_SOUND,
-            vibration = Config.DEFAULT_VIBRATION,
-            mode = Config.DEFAULT_ALARM_MODE,
-        )
+        val settings = SettingsStore.settings.value
+        alarm.start(sound = settings.sound, vibration = settings.vibration, mode = settings.alarmMode)
     }
 
     /** Hides the banner without a choice: the user left the app. */
@@ -51,8 +48,10 @@ class InterruptController(private val service: AccessibilityService) {
      */
     fun showLevel2(packageName: String, scrollSeconds: Int) {
         hideBanner()
-        alarm.notifyLevel2(sound = Config.DEFAULT_SOUND, vibration = Config.DEFAULT_VIBRATION)
-        val task = Config.DEFAULT_TASKS.random()
+        val settings = SettingsStore.settings.value
+        alarm.notifyLevel2(sound = settings.sound, vibration = settings.vibration)
+        // Like pickTask() in the web demo: one of the chosen tasks at random.
+        val task = settings.tasks.ifEmpty { Config.DEFAULT_TASKS }.random()
         service.startActivity(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
     }
 

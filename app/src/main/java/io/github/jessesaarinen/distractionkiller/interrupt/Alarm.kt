@@ -51,6 +51,12 @@ class Alarm(context: Context) {
         }
     }
 
+    /** The test button on the settings screen: the alarm for a few seconds. */
+    fun test(sound: Boolean, vibration: Boolean) {
+        start(sound, vibration, AlarmMode.UNTIL_DISMISSED)
+        handler.postDelayed(timeout, Config.ALARM_TEST_MS)
+    }
+
     /** One chime and a stronger double buzz when level 2 starts. */
     fun notifyLevel2(sound: Boolean, vibration: Boolean) {
         stop()

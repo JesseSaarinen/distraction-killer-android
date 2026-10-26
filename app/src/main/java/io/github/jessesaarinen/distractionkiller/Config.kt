@@ -1,12 +1,16 @@
 package io.github.jessesaarinen.distractionkiller
 
-/** How long the level 1 alarm rings. */
-enum class AlarmMode {
+/** How long the level 1 alarm rings. The id is what the settings store, same as in the web demo. */
+enum class AlarmMode(val id: String) {
     /** "Kunnes sammutan": until the user taps a banner button. */
-    UNTIL_DISMISSED,
+    UNTIL_DISMISSED("untilDismissed"),
 
     /** "15 sekuntia": stops by itself after Config.ALARM_TIMED_SECONDS. */
-    TIMED,
+    TIMED("timed");
+
+    companion object {
+        fun fromId(id: String?): AlarmMode = entries.firstOrNull { it.id == id } ?: Config.DEFAULT_ALARM_MODE
+    }
 }
 
 /** The level 2 tasks. The id is what the event log stores, same as in the web demo. */
@@ -44,6 +48,9 @@ object Config {
     const val ALARM_VIBRATION_MS = 200L
     const val ALARM_TIMED_SECONDS = 15
 
+    /** The test button on the settings screen rings this long. */
+    const val ALARM_TEST_MS = 3_000L
+
     /** Level 2 starts with one chime and this vibration pattern (pause, buzz, pause, buzz). */
     val LEVEL2_VIBRATION_PATTERN = longArrayOf(0, 300, 150, 300)
 
@@ -55,9 +62,10 @@ object Config {
     const val PHYSICAL_SECONDS = 10
     const val ANSWER_MAX_LENGTH = 120
 
-    // Defaults until the settings screen exists (N10).
+    // Default settings, like DEFAULT_SETTINGS in the web demo.
     val DEFAULT_ALARM_MODE = AlarmMode.UNTIL_DISMISSED
     const val DEFAULT_SOUND = true
     const val DEFAULT_VIBRATION = true
-    val DEFAULT_TASKS = TaskType.entries.toList()
+    const val DEFAULT_DEMO_MODE = false
+    val DEFAULT_TASKS = TaskType.entries.toSet()
 }
