@@ -25,6 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.BuildConfig
@@ -64,6 +68,7 @@ fun HomeScreen(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = stringResource(R.string.home_intro),
@@ -96,6 +101,7 @@ fun HomeScreen(
             Text(
                 text = stringResource(R.string.home_setup_title),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             SetupStep(
                 number = 1,
@@ -185,6 +191,8 @@ private fun SetupStep(
     text: String,
     actions: @Composable () -> Unit = {},
 ) {
+    // A screen reader says "Vaihe 1" or "Vaihe 1, tehty" instead of "1" or "✓".
+    val stepLabel = stringResource(if (done) R.string.setup_step_done else R.string.setup_step, number)
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             modifier = Modifier
@@ -192,7 +200,8 @@ private fun SetupStep(
                 .background(
                     color = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                     shape = CircleShape,
-                ),
+                )
+                .clearAndSetSemantics { contentDescription = stepLabel },
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -205,7 +214,11 @@ private fun SetupStep(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 4.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 4.dp).semantics { heading() },
+            )
             if (!done) {
                 Text(
                     text = text,

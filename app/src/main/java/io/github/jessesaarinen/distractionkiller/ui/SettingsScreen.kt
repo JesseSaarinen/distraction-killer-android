@@ -30,7 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
@@ -67,6 +71,7 @@ fun SettingsScreen() {
                 text = stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() },
             )
             SwitchRow(
                 title = stringResource(R.string.settings_interruptions_on),
@@ -112,7 +117,11 @@ fun SettingsScreen() {
                     },
                 )
             }
-            Hint(stringResource(if (tasksError) R.string.settings_tasks_min_one else R.string.settings_tasks_hint))
+            Hint(
+                text = stringResource(if (tasksError) R.string.settings_tasks_min_one else R.string.settings_tasks_hint),
+                // A screen reader reads the note out when it changes.
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
 
             SectionTitle(stringResource(R.string.settings_alarm_title))
             Column(Modifier.selectableGroup()) {
@@ -179,16 +188,17 @@ private fun SectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 20.dp),
+        modifier = Modifier.padding(top = 20.dp).semantics { heading() },
     )
 }
 
 @Composable
-private fun Hint(text: String) {
+private fun Hint(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
     )
 }
 

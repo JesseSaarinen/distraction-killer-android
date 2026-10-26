@@ -15,6 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,11 +37,13 @@ fun DoneScreen(scrollSeconds: Int, onClose: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
-            Text(text = stringResource(R.string.done_icon), fontSize = 64.sp)
+            // Only decoration, so a screen reader skips it.
+            Text(text = stringResource(R.string.done_icon), fontSize = 64.sp, modifier = Modifier.clearAndSetSemantics {})
             Text(
                 text = stringResource(R.string.done_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = if (scrollSeconds > 0) {
