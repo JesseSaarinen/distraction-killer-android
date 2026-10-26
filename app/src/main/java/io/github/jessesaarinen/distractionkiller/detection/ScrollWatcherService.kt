@@ -7,7 +7,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import io.github.jessesaarinen.distractionkiller.Config
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.interrupt.InterruptController
 
 /**
@@ -36,6 +36,7 @@ class ScrollWatcherService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        SettingsStore.init(this)
         interrupts = InterruptController(this)
         handler.postDelayed(tickRunnable, TICK_MS)
     }
@@ -55,12 +56,12 @@ class ScrollWatcherService : AccessibilityService() {
         awayTicks = if (foreground == null) awayTicks + 1 else 0
         if (awayTicks >= 2) interrupts?.dismissLevel1()
 
-        // Settings come in N10. Until then: default interval, no demo mode.
+        val settings = SettingsStore.settings.value
         val level = ScrollTimer.tick(
             nowMillis = now,
             shortVideoInFront = foreground != null,
-            level1Seconds = Config.DEFAULT_INTERVAL_MIN * 60,
-            level2DelaySeconds = Config.LEVEL2_DELAY_SECONDS,
+            level1Seconds = settings.level1Seconds,
+            level2DelaySeconds = settings.level2DelaySeconds,
         )
         if (level == null || foreground == null) return
 
@@ -84,12 +85,18 @@ class ScrollWatcherService : AccessibilityService() {
         val active = rootInActiveWindow?.packageName?.toString() ?: return null
         // The user is touching our own banner: the video app is still right behind it.
         if (active == packageName) return interrupts?.bannerApp
-        return if (AppMarkers.find(active) != null) active else null
+        return if (isWatched(active)) active else null
+    }
+
+    /** A watched app that the user has not turned off in the settings. */
+    private fun isWatched(packageName: String): Boolean {
+        val app = AppMarkers.find(packageName) ?: return false
+        return app.label in SettingsStore.settings.value.watchedApps
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString() ?: return
-        if (AppMarkers.find(packageName) == null) return
+        if (!isWatched(packageName)) return
 
         val kind = when (event.eventType) {
             AccessibilityEvent.TYPE_VIEW_SCROLLED -> EventKind.SCROLLED

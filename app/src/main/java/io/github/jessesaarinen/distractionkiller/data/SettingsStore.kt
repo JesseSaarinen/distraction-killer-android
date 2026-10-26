@@ -1,0 +1,75 @@
+package io.github.jessesaarinen.distractionkiller.data
+
+import android.content.Context
+import android.content.SharedPreferences
+import io.github.jessesaarinen.distractionkiller.AlarmMode
+import io.github.jessesaarinen.distractionkiller.Config
+import io.github.jessesaarinen.distractionkiller.TaskType
+import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/**
+ * Saves the settings on the phone, like getSettings() and saveSettings() in
+ * the web demo's state.js. This is the only place that reads or writes them.
+ * The service and the screens share one StateFlow, so a change works right away.
+ */
+object SettingsStore {
+    private const val FILE_NAME = "settings"
+    private const val KEY_INTERVAL_MIN = "intervalMin"
+    private const val KEY_TASKS = "tasks"
+    private const val KEY_ALARM_MODE = "alarmMode"
+    private const val KEY_SOUND = "sound"
+    private const val KEY_VIBRATION = "vibration"
+    private const val KEY_DEMO_MODE = "demoMode"
+    private const val KEY_WATCHED_APPS = "watchedApps"
+
+    private var prefs: SharedPreferences? = null
+    private val _settings = MutableStateFlow(Settings())
+    val settings: StateFlow<Settings> = _settings.asStateFlow()
+
+    /** Reads the saved settings once. MainActivity and the service call this when they start. */
+    fun init(context: Context) {
+        if (prefs != null) return
+        val loaded = context.applicationContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
+        prefs = loaded
+        _settings.value = read(loaded)
+    }
+
+    /** Changes and saves the settings, for example update { it.copy(sound = false) }. */
+    fun update(change: (Settings) -> Settings) {
+        val new = change(_settings.value)
+        _settings.value = new
+        val p = prefs ?: return
+        p.edit()
+            .putInt(KEY_INTERVAL_MIN, new.intervalMin)
+            .putStringSet(KEY_TASKS, new.tasks.map { it.id }.toSet())
+            .putString(KEY_ALARM_MODE, new.alarmMode.id)
+            .putBoolean(KEY_SOUND, new.sound)
+            .putBoolean(KEY_VIBRATION, new.vibration)
+            .putBoolean(KEY_DEMO_MODE, new.demoMode)
+            .putStringSet(KEY_WATCHED_APPS, new.watchedApps)
+            .apply()
+    }
+
+    // Missing or unknown values fall back to the defaults, so settings saved by
+    // an older version never break the app.
+    private fun read(p: SharedPreferences): Settings {
+        val defaults = Settings()
+        val interval = p.getInt(KEY_INTERVAL_MIN, defaults.intervalMin)
+        val taskIds = p.getStringSet(KEY_TASKS, null).orEmpty()
+        val tasks = TaskType.entries.filter { it.id in taskIds }.toSet()
+        // null = never saved, so every app is watched. An empty set means the user turned all off.
+        val apps = p.getStringSet(KEY_WATCHED_APPS, null)
+        return Settings(
+            intervalMin = if (interval in Config.INTERVAL_OPTIONS_MIN) interval else defaults.intervalMin,
+            tasks = tasks.ifEmpty { defaults.tasks },
+            alarmMode = AlarmMode.fromId(p.getString(KEY_ALARM_MODE, null)),
+            sound = p.getBoolean(KEY_SOUND, defaults.sound),
+            vibration = p.getBoolean(KEY_VIBRATION, defaults.vibration),
+            demoMode = p.getBoolean(KEY_DEMO_MODE, defaults.demoMode),
+            watchedApps = if (apps == null) defaults.watchedApps else AppMarkers.labels.filter { it in apps }.toSet(),
+        )
+    }
+}
