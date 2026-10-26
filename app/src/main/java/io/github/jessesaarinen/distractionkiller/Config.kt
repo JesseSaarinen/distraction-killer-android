@@ -33,8 +33,9 @@ object Config {
     /** A second counts as active scrolling if the user swiped within this time. */
     const val SWIPE_WINDOW_SECONDS = 60
 
-    /** After level 1, this many more active seconds bring level 2. */
-    const val LEVEL2_DELAY_SECONDS = 30
+    /** Choices for how many more active seconds after level 1 bring level 2. */
+    val LEVEL2_DELAY_OPTIONS_SECONDS = listOf(15, 30, 60, 120)
+    const val DEFAULT_LEVEL2_DELAY_SECONDS = 30
 
     /** This long without active scrolling starts a new session from zero. */
     const val SESSION_BREAK_SECONDS = 10 * 60
@@ -67,5 +68,6 @@ object Config {
     const val DEFAULT_SOUND = true
     const val DEFAULT_VIBRATION = true
     const val DEFAULT_DEMO_MODE = false
+    const val DEFAULT_INTERRUPTIONS_ON = true
     val DEFAULT_TASKS = TaskType.entries.toSet()
 }
