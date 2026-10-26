@@ -61,8 +61,9 @@
     <string name="stats_days_title">Viimeiset 7 päivää</string>
     <string name="stats_days_rounds">Keskeytykset</string>
     <string name="stats_days_stopped">Lopetit scrollauksen</string>
-    <!-- Read by a screen reader for each day of the chart, for example "ke: 3 keskeytystä, lopetit 1". -->
-    <string name="stats_day">%1$s: %2$d keskeytystä, lopetit %3$d</string>
+    <!-- Read by a screen reader for each day of the chart, for example "ke: keskeytyksiä 3, lopetit 1".
+         The numbers come last, so the words fit any number (1 keskeytys, 3 keskeytystä). -->
+    <string name="stats_day">%1$s: keskeytyksiä %2$d, lopetit %3$d</string>
     <string-array name="weekdays_short">
         <item>ma</item>
         <item>ti</item>
