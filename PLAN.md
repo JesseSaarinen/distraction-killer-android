@@ -45,6 +45,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
+  ui/DayChart.kt           # N16: tilastojen pylväät viimeisiltä 7 päivältä
   ui/theme/Theme.kt        # kaikki värit
   detection/AppMarkers.kt          # valvotut sovellukset ja niiden lyhytvideomerkit (N5)
   detection/ShortVideoClassifier.kt # N5: mitä vieritystapahtuma tarkoittaa (yksikkötestit)
