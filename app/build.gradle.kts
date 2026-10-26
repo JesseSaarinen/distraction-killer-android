@@ -51,9 +51,8 @@ android {
     }
 
     lint {
-        // CI runs lint. The findings go to the CI log, so they can be read without Android Studio.
+        // A plain text report too, which CI prints to its log.
         textReport = true
-        textOutput = file("stdout")
     }
 }
 
