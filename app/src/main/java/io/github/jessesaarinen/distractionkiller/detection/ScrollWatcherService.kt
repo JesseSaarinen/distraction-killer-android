@@ -39,6 +39,9 @@ class ScrollWatcherService : AccessibilityService() {
     private var feedItem: String? = null
     private var feedItemAt = 0L
 
+    /** How the last player check found the feed items. A change shows in the inspector. */
+    private var feedHow: String? = null
+
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
         override fun run() {
@@ -143,7 +146,13 @@ class ScrollWatcherService : AccessibilityService() {
      * the app sent no scroll event for it, which YouTube's lists may not do.
      */
     private fun checkFeedItem(now: Long, root: AccessibilityNodeInfo, app: WatchedApp, playerOnScreen: Boolean) {
-        val item = if (playerOnScreen) visibleFeedItem(root, app) else null
+        val look = if (playerOnScreen) lookAtFeed(root, app) else null
+        // Once per visit to the player, so a log without ITEM swipes still tells why.
+        if (look != null && look.how != feedHow) {
+            InspectorLog.add(InspectorEntry(now, app.packageName, EventKind.ITEM, detail = "feed: ${look.how}"))
+        }
+        feedHow = look?.how
+        val item = look?.item
         // After a gap (another app, screen off, our banner) there is nothing to compare with.
         val previous = if (now - feedItemAt <= 2 * TICK_MS) feedItem else null
         feedItem = item
@@ -155,14 +164,19 @@ class ScrollWatcherService : AccessibilityService() {
         )
     }
 
+    /** The feed item on screen at a player check, or null, and how the check found it. */
+    private class FeedLook(val item: String?, val how: String)
+
     /**
      * The feed item that fills most of the screen, as a key that changes with
      * every swipe: its place in the list if the list tells it, otherwise the view.
      */
-    private fun visibleFeedItem(root: AccessibilityNodeInfo, app: WatchedApp): String? {
+    private fun lookAtFeed(root: AccessibilityNodeInfo, app: WatchedApp): FeedLook {
         val feed = app.swipeIds
             .flatMap { root.findAccessibilityNodeInfosByViewId("${app.packageName}:id/$it") }
-            .firstOrNull { it.isVisibleToUser } ?: return null
+            .firstOrNull { it.isVisibleToUser }
+            ?: return FeedLook(null, "${app.swipeIds.joinToString()} not on screen")
+        if (feed.childCount == 0) return FeedLook(null, "the list shows no items")
         val feedBounds = Rect()
         feed.getBoundsInScreen(feedBounds)
         var best: AccessibilityNodeInfo? = null
@@ -176,9 +190,13 @@ class ScrollWatcherService : AccessibilityService() {
             best = child
             bestHeight = bounds.height()
         }
-        val item = best ?: return null
+        val item = best ?: return FeedLook(null, "no item on screen")
         val row = item.collectionItemInfo?.rowIndex ?: -1
-        return if (row >= 0) "item $row" else "view ${item.hashCode()}"
+        return if (row >= 0) {
+            FeedLook("item $row", "items by their place in the list")
+        } else {
+            FeedLook("view ${item.hashCode()}", "items by view, the list does not tell their place")
+        }
     }
 
     /** Notes whether this app's short videos are in front. Changes show in the inspector. */

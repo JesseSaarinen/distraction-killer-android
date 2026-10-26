@@ -27,8 +27,8 @@ Avaa *Tarkastelu (kehittäjille)* ja paina *Tyhjennä*. Yläosassa pitää lukea
 - [ ] **Instagram**, etusivu: `id=list … → other (not the feed)`. Ajastin ei kasva.
 - [ ] Instagram, Reels: `id=clips_viewer_view_pager … → swipe`. Ajastin kasvaa. Takaisin etusivulle ja vieritä: `FRONT short videos not in front (scrolled list)`.
 - [ ] **YouTube**, etusivu ja tavallinen video: ei `FRONT short videos in front` -riviä.
-- [ ] YouTube, Shorts: `FRONT short videos in front (player on screen)`.
-- [ ] **Tärkein tarkistus:** pyyhkäise viisi Shortsia. Jokaisesta pitäisi tulla `SCROLLED id=reel_recycler … → swipe` tai `ITEM item N → swipe (new item on screen)`, ja ajastimen pitää kasvaa koko ajan. Jaa loki, niin nähdään, kumpi tapa toimii. Jos ajastin pysähtyy noin minuutin päästä, Shortsin pyyhkäisyt eivät näy tunnistukselle.
+- [ ] YouTube, Shorts: `FRONT short videos in front (player on screen)` ja heti perään `ITEM feed: …`. Se kertoo, miten tunnistus löytää ruudulla olevan Shortsin. Paras on `items by their place in the list`.
+- [ ] **Tärkein tarkistus:** pyyhkäise viisi Shortsia. Jokaisesta pitäisi tulla `SCROLLED id=reel_recycler … → swipe` tai `ITEM item N → swipe (new item on screen)`, ja ajastimen pitää kasvaa koko ajan. Jaa loki, niin nähdään, kumpi tapa toimii. Jos ajastin pysähtyy noin minuutin päästä, Shortsin pyyhkäisyt eivät näy tunnistukselle, ja `ITEM feed:` -rivi kertoo, mihin uuden Shortsin tunnistus jäi.
 - [ ] Paina *Jaa* ja lähetä teksti. Tekstin alussa on tila, asetukset ja versio, joten tyhjäkin loki kertoo syyn.
 
 ## 4. Keskeytykset (demotila)
