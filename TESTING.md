@@ -40,6 +40,7 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 - [ ] Uusi kierros: banneri → *Lopeta tähän* → kiitosnäkymä → *Sulje* vie aloitusnäyttöön.
 - [ ] Uusi kierros: tauko → tehtävä loppuun → *Lopetan scrollauksen* → kiitosnäkymä. Kysymystehtävässä näppäimistö toimii.
 - [ ] Banneri näkyvissä → paina Koti → banneri ja hälytys loppuvat.
+- [ ] Tauon aikana käännä puhelin vaakaan ja takaisin (automaattinen kierto päällä): tehtävä jatkuu siitä, mihin jäi, ja napit pysyvät.
 - [ ] Sama Reelsissä ja Shortsissa.
 
 ## 5. Asetukset
