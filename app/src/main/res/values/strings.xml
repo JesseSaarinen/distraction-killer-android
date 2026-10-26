@@ -61,6 +61,20 @@
     <string name="stats_skipped">kertaa ohitit</string>
     <string name="stats_dismissed">kertaa poistuit sovelluksesta keskeytyksen aikana</string>
     <string name="stats_avg_before_stop">scrollausta keskimäärin ennen lopettamista</string>
+    <string name="stats_days_title">Viimeiset 7 päivää</string>
+    <string name="stats_days_rounds">Keskeytykset</string>
+    <string name="stats_days_stopped">Lopetit scrollauksen</string>
+    <!-- Read by a screen reader for each day of the chart, for example "ke: 3 keskeytystä, lopetit 1". -->
+    <string name="stats_day">%1$s: %2$d keskeytystä, lopetit %3$d</string>
+    <string-array name="weekdays_short">
+        <item>ma</item>
+        <item>ti</item>
+        <item>ke</item>
+        <item>to</item>
+        <item>pe</item>
+        <item>la</item>
+        <item>su</item>
+    </string-array>
     <string name="stats_where_title">Missä vaiheessa lopetit</string>
     <string name="stats_where_level1">Kevyt keskeytys (banneri)</string>
     <string name="stats_where_level2">Koko näytön keskeytys</string>

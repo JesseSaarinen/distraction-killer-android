@@ -39,9 +39,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
+import io.github.jessesaarinen.distractionkiller.data.DayStats
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.Summary
+import io.github.jessesaarinen.distractionkiller.data.lastDays
 import io.github.jessesaarinen.distractionkiller.data.summarize
+import java.time.LocalDate
+import java.time.ZoneId
 
 // Stats (task N11), like views/stats.js in the web demo: numbers from the
 // event log, and the log export for the RT8 test. Back gesture returns home.
@@ -49,6 +53,7 @@ import io.github.jessesaarinen.distractionkiller.data.summarize
 fun StatsScreen(onShare: () -> Unit) {
     val events by EventLog.events.collectAsState()
     val summary = remember(events) { summarize(events) }
+    val days = remember(events) { lastDays(events, LocalDate.now(), ZoneId.systemDefault()) }
     var confirmClear by remember { mutableStateOf(false) }
 
     Scaffold { innerPadding ->
@@ -73,7 +78,7 @@ fun StatsScreen(onShare: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                Numbers(summary)
+                Numbers(summary, days)
             }
 
             SectionTitle(stringResource(R.string.stats_testers_title))
@@ -115,7 +120,7 @@ fun StatsScreen(onShare: () -> Unit) {
 }
 
 @Composable
-private fun Numbers(summary: Summary) {
+private fun Numbers(summary: Summary, days: List<DayStats>) {
     // The main number: how often an interruption ended the scrolling.
     StatBox(
         value = stringResource(R.string.stats_percent, summary.stopRate),
@@ -136,6 +141,9 @@ private fun Numbers(summary: Summary) {
         value = durationText(summary.avgScrollBeforeStop),
         label = stringResource(R.string.stats_avg_before_stop),
     )
+
+    SectionTitle(stringResource(R.string.stats_days_title))
+    DayChart(days)
 
     SectionTitle(stringResource(R.string.stats_where_title))
     TableRow(stringResource(R.string.stats_where_level1), listOf(summary.stoppedAtLevel1.toString()))

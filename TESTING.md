@@ -53,6 +53,7 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 ## 6. Tilastot ja lokit
 
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
+- [ ] *Viimeiset 7 päivää*: tämän päivän pylvään yläpuolella on päivän keskeytysten määrä, ja pylvään tumma alaosa näyttää lopetukset.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
 
 ## 7. Ruudunlukija (valinnainen, N16)
