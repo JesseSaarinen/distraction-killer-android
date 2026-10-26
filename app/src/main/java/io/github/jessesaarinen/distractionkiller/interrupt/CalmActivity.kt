@@ -41,6 +41,10 @@ class CalmActivity : ComponentActivity() {
         scrollSeconds = intent.getIntExtra(EXTRA_SECONDS, 0)
         val startWithDone = intent.getBooleanExtra(EXTRA_DONE, false)
         level2Open = savedInstanceState?.getBoolean(STATE_LEVEL2_OPEN) ?: !startWithDone
+        if (savedInstanceState == null) {
+            // In the inspector this shows that Android let the service open the screen.
+            InspectorLog.note(if (startWithDone) "thank-you screen opened" else "level 2 screen opened")
+        }
 
         setContent {
             DistractionKillerTheme {

@@ -14,6 +14,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 
 /**
  * A window drawn with Compose on top of other apps. It uses the accessibility
@@ -25,7 +26,8 @@ class OverlayWindow(private val context: Context, private val fullScreen: Boolea
     private var view: ComposeView? = null
     private var owner: OverlayOwner? = null
 
-    fun show(content: @Composable () -> Unit) {
+    /** Shows the window. Returns false if Android did not let it show. */
+    fun show(content: @Composable () -> Unit): Boolean {
         hide()
         val newOwner = OverlayOwner()
         val newView = ComposeView(context).apply {
@@ -37,15 +39,23 @@ class OverlayWindow(private val context: Context, private val fullScreen: Boolea
             windowManager.addView(newView, layoutParams())
         } catch (e: RuntimeException) {
             // The service is not connected (anymore). Nothing to show.
+            InspectorLog.error("overlay", e)
             newOwner.destroy()
-            return
+            return false
         }
         view = newView
         owner = newOwner
+        return true
     }
 
     fun hide() {
-        view?.let { windowManager.removeView(it) }
+        view?.let {
+            try {
+                windowManager.removeView(it)
+            } catch (e: RuntimeException) {
+                // Android removed it already, for example when the service was turned off.
+            }
+        }
         owner?.destroy()
         view = null
         owner = null

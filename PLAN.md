@@ -108,7 +108,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 - **Aikataulu RT8:aan on tiukka.** Karsintajärjestys: tilastonäkymä, kysymys- ja liiketehtävä, asetukset. Hengitys + taso 1 riittää arvolupauksen testaamiseen.
 - **Sovelluspäivitys muuttaa näkymä-ID:t.** Automaattipäivitykset pois ennen 5.11. ja 25.11. Merkit ovat yhdessä tiedostossa.
-- **Taso 2 ei aukea**, jos Android estää taustalta avatun näkymän. Accessibility Service on sallittu poikkeus, ja varmuuden vuoksi ajastin palaa alkuun 10 minuutin tauon jälkeen myös tasolla 2.
+- **Taso 2 ei aukea**, jos Android estää taustalta avatun näkymän. Accessibility Service on sallittu poikkeus, ja varmuuden vuoksi ajastin palaa alkuun 10 minuutin tauon jälkeen myös tasolla 2. Tarkastelussa näkyy `NOTE level 2 screen opened`, kun näkymä aukesi.
 - **Samsung pysäyttää palvelun taustalla.** Akunkäyttö "Rajoittamaton", kotinäkymä näyttää palvelun tilan.
 - **Testaajat eivät voi asentaa omiin puhelimiinsa.** RT8-testit tehdään Jessen puhelimella.
 

@@ -3,6 +3,7 @@ package io.github.jessesaarinen.distractionkiller.interrupt
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.ln
@@ -12,14 +13,36 @@ import kotlin.math.sin
  * A soft two-note "ding" made in code, like playChime() in the web demo:
  * 660 Hz, then 880 Hz 0.18 s later. No audio files.
  *
- * Plays on the alarm volume, so it is heard over the video.
+ * Plays on the alarm volume, so it is heard over the video. If the phone gives
+ * no audio track, the chime stays silent and the alarm only vibrates.
  */
 class Chime {
-    private val track: AudioTrack
+    private val track: AudioTrack? = try {
+        createTrack()
+    } catch (e: RuntimeException) {
+        InspectorLog.error("chime", e)
+        null
+    }
 
-    init {
+    fun play() {
+        if (track == null || track.state != AudioTrack.STATE_INITIALIZED) return
+        try {
+            // A static track replays from the start after stop() + reloadStaticData().
+            track.stop()
+            track.reloadStaticData()
+            track.play()
+        } catch (e: IllegalStateException) {
+            InspectorLog.error("chime", e)
+        }
+    }
+
+    fun release() {
+        track?.release()
+    }
+
+    private fun createTrack(): AudioTrack {
         val samples = generate()
-        track = AudioTrack.Builder()
+        return AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
@@ -36,19 +59,7 @@ class Chime {
             .setTransferMode(AudioTrack.MODE_STATIC)
             .setBufferSizeInBytes(samples.size * 2)
             .build()
-        track.write(samples, 0, samples.size)
-    }
-
-    fun play() {
-        if (track.state != AudioTrack.STATE_INITIALIZED) return
-        // A static track replays from the start after stop() + reloadStaticData().
-        track.stop()
-        track.reloadStaticData()
-        track.play()
-    }
-
-    fun release() {
-        track.release()
+            .apply { write(samples, 0, samples.size) }
     }
 
     private fun generate(): ShortArray {
