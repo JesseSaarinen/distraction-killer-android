@@ -101,10 +101,12 @@ object EventLog {
 
     private fun settingsJson(settings: Settings): JSONObject = JSONObject()
         .put("intervalMin", settings.intervalMin)
+        .put("level2AfterSec", settings.level2AfterSec)
         .put("tasks", JSONArray(settings.tasks.map { it.id }))
         .put("alarmMode", settings.alarmMode.id)
         .put("sound", settings.sound)
         .put("vibration", settings.vibration)
         .put("demoMode", settings.demoMode)
         .put("watchedApps", JSONArray(settings.watchedApps.toList()))
+        .put("interruptionsOn", settings.interruptionsOn)
 }

@@ -68,6 +68,12 @@ fun SettingsScreen() {
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+            SwitchRow(
+                title = stringResource(R.string.settings_interruptions_on),
+                hint = stringResource(R.string.settings_interruptions_hint),
+                checked = settings.interruptionsOn,
+                onCheckedChange = { on -> SettingsStore.update { it.copy(interruptionsOn = on) } },
+            )
 
             SectionTitle(stringResource(R.string.settings_interval_title))
             Column(Modifier.selectableGroup()) {
@@ -80,6 +86,18 @@ fun SettingsScreen() {
                 }
             }
             Hint(stringResource(R.string.settings_interval_hint))
+
+            SectionTitle(stringResource(R.string.settings_level2_title))
+            Column(Modifier.selectableGroup()) {
+                for (seconds in Config.LEVEL2_DELAY_OPTIONS_SECONDS) {
+                    RadioRow(
+                        text = durationText(seconds),
+                        selected = seconds == settings.level2AfterSec,
+                        onClick = { SettingsStore.update { it.copy(level2AfterSec = seconds) } },
+                    )
+                }
+            }
+            Hint(stringResource(R.string.settings_level2_hint))
 
             SectionTitle(stringResource(R.string.settings_tasks_title))
             for (task in TaskType.entries) {

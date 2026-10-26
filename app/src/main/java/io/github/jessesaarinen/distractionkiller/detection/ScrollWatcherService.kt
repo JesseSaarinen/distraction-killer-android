@@ -78,6 +78,11 @@ class ScrollWatcherService : AccessibilityService() {
         if (root != null && foreground != null) checkPlayer(now, root, foreground)
 
         val settings = SettingsStore.settings.value
+        if (!settings.interruptionsOn) {
+            // Paused in the settings: nothing counts, and turning it back on starts from zero.
+            ScrollTimer.reset()
+            return
+        }
         val level = ScrollTimer.tick(
             nowMillis = now,
             shortVideoInFront = foreground != null && foreground == shortVideoApp,

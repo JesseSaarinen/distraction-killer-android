@@ -69,7 +69,18 @@ fun HomeScreen(
                 text = stringResource(R.string.home_intro),
                 style = MaterialTheme.typography.bodyLarge,
             )
-            if (serviceEnabled) {
+            if (serviceEnabled && !settings.interruptionsOn) {
+                Text(
+                    text = stringResource(R.string.home_paused),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Button(
+                    onClick = { SettingsStore.update { it.copy(interruptionsOn = true) } },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                ) {
+                    Text(stringResource(R.string.home_resume))
+                }
+            } else if (serviceEnabled) {
                 Text(
                     text = stringResource(R.string.home_service_on, durationText(settings.level1Seconds)),
                     style = MaterialTheme.typography.bodyLarge,

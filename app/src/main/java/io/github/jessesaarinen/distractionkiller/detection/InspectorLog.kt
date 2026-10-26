@@ -268,6 +268,7 @@ object InspectorLog {
         fun onOff(on: Boolean) = if (on) "päällä" else "pois"
         val watched = AppMarkers.labels.filter { it in settings.watchedApps }
         return listOf(
+            "keskeytykset ${if (settings.interruptionsOn) "päällä" else "tauolla"}",
             "väli ${settings.intervalMin} min",
             "demotila ${onOff(settings.demoMode)}",
             "taso 1 ${settings.level1Seconds} s",

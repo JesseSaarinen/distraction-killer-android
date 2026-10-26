@@ -4,6 +4,8 @@
     <string name="home_intro">Sovellus huomaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa, ja pysäyttää selauksen hetkeksi valitsemasi ajan jälkeen.</string>
     <string name="home_version">Versio %1$s</string>
     <string name="home_service_on">Selauksen tunnistus on päällä. Keskeytys tulee %1$s aktiivisen selauksen jälkeen.</string>
+    <string name="home_paused">Keskeytykset ovat tauolla, joten scrollausta ei nyt lasketa.</string>
+    <string name="home_resume">Laita keskeytykset päälle</string>
     <string name="home_service_off">Selauksen tunnistus ei ole vielä päällä. Tee alla olevat vaiheet.</string>
     <string name="home_open_accessibility">Avaa esteettömyysasetukset</string>
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
@@ -21,8 +23,12 @@
     <string name="home_open_inspector">Tarkastelu (kehittäjille)</string>
 
     <string name="settings_title">Asetukset</string>
+    <string name="settings_interruptions_on">Keskeytykset päällä</string>
+    <string name="settings_interruptions_hint">Pois päältä scrollausta ei lasketa eikä keskeytyksiä tule. Esteettömyysasetukseen ei tarvitse koskea.</string>
     <string name="settings_interval_title">Kuinka usein keskeytetään?</string>
     <string name="settings_interval_hint">Aika lasketaan vain silloin, kun scrollaat.</string>
+    <string name="settings_level2_title">Kuinka pian koko näytön tauko tulee?</string>
+    <string name="settings_level2_hint">Jos jatkat bannerin jälkeen, koko näytön tauko tulee, kun olet scrollannut vielä tämän verran.</string>
     <string name="settings_tasks_title">Keskeytyksen tehtävät</string>
     <string name="task_breathing">Hengitysharjoitus</string>
     <string name="task_question">Mitä olit tekemässä?</string>

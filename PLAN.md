@@ -23,7 +23,7 @@ Natiivi Android-sovellus, joka huomaa lyhytvideoiden selauksen TikTokissa, Insta
 
 3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana. 10 minuutin tauko aloittaa laskennan alusta.
 4. **Taso 1**, kun väli täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s).
-5. **Taso 2**, jos selaus jatkuu bannerin jälkeen 30 s (demotila 10 s): koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike), *Ohita* 5 s jälkeen.
+5. **Taso 2**, jos selaus jatkuu bannerin jälkeen 30 s (asetuksista 15 s – 2 min, demotila 10 s): koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike), *Ohita* 5 s jälkeen.
 6. **Lopetus** (tasolla 1 tai 2) avaa kiitosnäkymän, ja *Sulje* vie puhelimen aloitusnäyttöön. Jatkaminen ja ohittaminen nollaavat ajastimen.
 7. **Loki** tallentuu puhelimeen. Tilastot ja JSON-vienti jakovalikon kautta.
 
@@ -31,7 +31,7 @@ Tason 1 banneri piirretään Accessibility Servicen omaan ikkunaan, joten "Näyt
 
 ## Asetukset ja tapahtumat
 
-- Asetukset: `{ intervalMin, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps }`. `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). Tallennus: `data/SettingsStore.kt` (SharedPreferences).
+- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps, interruptionsOn }`. `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s, demotilassa aina 10 s). `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä, mutta tarkastelu näyttää tapahtumat. Tallennus: `data/SettingsStore.kt` (SharedPreferences).
 - Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer }`. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
 
 ## Tiedostorakenne (kasvaa tehtävien mukana)
@@ -91,7 +91,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **M3 – Taso 2, asetukset ja tilastot (3.–4.11.)**
 - ☑ N9 Taso 2: hengitys, kysymys, liike, *Ohita* 5 s jälkeen. Kiitosnäkymä, jonne myös tason 1 *Lopeta tähän* vie
-- ☑ N10 Asetukset: väli, tehtävät, hälytys, ääni, värinä, demotila, valvotut sovellukset
+- ☑ N10 Asetukset: väli, tason 2 aika, tehtävät, hälytys, ääni, värinä, demotila, valvotut sovellukset, keskeytysten tauko
 - ☑ N11 Loki, tilastonäkymä, JSON-vienti jakovalikolla
 - ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 

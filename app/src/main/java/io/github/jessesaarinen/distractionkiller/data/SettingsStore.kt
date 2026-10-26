@@ -18,12 +18,14 @@ import kotlinx.coroutines.flow.asStateFlow
 object SettingsStore {
     private const val FILE_NAME = "settings"
     private const val KEY_INTERVAL_MIN = "intervalMin"
+    private const val KEY_LEVEL2_AFTER_SEC = "level2AfterSec"
     private const val KEY_TASKS = "tasks"
     private const val KEY_ALARM_MODE = "alarmMode"
     private const val KEY_SOUND = "sound"
     private const val KEY_VIBRATION = "vibration"
     private const val KEY_DEMO_MODE = "demoMode"
     private const val KEY_WATCHED_APPS = "watchedApps"
+    private const val KEY_INTERRUPTIONS_ON = "interruptionsOn"
 
     private var prefs: SharedPreferences? = null
     private val _settings = MutableStateFlow(Settings())
@@ -44,12 +46,14 @@ object SettingsStore {
         val p = prefs ?: return
         p.edit()
             .putInt(KEY_INTERVAL_MIN, new.intervalMin)
+            .putInt(KEY_LEVEL2_AFTER_SEC, new.level2AfterSec)
             .putStringSet(KEY_TASKS, new.tasks.map { it.id }.toSet())
             .putString(KEY_ALARM_MODE, new.alarmMode.id)
             .putBoolean(KEY_SOUND, new.sound)
             .putBoolean(KEY_VIBRATION, new.vibration)
             .putBoolean(KEY_DEMO_MODE, new.demoMode)
             .putStringSet(KEY_WATCHED_APPS, new.watchedApps)
+            .putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
             .apply()
     }
 
@@ -58,18 +62,21 @@ object SettingsStore {
     private fun read(p: SharedPreferences): Settings {
         val defaults = Settings()
         val interval = p.getInt(KEY_INTERVAL_MIN, defaults.intervalMin)
+        val level2After = p.getInt(KEY_LEVEL2_AFTER_SEC, defaults.level2AfterSec)
         val taskIds = p.getStringSet(KEY_TASKS, null).orEmpty()
         val tasks = TaskType.entries.filter { it.id in taskIds }.toSet()
         // null = never saved, so every app is watched. An empty set means the user turned all off.
         val apps = p.getStringSet(KEY_WATCHED_APPS, null)
         return Settings(
             intervalMin = if (interval in Config.INTERVAL_OPTIONS_MIN) interval else defaults.intervalMin,
+            level2AfterSec = if (level2After in Config.LEVEL2_DELAY_OPTIONS_SECONDS) level2After else defaults.level2AfterSec,
             tasks = tasks.ifEmpty { defaults.tasks },
             alarmMode = AlarmMode.fromId(p.getString(KEY_ALARM_MODE, null)),
             sound = p.getBoolean(KEY_SOUND, defaults.sound),
             vibration = p.getBoolean(KEY_VIBRATION, defaults.vibration),
             demoMode = p.getBoolean(KEY_DEMO_MODE, defaults.demoMode),
             watchedApps = if (apps == null) defaults.watchedApps else AppMarkers.labels.filter { it in apps }.toSet(),
+            interruptionsOn = p.getBoolean(KEY_INTERRUPTIONS_ON, defaults.interruptionsOn),
         )
     }
 }
