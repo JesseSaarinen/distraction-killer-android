@@ -15,8 +15,8 @@ import io.github.jessesaarinen.distractionkiller.interrupt.InterruptController
  * Reads only the app's package name, view IDs, class names and scroll positions.
  * Never reads text, messages or video content.
  *
- * Swipes feed the ScrollTimer (N6). Level 1 shows the banner (N7); the calm
- * level 2 overlay comes in N9.
+ * Swipes feed the ScrollTimer (N6). Level 1 shows the banner (N7) and
+ * level 2 the calm full screen (N9).
  */
 class ScrollWatcherService : AccessibilityService() {
 
@@ -70,9 +70,7 @@ class ScrollWatcherService : AccessibilityService() {
             interrupts?.showLevel1(foreground, seconds)
         } else {
             InspectorLog.add(InspectorEntry(now, foreground, EventKind.LEVEL2, detail = "active=${seconds}s"))
-            interrupts?.dismissLevel1()
-            // Placeholder until the calm overlay (N9): start over.
-            ScrollTimer.reset()
+            interrupts?.showLevel2(foreground, seconds)
         }
     }
 

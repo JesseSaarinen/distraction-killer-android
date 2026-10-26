@@ -39,9 +39,21 @@ class InterruptController(private val service: AccessibilityService) {
         )
     }
 
-    /** Hides the banner without a choice: the user left the app, or level 2 replaced it. */
+    /** Hides the banner without a choice: the user left the app. */
     fun dismissLevel1() {
         if (bannerApp != null) finishLevel1("dismissed")
+    }
+
+    /**
+     * Level 2: the calm full screen with one random task. It replaces the
+     * banner, and like in the web demo level 1 then gets no outcome.
+     * CalmActivity resets the timer when the break ends.
+     */
+    fun showLevel2(packageName: String, scrollSeconds: Int) {
+        hideBanner()
+        alarm.notifyLevel2(sound = Config.DEFAULT_SOUND, vibration = Config.DEFAULT_VIBRATION)
+        val task = Config.DEFAULT_TASKS.random()
+        service.startActivity(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
     }
 
     fun release() {
@@ -52,16 +64,21 @@ class InterruptController(private val service: AccessibilityService) {
 
     private fun finishLevel1(outcome: String) {
         val packageName = bannerApp ?: return
-        bannerApp = null
-        alarm.stop()
-        banner.hide()
+        hideBanner()
         if (outcome == "stopped") {
-            // "Lopeta tähän" really leaves the video app.
+            // "Lopeta tähän" leaves the video app for the thank-you screen.
+            val seconds = ScrollTimer.state.value.activeSeconds
             ScrollTimer.reset()
-            service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
+            service.startActivity(CalmActivity.doneIntent(service, packageName, seconds))
         }
         InspectorLog.add(
             InspectorEntry(System.currentTimeMillis(), packageName, EventKind.OUTCOME, detail = "level1 $outcome")
         )
+    }
+
+    private fun hideBanner() {
+        bannerApp = null
+        alarm.stop()
+        banner.hide()
     }
 }
