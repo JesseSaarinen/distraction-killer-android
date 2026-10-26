@@ -13,9 +13,11 @@ Natiivi Android-sovellus, joka huomaa lyhytvideoiden selauksen TikTokissa, Insta
 
    | Sovellus | Paketti | Tunnistus |
    | --- | --- | --- |
-   | TikTok | `com.zhiliaoapp.musically` | Koko sovellus on lyhytvideosyöte |
-   | Instagram Reels | `com.instagram.android` | Reels-näkymän ID (ehdokas: sisältää `clips_viewer`) |
-   | YouTube Shorts | `com.google.android.youtube` | Shorts-näkymän ID (ehdokas: alkaa `reel_`) |
+   | TikTok | `com.zhiliaoapp.musically` | Koko sovellus on lyhytvideosyöte (ei vielä tarkistettu) |
+   | Instagram Reels | `com.instagram.android` | Vain Reels: vieritys näkymässä `clips_viewer_view_pager` (tarkistettu 26.10.). Etusivun syöte `list` ei laske. |
+   | YouTube Shorts | `com.google.android.youtube` | Shorts-näkymän ID (ehdokas: alkaa `reel_`). Kunnes se on tarkistettu, koko sovellus laskee. |
+
+   Pyyhkäisy on vieritystapahtuma, jossa näkymä oikeasti liikkui. Lista lähettää vieritystapahtuman myös latautuessaan, mutta silloin siirtymä on nolla (`dy=0`), eikä sitä lasketa. Kun käyttäjä vierittää samassa sovelluksessa jotain muuta (esim. Instagramin etusivua), lyhytvideonäkymä ei ole enää edessä. Tarkastelunäkymä merkitsee lasketut pyyhkäisyt sanalla `swipe`.
 
 3. **Ajastin** laskee sekunnin, kun lyhytvideonäkymä on edessä, näyttö on päällä ja käyttäjä on pyyhkäissyt viimeisen 60 s aikana. 10 minuutin tauko aloittaa laskennan alusta.
 4. **Taso 1**, kun väli täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s).
@@ -75,8 +77,8 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **M1 – Tunnistuksen tarkistuspiste (29.–31.10.)**
 - ☑ N4 Accessibility Service + tarkastelunäkymä, joka listaa paketit, näkymä-ID:t ja tapahtumatyypit
-- ☐ N5 Selataan jokaista sovellusta minuutti, valitaan merkit, tarkistetaan että pyyhkäisyt näkyvät
-- ☐ Päätös sovelluksittain: vain lyhytvideonäkymä vai koko sovellus
+- ◐ N5 Selataan jokaista sovellusta minuutti, valitaan merkit, tarkistetaan että pyyhkäisyt näkyvät. Instagram valmis, TikTok ja YouTube odottavat tarkastelun lokia
+- ◐ Päätös sovelluksittain: vain lyhytvideonäkymä vai koko sovellus. Instagram: vain Reels
 
 **M2 – Ajastin ja taso 1 (1.–2.11.)**
 - ☑ N6 Aktiivisen ajan ajastin (60 s pyyhkäisysääntö)

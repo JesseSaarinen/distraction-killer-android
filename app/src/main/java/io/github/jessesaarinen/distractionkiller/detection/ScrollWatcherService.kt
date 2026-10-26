@@ -15,8 +15,8 @@ import io.github.jessesaarinen.distractionkiller.interrupt.InterruptController
  * Reads only the app's package name, view IDs, class names and scroll positions.
  * Never reads text, messages or video content.
  *
- * Swipes feed the ScrollTimer (N6). Level 1 shows the banner (N7) and
- * level 2 the calm full screen (N9).
+ * Swipes in the short-video feed (N5) feed the ScrollTimer (N6). Level 1
+ * shows the banner (N7) and level 2 the calm full screen (N9).
  */
 class ScrollWatcherService : AccessibilityService() {
 
@@ -25,6 +25,12 @@ class ScrollWatcherService : AccessibilityService() {
 
     /** Ticks in a row with no watched app in front. */
     private var awayTicks = 0
+
+    /**
+     * The app whose short-video feed the user swiped last. Cleared when they
+     * scroll something else in that app, like Instagram's home feed.
+     */
+    private var shortVideoApp: String? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private val tickRunnable = object : Runnable {
@@ -58,7 +64,7 @@ class ScrollWatcherService : AccessibilityService() {
         val settings = SettingsStore.settings.value
         val level = ScrollTimer.tick(
             nowMillis = now,
-            shortVideoInFront = foreground != null,
+            shortVideoInFront = foreground != null && foreground == shortVideoApp,
             level1Seconds = settings.level1Seconds,
             level2DelaySeconds = settings.level2DelaySeconds,
         )
@@ -74,10 +80,7 @@ class ScrollWatcherService : AccessibilityService() {
         }
     }
 
-    /**
-     * The watched app in front, if the screen is on. For now the whole app
-     * counts; N5 narrows this to the short-video screens.
-     */
+    /** The watched app in front, if the screen is on. */
     private fun foregroundWatchedApp(): String? {
         val power = getSystemService(PowerManager::class.java)
         if (power == null || !power.isInteractive) return null
@@ -109,15 +112,21 @@ class ScrollWatcherService : AccessibilityService() {
         if (kind == EventKind.CONTENT) return
 
         val now = System.currentTimeMillis()
-        if (kind == EventKind.SCROLLED) ScrollTimer.onSwipe(now)
+        val viewId = event.source?.viewIdResourceName?.let(::shortId)
+        var detail: String? = null
+        if (kind == EventKind.SCROLLED) {
+            // "swipe" marks the scrolls that count, so they can be checked in the inspector.
+            val swipe = onScroll(now, packageName, viewId, event)
+            detail = scrollDetail(event) + if (swipe) " swipe" else ""
+        }
         InspectorLog.add(
             InspectorEntry(
                 timeMillis = now,
                 packageName = packageName,
                 kind = kind,
-                viewId = event.source?.viewIdResourceName?.let(::shortId),
+                viewId = viewId,
                 className = event.className?.toString(),
-                detail = if (kind == EventKind.SCROLLED) scrollDetail(event) else null,
+                detail = detail,
             )
         )
         takeSnapshot(now, packageName)
@@ -125,6 +134,29 @@ class ScrollWatcherService : AccessibilityService() {
 
     override fun onInterrupt() {
         // Nothing to stop: this service gives no spoken or haptic feedback.
+    }
+
+    /**
+     * A swipe is a scroll that moved, in the app's short-video feed. It goes
+     * to the timer. Returns true for a swipe.
+     */
+    private fun onScroll(now: Long, packageName: String, viewId: String?, event: AccessibilityEvent): Boolean {
+        if (!moved(event)) return false
+        if (AppMarkers.isShortVideo(packageName, viewId)) {
+            shortVideoApp = packageName
+            ScrollTimer.onSwipe(now)
+            return true
+        }
+        // The user scrolls something else in the same app, so the short videos are no longer in front.
+        if (shortVideoApp == packageName) shortVideoApp = null
+        return false
+    }
+
+    /** A list also sends a scroll event when it only lays itself out. Then it does not move. */
+    private fun moved(event: AccessibilityEvent): Boolean {
+        // Before Android 9 the event does not tell how far the view moved.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return true
+        return event.scrollDeltaX != 0 || event.scrollDeltaY != 0
     }
 
     /** Lists the view IDs on screen, at most once every 2 seconds per app. */
