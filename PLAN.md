@@ -43,7 +43,12 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   detection/ScrollWatcherService.kt # N4: Accessibility Service
   detection/InspectorLog.kt        # N4: tarkastelun loki muistissa (ei tallennu)
   detection/ScrollTimer.kt         # N6: aktiivisen ajan ajastin
-  interrupt/               # N7–N9: taso 1 ja taso 2 overlayt, hälytys, tehtävät
+  interrupt/InterruptController.kt # N7: näyttää keskeytykset ja toimii valinnan mukaan
+  interrupt/OverlayWindow.kt       # N7: Compose-ikkuna muiden sovellusten päälle
+  interrupt/Level1Banner.kt        # N7: tason 1 banneri
+  interrupt/Alarm.kt, Chime.kt     # N7: hälytys (värinä + koodissa tehty ääni)
+  interrupt/                       # N9: tason 2 overlay ja tehtävät
+  ui/Format.kt                     # kestot tekstiksi ("1 min 30 s")
   data/                    # N10–N11: asetukset, loki, vienti
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 .github/workflows/build.yml           # APK-build ja julkaisut
@@ -65,8 +70,8 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **M2 – Ajastin ja taso 1 (1.–2.11.)**
 - ☑ N6 Aktiivisen ajan ajastin (60 s pyyhkäisysääntö)
-- ☐ N7 Tason 1 banneri + hälytys (ääni, värinä, molemmat kestot)
-- ☐ N8 *Lopeta tähän* → Koti, *Jatka* → tason 2 seuranta
+- ☑ N7 Tason 1 banneri + hälytys (ääni, värinä, molemmat kestot)
+- ☑ N8 *Lopeta tähän* → Koti, *Jatka* → tason 2 seuranta
 
 **M3 – Taso 2, asetukset ja tilastot (3.–4.11.)**
 - ☐ N9 Tason 2 overlay: hengitys, kysymys, liike, *Ohita* 5 s jälkeen

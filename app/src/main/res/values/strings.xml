@@ -13,6 +13,15 @@
     <string name="accessibility_service_label">Distraction Killer: selauksen tunnistus</string>
     <string name="accessibility_service_description">Tunnistaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa. Sovellus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä mikään tieto lähde puhelimesta.</string>
 
+    <string name="duration_seconds">%1$d s</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+
+    <string name="level1_title">Olet scrollannut %1$s</string>
+    <string name="level1_text">Onko tämä sitä, mitä halusit tehdä juuri nyt?</string>
+    <string name="level1_stop">Lopeta tähän</string>
+    <string name="level1_continue">Jatka</string>
+
     <string name="inspector_title">Tarkastelu</string>
     <string name="inspector_intro">Selaa hetki TikTokia, Instagramin Reelsejä ja YouTuben Shortseja. Tähän kertyy, mitä tunnistus näkee: sovellus, tapahtuma ja näkymän tunniste. Paina lopuksi Jaa ja lähetä teksti.</string>
     <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>
