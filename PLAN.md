@@ -37,7 +37,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   DistractionKillerApp.kt  # N11: lataa asetukset ja lokin ennen muuta
   MainActivity.kt          # käynnistys, näkymien vaihto
   Config.kt                # kaikki ajat ja vaihtoehdot (vrt. web-demon config.js)
-  ui/HomeScreen.kt         # kotinäkymä: tunnistuksen tila (N12: käyttöönotto-opas)
+  ui/HomeScreen.kt         # kotinäkymä: tunnistuksen tila ja käyttöönotto-opas (N12)
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
@@ -87,7 +87,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N9 Taso 2: hengitys, kysymys, liike, *Ohita* 5 s jälkeen. Kiitosnäkymä, jonne myös tason 1 *Lopeta tähän* vie
 - ☑ N10 Asetukset: väli, tehtävät, hälytys, ääni, värinä, demotila, valvotut sovellukset
 - ☑ N11 Loki, tilastonäkymä, JSON-vienti jakovalikolla
-- ☐ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
+- ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta

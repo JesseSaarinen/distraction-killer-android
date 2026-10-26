@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
@@ -29,8 +30,9 @@ enum class Screen { HOME, SETTINGS, STATS, INSPECTOR }
 
 class MainActivity : ComponentActivity() {
 
-    // Checked again every time the app comes back from the settings.
+    // Checked again every time the app comes back from the phone's settings.
     private var serviceEnabled by mutableStateOf(false)
+    private var batteryUnrestricted by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
                 when (screen) {
                     Screen.HOME -> HomeScreen(
                         serviceEnabled = serviceEnabled,
+                        batteryUnrestricted = batteryUnrestricted,
                         onOpenAccessibilitySettings = ::openAccessibilitySettings,
                         onOpenAppInfo = ::openAppInfo,
                         onOpenSettings = { screen = Screen.SETTINGS },
@@ -70,6 +73,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         serviceEnabled = isServiceEnabled()
+        batteryUnrestricted = isBatteryUnrestricted()
     }
 
     private fun isServiceEnabled(): Boolean {
@@ -80,11 +84,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // "Unrestricted" battery use, so Samsung does not stop the service in the background.
+    private fun isBatteryUnrestricted(): Boolean {
+        val power = getSystemService(PowerManager::class.java) ?: return false
+        return power.isIgnoringBatteryOptimizations(packageName)
+    }
+
     private fun openAccessibilitySettings() {
         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
     }
 
-    // "Allow restricted settings" lives in the app info menu (Android 13+).
+    // "Allow restricted settings" (Android 13+) and the battery setting live in the app info.
     private fun openAppInfo() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
