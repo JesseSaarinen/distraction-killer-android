@@ -18,6 +18,8 @@
     <string name="inspector_service_off">Tunnistus on pois päältä, joten tapahtumia ei tule.</string>
     <string name="inspector_share">Jaa</string>
     <string name="inspector_clear">Tyhjennä</string>
+    <string name="inspector_timer">Ajastin: %1$d s aktiivista selausta (%2$s)</string>
+    <string name="inspector_reset_timer">Nollaa ajastin</string>
     <string name="inspector_counts_title">Tapahtumia sovelluksittain</string>
     <string name="inspector_events_title">Uusimmat tapahtumat</string>
     <string name="inspector_empty">Ei vielä tapahtumia.</string>
