@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Distraction Killer</string>
-    <string name="home_intro">Tervetuloa! Sovellus auttaa sinua huomaamaan, kun lyhytvideoiden selaus venyy. Keskeytykset tulevat käyttöön pian.</string>
+    <string name="home_intro">Sovellus huomaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa, ja pysäyttää selauksen hetkeksi valitsemasi ajan jälkeen.</string>
     <string name="home_version">Versio %1$s</string>
-    <string name="home_service_on">Selauksen tunnistus on päällä.</string>
-    <string name="home_service_off">Selauksen tunnistus on pois päältä. Laita se päälle esteettömyysasetuksista: Asennetut sovellukset → Distraction Killer.</string>
+    <string name="home_service_on">Selauksen tunnistus on päällä. Keskeytys tulee %1$s aktiivisen selauksen jälkeen.</string>
+    <string name="home_service_off">Selauksen tunnistus ei ole vielä päällä. Tee alla olevat vaiheet.</string>
     <string name="home_open_accessibility">Avaa esteettömyysasetukset</string>
-    <string name="home_restricted_hint">Jos kytkin on harmaana, avaa sovelluksen tiedot, paina ⋮ ja valitse Salli rajoitetut asetukset. Palaa sitten esteettömyysasetuksiin.</string>
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
+    <string name="home_setup_title">Käyttöönotto</string>
+    <string name="setup_accessibility_title">Laita selauksen tunnistus päälle</string>
+    <string name="setup_accessibility_text">Avaa esteettömyysasetukset ja valitse Asennetut sovellukset → Distraction Killer: selauksen tunnistus → päälle.</string>
+    <string name="setup_restricted_text">Jos puhelin sanoo, että asetus on rajoitettu: avaa sovelluksen tiedot, paina oikean yläkulman ⋮ ja valitse Salli rajoitetut asetukset. Kokeile sitten uudelleen.</string>
+    <string name="setup_battery_title">Salli toiminta taustalla</string>
+    <string name="setup_battery_text">Avaa sovelluksen tiedot ja valitse Akku → Rajoittamaton, ettei puhelin pysäytä tunnistusta.</string>
+    <string name="setup_try_title">Kokeile</string>
+    <string name="setup_try_text">Laita asetuksista demotila päälle ja selaa hetki TikTokia, Reelsejä tai Shortseja. Ensimmäinen keskeytys tulee jo %1$d sekunnin päästä.</string>
+    <string name="home_privacy">Sovellus näkee vain, mikä sovellus on auki ja milloin selaat. Se ei lue tekstejä, viestejä tai videoita, eikä mikään tieto lähde puhelimesta.</string>
     <string name="home_open_settings">Asetukset</string>
     <string name="home_open_stats">Tilastot</string>
     <string name="home_open_inspector">Tarkastelu (kehittäjille)</string>

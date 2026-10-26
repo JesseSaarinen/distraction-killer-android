@@ -18,6 +18,8 @@ Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ohjeet AI-agenteille: [CLAUDE.md]
 3. Sovelluksen tiedot → Akku → **Rajoittamaton**, jotta Samsung ei pysäytä tunnistusta taustalla.
 4. Auto Blockerin voi nyt kytkeä takaisin päälle.
 
+Sovelluksen kotinäkymässä on samat vaiheet, ja valmis vaihe saa ✓-merkin.
+
 Tunnistus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä sovelluksella ole internet-oikeutta.
 
 ## Kehitys
