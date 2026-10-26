@@ -51,7 +51,7 @@ android {
     }
 
     lint {
-        // A plain text report too, which CI prints to its log.
+        // Print the findings to the build log too, so they show in CI.
         textReport = true
     }
 }

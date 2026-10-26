@@ -25,7 +25,8 @@ import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.R
 import kotlinx.coroutines.delay
 
-private data class Challenge(@StringRes val icon: Int, @StringRes val text: Int)
+// @param: puts the annotation on the constructor's parameters, as Kotlin asks.
+private data class Challenge(@param:StringRes val icon: Int, @param:StringRes val text: Int)
 
 private val CHALLENGES = listOf(
     Challenge(R.string.physical_window_icon, R.string.physical_window),

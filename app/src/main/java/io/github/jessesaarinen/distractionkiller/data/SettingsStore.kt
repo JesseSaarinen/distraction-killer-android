@@ -2,6 +2,7 @@ package io.github.jessesaarinen.distractionkiller.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
@@ -44,17 +45,17 @@ object SettingsStore {
         val new = change(_settings.value)
         _settings.value = new
         val p = prefs ?: return
-        p.edit()
-            .putInt(KEY_INTERVAL_MIN, new.intervalMin)
-            .putInt(KEY_LEVEL2_AFTER_SEC, new.level2AfterSec)
-            .putStringSet(KEY_TASKS, new.tasks.map { it.id }.toSet())
-            .putString(KEY_ALARM_MODE, new.alarmMode.id)
-            .putBoolean(KEY_SOUND, new.sound)
-            .putBoolean(KEY_VIBRATION, new.vibration)
-            .putBoolean(KEY_DEMO_MODE, new.demoMode)
-            .putStringSet(KEY_WATCHED_APPS, new.watchedApps)
-            .putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
-            .apply()
+        p.edit {
+            putInt(KEY_INTERVAL_MIN, new.intervalMin)
+            putInt(KEY_LEVEL2_AFTER_SEC, new.level2AfterSec)
+            putStringSet(KEY_TASKS, new.tasks.map { it.id }.toSet())
+            putString(KEY_ALARM_MODE, new.alarmMode.id)
+            putBoolean(KEY_SOUND, new.sound)
+            putBoolean(KEY_VIBRATION, new.vibration)
+            putBoolean(KEY_DEMO_MODE, new.demoMode)
+            putStringSet(KEY_WATCHED_APPS, new.watchedApps)
+            putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
+        }
     }
 
     // Missing or unknown values fall back to the defaults, so settings saved by

@@ -38,14 +38,10 @@ jobs:
         run: ./gradlew testDebugUnitTest
 
       # Android's own checks for bugs (for example Compose state, API levels, resources).
-      # The findings are printed here, so they can be read without Android Studio.
-      # Errors fail the build, warnings do not.
+      # The findings are printed here (textReport in app/build.gradle.kts), so they
+      # can be read without Android Studio. Errors fail the build, warnings do not.
       - name: Lint
-        run: |
-          status=0
-          ./gradlew lintDebug || status=$?
-          cat app/build/reports/lint-results-debug.txt
-          exit $status
+        run: ./gradlew lintDebug
 
       - name: Build APK
         run: ./gradlew assembleDebug
