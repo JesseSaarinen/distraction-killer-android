@@ -22,9 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
+import io.github.jessesaarinen.distractionkiller.data.Settings
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
+import io.github.jessesaarinen.distractionkiller.detection.TimerPhase
+import io.github.jessesaarinen.distractionkiller.detection.TimerState
 
 // Inspector (tasks N4 and N5): the scroll watcher's state right now, and a list
 // of what it sees, so the short-video markers can be found and checked.
@@ -38,6 +42,7 @@ fun InspectorScreen(
     val counts by InspectorLog.counts.collectAsState()
     val timer by ScrollTimer.state.collectAsState()
     val status by InspectorLog.status.collectAsState()
+    val settings by SettingsStore.settings.collectAsState()
 
     Scaffold { innerPadding ->
         LazyColumn(
@@ -97,7 +102,8 @@ fun InspectorScreen(
                             stringResource(R.string.inspector_not_in_front)
                         }
                     )
-                    StatusLine(stringResource(R.string.inspector_timer, timer.activeSeconds, timer.phase.name))
+                    StatusLine(timerText(timer, settings))
+                    if (!settings.interruptionsOn) StatusLine(stringResource(R.string.inspector_paused))
                     val lastAt = status.lastEventAt
                     StatusLine(
                         if (lastAt != null) {
@@ -155,6 +161,19 @@ fun InspectorScreen(
             }
         }
     }
+}
+
+/** How far the timer is, and when the next level comes. */
+@Composable
+private fun timerText(timer: TimerState, settings: Settings): String = when (timer.phase) {
+    TimerPhase.COUNTING ->
+        stringResource(R.string.inspector_timer_level1, timer.activeSeconds, settings.level1Seconds)
+    TimerPhase.AFTER_LEVEL1 -> {
+        // Level 2 comes level2DelaySeconds after the second where level 1 came.
+        val level2At = timer.activeSeconds - timer.secondsAfterLevel1 + settings.level2DelaySeconds
+        stringResource(R.string.inspector_timer_level2, timer.activeSeconds, level2At)
+    }
+    TimerPhase.PAUSED -> stringResource(R.string.inspector_timer_paused, timer.activeSeconds)
 }
 
 @Composable
