@@ -141,7 +141,10 @@
     <string name="inspector_status_stopped">Tunnistus ei ole käynnissä. Laita se päälle esteettömyysasetuksista.</string>
     <string name="inspector_in_front">Edessä: lyhytvideot (%1$s)</string>
     <string name="inspector_not_in_front">Edessä: ei lyhytvideoita</string>
-    <string name="inspector_timer">Ajastin: %1$d s aktiivista selausta (%2$s)</string>
+    <string name="inspector_timer_level1">Ajastin: %1$d s aktiivista selausta, banneri kohdassa %2$d s</string>
+    <string name="inspector_timer_level2">Ajastin: %1$d s aktiivista selausta, koko näytön tauko kohdassa %2$d s</string>
+    <string name="inspector_timer_paused">Ajastin: %1$d s, koko näytön tauko näytetty. Laskenta alkaa alusta tauon jälkeen.</string>
+    <string name="inspector_paused">Keskeytykset ovat tauolla asetuksissa, joten ajastin ei laske.</string>
     <string name="inspector_last_event">Viimeisin tapahtuma: %1$s %2$s</string>
     <string name="inspector_last_event_none">Viimeisin tapahtuma: ei yhtään sovelluksen käynnistymisen jälkeen</string>
     <string name="inspector_last_scroll">Viimeisin vieritys: %1$s</string>
