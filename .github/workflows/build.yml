@@ -37,6 +37,10 @@ jobs:
       - name: Unit tests
         run: ./gradlew testDebugUnitTest
 
+      # Android's own checks for bugs (for example Compose state, API levels, resources).
+      - name: Lint
+        run: ./gradlew lintDebug
+
       - name: Build APK
         run: ./gradlew assembleDebug
 

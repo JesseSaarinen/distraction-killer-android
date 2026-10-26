@@ -49,6 +49,12 @@ android {
         compose = true
         buildConfig = true
     }
+
+    lint {
+        // CI runs lint. The findings go to the CI log, so they can be read without Android Studio.
+        textReport = true
+        textOutput = file("stdout")
+    }
 }
 
 kotlin {
