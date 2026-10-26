@@ -49,6 +49,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    lint {
+        // Print the findings to the build log too, so they show in CI.
+        textReport = true
+    }
 }
 
 kotlin {
