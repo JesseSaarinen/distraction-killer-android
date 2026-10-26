@@ -53,10 +53,13 @@ object ScrollTimer {
         val current = _state.value
 
         // A long break starts over. This also ends a pause whose level 2 screen
-        // never got to call reset(), so the timer cannot get stuck.
+        // never got to call reset(), so the timer cannot get stuck. A swipe that
+        // came with the return is kept, so the new session starts right away.
         val lastActive = lastActiveAtMillis
         if (lastActive != null && nowMillis - lastActive >= Config.SESSION_BREAK_SECONDS * 1000L) {
+            val lastSwipe = lastSwipeAtMillis
             reset()
+            lastSwipeAtMillis = lastSwipe
             return null
         }
         if (current.phase == TimerPhase.PAUSED) return null
