@@ -1,6 +1,7 @@
 package io.github.jessesaarinen.distractionkiller.interrupt
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.LogEvent
@@ -29,14 +30,17 @@ class InterruptController(private val service: AccessibilityService) {
     /** Level 1: banner + alarm. */
     fun showLevel1(packageName: String, scrollSeconds: Int) {
         EventLog.add(LogEvent(type = "level1", app = AppMarkers.label(packageName), scrollSeconds = scrollSeconds))
-        bannerApp = packageName
-        banner.show {
+        val shown = banner.show {
             Level1Banner(
                 scrollSeconds = scrollSeconds,
                 onStop = { finishLevel1("stopped") },
                 onContinue = { finishLevel1("continued") },
             )
         }
+        // Without the banner there is no button to stop the alarm, so no alarm
+        // either. Level 2 still comes if the scrolling goes on.
+        if (!shown) return
+        bannerApp = packageName
         val settings = SettingsStore.settings.value
         alarm.start(sound = settings.sound, vibration = settings.vibration, mode = settings.alarmMode)
     }
@@ -52,7 +56,6 @@ class InterruptController(private val service: AccessibilityService) {
      * CalmActivity resets the timer when the break ends.
      */
     fun showLevel2(packageName: String, scrollSeconds: Int) {
-        hideBanner()
         val settings = SettingsStore.settings.value
         alarm.notifyLevel2(sound = settings.sound, vibration = settings.vibration)
         // Like pickTask() in the web demo: one of the chosen tasks at random.
@@ -60,7 +63,8 @@ class InterruptController(private val service: AccessibilityService) {
         EventLog.add(
             LogEvent(type = "level2", app = AppMarkers.label(packageName), scrollSeconds = scrollSeconds, task = task.id)
         )
-        service.startActivity(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
+        openCalmScreen(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
+        hideBanner()
     }
 
     fun release() {
@@ -72,6 +76,11 @@ class InterruptController(private val service: AccessibilityService) {
     private fun finishLevel1(outcome: String) {
         val packageName = bannerApp ?: return
         val seconds = ScrollTimer.state.value.activeSeconds
+        if (outcome == "stopped") {
+            // "Lopeta tähän" leaves the video app for the thank-you screen.
+            ScrollTimer.reset()
+            openCalmScreen(CalmActivity.doneIntent(service, packageName, seconds))
+        }
         hideBanner()
         EventLog.add(
             LogEvent(
@@ -82,14 +91,21 @@ class InterruptController(private val service: AccessibilityService) {
                 outcome = outcome,
             )
         )
-        if (outcome == "stopped") {
-            // "Lopeta tähän" leaves the video app for the thank-you screen.
-            ScrollTimer.reset()
-            service.startActivity(CalmActivity.doneIntent(service, packageName, seconds))
-        }
         InspectorLog.add(
             InspectorEntry(System.currentTimeMillis(), packageName, EventKind.OUTCOME, detail = "level1 $outcome")
         )
+    }
+
+    /**
+     * Opens CalmActivity. Called while the banner is still up, so the video
+     * does not show on its own for a moment in between.
+     */
+    private fun openCalmScreen(intent: Intent) {
+        try {
+            service.startActivity(intent)
+        } catch (e: RuntimeException) {
+            InspectorLog.error("calm screen", e)
+        }
     }
 
     private fun hideBanner() {

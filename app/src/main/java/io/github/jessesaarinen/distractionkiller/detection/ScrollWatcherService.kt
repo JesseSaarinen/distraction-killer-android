@@ -51,6 +51,9 @@ class ScrollWatcherService : AccessibilityService() {
         super.onServiceConnected()
         InspectorLog.setServiceRunning(true)
         InspectorLog.note("service started")
+        // If Android connects the service again, start over instead of running two tickers.
+        handler.removeCallbacks(tickRunnable)
+        interrupts?.release()
         interrupts = InterruptController(this)
         handler.postDelayed(tickRunnable, TICK_MS)
     }
