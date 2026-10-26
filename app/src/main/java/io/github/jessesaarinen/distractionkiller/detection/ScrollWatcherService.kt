@@ -149,7 +149,8 @@ class ScrollWatcherService : AccessibilityService() {
         val look = if (playerOnScreen) lookAtFeed(root, app) else null
         // Once per visit to the player, so a log without ITEM swipes still tells why.
         if (look != null && look.how != feedHow) {
-            InspectorLog.add(InspectorEntry(now, app.packageName, EventKind.ITEM, detail = "feed: ${look.how}"))
+            val size = if (look.itemsInList > 0) " (${look.itemsInList} in the list)" else ""
+            InspectorLog.add(InspectorEntry(now, app.packageName, EventKind.ITEM, detail = "feed: ${look.how}$size"))
         }
         feedHow = look?.how
         val item = look?.item
@@ -164,8 +165,8 @@ class ScrollWatcherService : AccessibilityService() {
         )
     }
 
-    /** The feed item on screen at a player check, or null, and how the check found it. */
-    private class FeedLook(val item: String?, val how: String)
+    /** The feed item on screen at a player check, or null, how the check found it, and the list's size. */
+    private class FeedLook(val item: String?, val how: String, val itemsInList: Int = 0)
 
     /**
      * The feed item that fills most of the screen, as a key that changes with
@@ -190,12 +191,12 @@ class ScrollWatcherService : AccessibilityService() {
             best = child
             bestHeight = bounds.height()
         }
-        val item = best ?: return FeedLook(null, "no item on screen")
+        val item = best ?: return FeedLook(null, "no item on screen", feed.childCount)
         val row = item.collectionItemInfo?.rowIndex ?: -1
         return if (row >= 0) {
-            FeedLook("item $row", "items by their place in the list")
+            FeedLook("item $row", "items by their place in the list", feed.childCount)
         } else {
-            FeedLook("view ${item.hashCode()}", "items by view, the list does not tell their place")
+            FeedLook("view ${item.hashCode()}", "items by view, the list does not tell their place", feed.childCount)
         }
     }
 
