@@ -8,6 +8,16 @@ Kurssin SCI-C1002 (Aalto, ryhmä 5) demo-sovellus Androidille. Sovellus huomaa, 
 
 Tämä korvaa aiemman web-demon (repo `distraction-killer`), jota ei enää kehitetä.
 
+## Rakenne lyhyesti
+
+- `detection/ScrollWatcherService.kt` on Accessibility Service. Se saa tapahtumat valvotuista sovelluksista ja ajaa kerran sekunnissa `onTick()`-silmukan.
+- `detection/ShortVideoClassifier.kt` päättää, mitä vieritys tarkoittaa (`SWIPE`, `OTHER`, `LAYOUT`, `IGNORED`). Sovellusten merkit (näkymien ID:t) ovat tiedostossa `detection/AppMarkers.kt`. Kun sovelluspäivitys muuttaa ID:t, muutos tehdään vain sinne.
+- `detection/ScrollTimer.kt` laskee aktiiviset sekunnit ja kertoo, milloin taso 1 ja taso 2 täyttyvät.
+- `interrupt/InterruptController.kt` näyttää tason 1 bannerin (`OverlayWindow`, palvelun oma ikkuna) ja avaa tason 2 (`CalmActivity`).
+- Puhelimeen tallentavat vain `data/SettingsStore.kt` (asetukset), `data/EventLog.kt` (keskeytysloki) ja `detection/InspectorLog.kt` (tarkastelun loki).
+- Luokittelu, ajastin, asetusten ajat ja tilastot ovat puhdasta Kotlinia ilman Androidin luokkia, ja niillä on yksikkötestit (`app/src/test/`). Pidä ne sellaisina.
+- Palvelu ei saa kaatua. Virheet otetaan kiinni ja kirjataan tarkasteluun (`InspectorLog.error`).
+
 ## Ehdottomat säännöt
 
 1. **Kotlin + Jetpack Compose, Gradle (Kotlin DSL).** Ei muita kehyksiä tai kieliä. Uusi kirjasto vain, jos ihminen hyväksyy sen ensin. Versiot ovat tiedostossa `gradle/libs.versions.toml`.
@@ -31,7 +41,7 @@ Tämä korvaa aiemman web-demon (repo `distraction-killer`), jota ei enää kehi
 - Pieni pull request per tehtävä. PR:n kuvaukseen: tehtävän ID, mitä muuttui, miten testattiin.
 - Merkitse tehtävän tila `PLAN.md`:n tehtävälistaan (☐ / ◐ / ☑).
 - **Build:** GitHub Actions rakentaa APK:n jokaisesta PR:stä ja `main`-pushista. PR ei ole valmis, jos build on punainen. Paikallisesti: `./gradlew assembleDebug` (vaatii Android SDK:n).
-- **Testaus:** asenna APK puhelimeen (ohjeet `README.md`:ssä) ja kokeile muutos oikeasti. Kerro PR:ssä, mitä testasit puhelimella.
+- **Testaus:** yksikkötestit `./gradlew testDebugUnitTest` (CI ajaa ne ennen buildia). Kun muutat luokittelua, ajastinta, asetuksia tai tilastoja, lisää tai päivitä testi. Asenna lisäksi APK puhelimeen (ohjeet `README.md`:ssä) ja kokeile muutos oikeasti `TESTING.md`:n listan avulla. Kerro PR:ssä, mitä testasit puhelimella.
 - Allekirjoitusavain `app/demo.keystore` on tarkoituksella julkinen, jotta uusi APK asentuu vanhan päälle. Älä vaihda sitä.
 
 ## Kun et ole varma
