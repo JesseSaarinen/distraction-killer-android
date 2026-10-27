@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Distraction Killer</string>
+    <string name="back">Takaisin</string>
+    <string name="home_headline">Nosta katse hetkeksi.</string>
     <string name="home_intro">Sovellus huomaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa, ja pysäyttää selauksen hetkeksi valitsemasi ajan jälkeen.</string>
     <string name="home_version">Versio %1$s</string>
-    <string name="home_service_on">Selauksen tunnistus on päällä. Keskeytys tulee %1$s aktiivisen selauksen jälkeen.</string>
-    <string name="home_paused">Keskeytykset ovat tauolla, joten scrollausta ei nyt lasketa.</string>
+    <string name="home_on_label">Päällä</string>
+    <string name="home_on_title">Tunnistus on päällä</string>
+    <string name="home_service_on">Keskeytys tulee %1$s aktiivisen selauksen jälkeen.</string>
+    <string name="home_no_apps">Yhtään sovellusta ei ole valittu. Valitse sovellukset asetuksista.</string>
+    <string name="home_demo_on">Demotila päällä</string>
+    <string name="home_paused_label">Tauolla</string>
+    <string name="home_paused_title">Keskeytykset ovat tauolla</string>
+    <string name="home_paused">Scrollausta ei nyt lasketa, eikä keskeytyksiä tule.</string>
     <string name="home_resume">Laita keskeytykset päälle</string>
-    <string name="home_service_off">Selauksen tunnistus ei ole vielä päällä. Tee alla olevat vaiheet.</string>
+    <string name="home_off_label">Ei vielä päällä</string>
+    <string name="home_off_title">Ota tunnistus käyttöön</string>
+    <string name="home_service_off">Tee alla olevat vaiheet, niin sovellus huomaa, kun selaat lyhytvideoita.</string>
     <string name="home_open_accessibility">Avaa esteettömyysasetukset</string>
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
     <string name="home_setup_title">Käyttöönotto</string>
+    <string name="home_setup_progress">%1$d/%2$d valmis</string>
     <string name="setup_accessibility_title">Laita selauksen tunnistus päälle</string>
     <string name="setup_accessibility_text">Avaa esteettömyysasetukset ja valitse Asennetut sovellukset → Distraction Killer: selauksen tunnistus → päälle.</string>
     <string name="setup_restricted_text">Jos puhelin sanoo, että asetus on rajoitettu: avaa sovelluksen tiedot, paina oikean yläkulman ⋮ ja valitse Salli rajoitetut asetukset. Kokeile sitten uudelleen.</string>
@@ -21,10 +32,15 @@
     <string name="home_open_settings">Asetukset</string>
     <string name="home_open_stats">Tilastot</string>
     <string name="home_open_inspector">Tarkastelu (kehittäjille)</string>
+    <string name="home_settings_sub">Keskeytys %1$s jälkeen</string>
+    <string name="home_stats_sub">Keskeytyksiä: %1$d</string>
+    <string name="home_stats_empty_sub">Ei vielä keskeytyksiä</string>
 
     <string name="settings_title">Asetukset</string>
     <string name="settings_interruptions_on">Keskeytykset päällä</string>
     <string name="settings_interruptions_hint">Pois päältä scrollausta ei lasketa eikä keskeytyksiä tule. Esteettömyysasetukseen ei tarvitse koskea.</string>
+    <string name="settings_demo_active">Demotila on päällä: keskeytys tulee jo %1$d s jälkeen ja koko näytön tauko %2$d s myöhemmin. Alla valitut ajat ovat käytössä, kun demotila on pois päältä.</string>
+    <string name="settings_section_timing">Ajoitus</string>
     <string name="settings_interval_title">Kuinka usein keskeytetään?</string>
     <string name="settings_interval_hint">Aika lasketaan vain silloin, kun scrollaat.</string>
     <string name="settings_level2_title">Kuinka pian koko näytön tauko tulee?</string>
@@ -33,24 +49,30 @@
     <string name="task_breathing">Hengitysharjoitus</string>
     <string name="task_question">Mitä olit tekemässä?</string>
     <string name="task_physical">Fyysinen haaste</string>
+    <string name="task_breathing_desc">%1$d sekunnin rauhallinen hengitys</string>
+    <string name="task_question_desc">Vastaa yhdellä napautuksella tai omin sanoin</string>
+    <string name="task_physical_desc">%1$d sekunnin pieni liike, esimerkiksi venyttely</string>
     <string name="settings_tasks_hint">Keskeytyksessä arvotaan jokin valituista.</string>
     <string name="settings_tasks_min_one">Valitse vähintään yksi tehtävä.</string>
-    <string name="settings_alarm_title">Hälytys soi</string>
+    <string name="settings_section_alarm">Hälytys</string>
+    <string name="settings_alarm_title">Kuinka kauan hälytys soi?</string>
     <string name="alarm_until_dismissed">Kunnes sammutan</string>
     <string name="alarm_timed">%1$d sekuntia</string>
     <string name="settings_alarm_hint">Kun aika täyttyy, puhelin hälyttää ja videon päälle tulee banneri. Hälytys sammuu bannerin napista.</string>
     <string name="settings_apps_title">Valvotut sovellukset</string>
     <string name="settings_apps_hint">Keskeytykset tulevat vain valituissa sovelluksissa.</string>
-    <string name="settings_other_title">Muut asetukset</string>
     <string name="settings_sound">Ääni</string>
     <string name="settings_vibration">Värinä</string>
+    <string name="settings_section_demo">Esittely</string>
     <string name="settings_demo">Demotila</string>
     <string name="settings_demo_hint">Keskeytys %1$d s jälkeen, kova keskeytys %2$d s myöhemmin</string>
-    <string name="settings_test_alarm">🔔 Kokeile hälytystä</string>
+    <string name="settings_test_alarm">Kokeile hälytystä</string>
 
     <string name="stats_title">Tilastot</string>
-    <string name="stats_empty">Ei vielä keskeytyksiä. Scrollaa lyhytvideoita, niin näet tilastot täällä.</string>
+    <string name="stats_empty_title">Ei vielä keskeytyksiä</string>
+    <string name="stats_empty">Scrollaa hetki lyhytvideoita, niin tilastot näkyvät täällä.</string>
     <string name="stats_percent">%1$d %%</string>
+    <string name="stats_stop_rate_label">Lopetusprosentti</string>
     <string name="stats_stop_rate">keskeytyksistä päättyi siihen, että lopetit scrollauksen</string>
     <!-- Labels under a number: "1 keskeytys" but "0 keskeytystä" and "3 keskeytystä". -->
     <plurals name="stats_rounds">
@@ -79,13 +101,11 @@
     <string name="stats_where_level2">Koko näytön keskeytys</string>
     <string name="stats_tasks_title">Tehtävät</string>
     <string name="stats_apps_title">Sovelluksittain</string>
-    <string name="stats_col_task">Tehtävä</string>
-    <string name="stats_col_app">Sovellus</string>
-    <string name="stats_col_times">Kertaa</string>
-    <string name="stats_col_stopped">Lopetit</string>
+    <string name="stats_bar_legend">Lopetit / kertoja yhteensä</string>
+    <string name="stats_of">%1$d / %2$d</string>
     <string name="stats_answers_title">Mitä olit tekemässä</string>
-    <string name="stats_answer">• %1$s</string>
     <string name="stats_testers_title">Testaajille</string>
+    <string name="stats_testers_hint">Jaa loki jokaisen testin jälkeen. Tyhjennä tilastot vasta sitten.</string>
     <string name="stats_share">Jaa loki (JSON)</string>
     <string name="stats_share_title">Jaa tapahtumaloki</string>
     <string name="stats_share_subject">Distraction Killer -loki</string>
@@ -100,6 +120,7 @@
     <string name="duration_seconds">%1$d s</string>
     <string name="duration_minutes">%1$d min</string>
     <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+    <string name="level1_label">Pieni muistutus</string>
 
     <string name="level1_title">Olet scrollannut %1$s</string>
     <string name="level1_text">Onko tämä sitä, mitä halusit tehdä juuri nyt?</string>
@@ -113,9 +134,9 @@
     <string name="level2_continue">Jatka scrollausta</string>
     <string name="level2_skip">Ohita</string>
     <string name="level2_skip_wait">Ohita-nappi tulee näkyviin hetken kuluttua</string>
-    <string name="task_done_mark">✓</string>
+    <string name="breathing_title">Hengitä rauhassa</string>
 
-    <string name="breathing_intro">Seuraa ympyrää ja hengitä rauhassa.</string>
+    <string name="breathing_intro">Hengitä sisään, kun ympyrä kasvaa, ja ulos, kun se pienenee.</string>
     <string name="breathing_in">Hengitä sisään</string>
     <string name="breathing_out">Hengitä ulos</string>
     <string name="breathing_done">Hienoa.</string>
@@ -132,17 +153,12 @@
     <string name="question_submit">Vastaa</string>
     <string name="question_thanks">Kiitos vastauksesta</string>
 
-    <string name="physical_window_icon">🪟</string>
     <string name="physical_window">Nouse ylös ja katso ikkunasta ulos.</string>
-    <string name="physical_stretch_icon">🙆</string>
     <string name="physical_stretch">Venyttele kädet kohti kattoa.</string>
-    <string name="physical_water_icon">💧</string>
     <string name="physical_water">Hae itsellesi lasi vettä.</string>
-    <string name="physical_eyes_icon">👀</string>
     <string name="physical_eyes">Katso jotain kaukana olevaa ja anna silmien levätä.</string>
     <string name="physical_done">Tehty</string>
 
-    <string name="done_icon">🌿</string>
     <string name="done_title">Hienoa!</string>
     <string name="done_text_seconds">Lopetit %1$s scrollauksen jälkeen. Tämä hetki on taas sinun.</string>
     <string name="done_text">Lopetit scrollauksen. Tämä hetki on taas sinun.</string>

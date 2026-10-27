@@ -52,17 +52,18 @@ class MainActivity : ComponentActivity() {
                     )
                     Screen.SETTINGS -> {
                         BackHandler { screen = Screen.HOME }
-                        SettingsScreen()
+                        SettingsScreen(onBack = { screen = Screen.HOME })
                     }
                     Screen.STATS -> {
                         BackHandler { screen = Screen.HOME }
-                        StatsScreen(onShare = ::shareEventLog)
+                        StatsScreen(onShare = ::shareEventLog, onBack = { screen = Screen.HOME })
                     }
                     Screen.INSPECTOR -> {
                         BackHandler { screen = Screen.HOME }
                         InspectorScreen(
                             serviceEnabled = serviceEnabled,
                             onShare = ::shareInspectorLog,
+                            onBack = { screen = Screen.HOME },
                         )
                     }
                 }

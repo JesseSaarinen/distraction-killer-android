@@ -1,23 +1,9 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,11 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
@@ -39,11 +23,19 @@ import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.interrupt.Alarm
+import io.github.jessesaarinen.distractionkiller.ui.components.Hint
+import io.github.jessesaarinen.distractionkiller.ui.components.ScreenScaffold
+import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
+import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
+import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
+import io.github.jessesaarinen.distractionkiller.ui.components.SegmentedChoice
+import io.github.jessesaarinen.distractionkiller.ui.components.SelectRow
+import io.github.jessesaarinen.distractionkiller.ui.components.SwitchRow
 
 // Settings (task N10), like views/settings.js in the web demo.
-// Every change is saved right away. Back gesture returns home.
+// Every change is saved right away. The back arrow and back gesture return home.
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onBack: () -> Unit) {
     val settings by SettingsStore.settings.collectAsState()
     var tasksError by remember { mutableStateOf(false) }
 
@@ -54,55 +46,78 @@ fun SettingsScreen() {
         onDispose { alarm.release() }
     }
 
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+    ScreenScaffold(title = stringResource(R.string.settings_title), onBack = onBack) {
+        // The main switch, in petrol while the app is on.
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            color = if (settings.interruptionsOn) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
         ) {
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
             SwitchRow(
                 title = stringResource(R.string.settings_interruptions_on),
                 hint = stringResource(R.string.settings_interruptions_hint),
                 checked = settings.interruptionsOn,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(interruptionsOn = on) } },
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
             )
+        }
 
-            SectionTitle(stringResource(R.string.settings_interval_title))
-            Column(Modifier.selectableGroup()) {
-                for (minutes in Config.INTERVAL_OPTIONS_MIN) {
-                    RadioRow(
-                        text = stringResource(R.string.duration_minutes, minutes),
-                        selected = minutes == settings.intervalMin,
-                        onClick = { SettingsStore.update { it.copy(intervalMin = minutes) } },
-                    )
-                }
+        if (settings.demoMode) {
+            // Demo mode overrides the times below, so say it where the times are.
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ) {
+                Text(
+                    text = stringResource(
+                        R.string.settings_demo_active,
+                        Config.DEMO_LEVEL1_SECONDS,
+                        Config.DEMO_LEVEL2_DELAY_SECONDS,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                )
             }
+        }
+
+        SectionLabel(stringResource(R.string.settings_section_timing))
+        SectionCard {
+            Text(text = stringResource(R.string.settings_interval_title), style = MaterialTheme.typography.titleMedium)
+            SegmentedChoice(
+                options = Config.INTERVAL_OPTIONS_MIN,
+                selected = settings.intervalMin,
+                label = { minutes -> stringResource(R.string.duration_minutes, minutes) },
+                onSelect = { minutes -> SettingsStore.update { it.copy(intervalMin = minutes) } },
+            )
             Hint(stringResource(R.string.settings_interval_hint))
 
-            SectionTitle(stringResource(R.string.settings_level2_title))
-            Column(Modifier.selectableGroup()) {
-                for (seconds in Config.LEVEL2_DELAY_OPTIONS_SECONDS) {
-                    RadioRow(
-                        text = durationText(seconds),
-                        selected = seconds == settings.level2AfterSec,
-                        onClick = { SettingsStore.update { it.copy(level2AfterSec = seconds) } },
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.settings_level2_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            SegmentedChoice(
+                options = Config.LEVEL2_DELAY_OPTIONS_SECONDS,
+                selected = settings.level2AfterSec,
+                label = { seconds -> durationText(seconds) },
+                onSelect = { seconds -> SettingsStore.update { it.copy(level2AfterSec = seconds) } },
+            )
             Hint(stringResource(R.string.settings_level2_hint))
+        }
 
-            SectionTitle(stringResource(R.string.settings_tasks_title))
+        SectionLabel(stringResource(R.string.settings_tasks_title))
+        SectionCard {
             for (task in TaskType.entries) {
-                CheckboxRow(
-                    text = stringResource(taskLabel(task)),
+                SelectRow(
+                    icon = taskIcon(task),
+                    title = stringResource(taskLabel(task)),
+                    description = taskDescription(task),
                     checked = task in settings.tasks,
                     onCheckedChange = { checked ->
                         val tasks = if (checked) settings.tasks + task else settings.tasks - task
@@ -112,24 +127,51 @@ fun SettingsScreen() {
                     },
                 )
             }
-            Hint(stringResource(if (tasksError) R.string.settings_tasks_min_one else R.string.settings_tasks_hint))
-
-            SectionTitle(stringResource(R.string.settings_alarm_title))
-            Column(Modifier.selectableGroup()) {
-                RadioRow(
-                    text = stringResource(R.string.alarm_until_dismissed),
-                    selected = settings.alarmMode == AlarmMode.UNTIL_DISMISSED,
-                    onClick = { SettingsStore.update { it.copy(alarmMode = AlarmMode.UNTIL_DISMISSED) } },
-                )
-                RadioRow(
-                    text = stringResource(R.string.alarm_timed, Config.ALARM_TIMED_SECONDS),
-                    selected = settings.alarmMode == AlarmMode.TIMED,
-                    onClick = { SettingsStore.update { it.copy(alarmMode = AlarmMode.TIMED) } },
-                )
+            if (tasksError) {
+                Hint(stringResource(R.string.settings_tasks_min_one), color = MaterialTheme.colorScheme.error)
+            } else {
+                Hint(stringResource(R.string.settings_tasks_hint))
             }
-            Hint(stringResource(R.string.settings_alarm_hint))
+        }
 
-            SectionTitle(stringResource(R.string.settings_apps_title))
+        SectionLabel(stringResource(R.string.settings_section_alarm))
+        SectionCard {
+            Text(text = stringResource(R.string.settings_alarm_title), style = MaterialTheme.typography.titleMedium)
+            SegmentedChoice(
+                options = AlarmMode.entries,
+                selected = settings.alarmMode,
+                label = { mode ->
+                    when (mode) {
+                        AlarmMode.UNTIL_DISMISSED -> stringResource(R.string.alarm_until_dismissed)
+                        AlarmMode.TIMED -> stringResource(R.string.alarm_timed, Config.ALARM_TIMED_SECONDS)
+                    }
+                },
+                onSelect = { mode -> SettingsStore.update { it.copy(alarmMode = mode) } },
+            )
+            Hint(stringResource(R.string.settings_alarm_hint))
+            SwitchRow(
+                title = stringResource(R.string.settings_sound),
+                checked = settings.sound,
+                onCheckedChange = { on -> SettingsStore.update { it.copy(sound = on) } },
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            SwitchRow(
+                title = stringResource(R.string.settings_vibration),
+                checked = settings.vibration,
+                onCheckedChange = { on -> SettingsStore.update { it.copy(vibration = on) } },
+            )
+            SecondaryButton(
+                text = stringResource(R.string.settings_test_alarm),
+                onClick = { alarm.test(sound = settings.sound, vibration = settings.vibration) },
+                icon = R.drawable.ic_bell,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp, bottom = 4.dp),
+            )
+        }
+
+        SectionLabel(stringResource(R.string.settings_apps_title))
+        SectionCard {
             for (label in AppMarkers.labels) {
                 SwitchRow(
                     title = label,
@@ -141,19 +183,11 @@ fun SettingsScreen() {
                     },
                 )
             }
-            Hint(stringResource(R.string.settings_apps_hint))
+            Hint(stringResource(R.string.settings_apps_hint), modifier = Modifier.padding(bottom = 4.dp))
+        }
 
-            SectionTitle(stringResource(R.string.settings_other_title))
-            SwitchRow(
-                title = stringResource(R.string.settings_sound),
-                checked = settings.sound,
-                onCheckedChange = { on -> SettingsStore.update { it.copy(sound = on) } },
-            )
-            SwitchRow(
-                title = stringResource(R.string.settings_vibration),
-                checked = settings.vibration,
-                onCheckedChange = { on -> SettingsStore.update { it.copy(vibration = on) } },
-            )
+        SectionLabel(stringResource(R.string.settings_section_demo))
+        SectionCard {
             SwitchRow(
                 title = stringResource(R.string.settings_demo),
                 hint = stringResource(
@@ -164,77 +198,14 @@ fun SettingsScreen() {
                 checked = settings.demoMode,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(demoMode = on) } },
             )
-            OutlinedButton(
-                onClick = { alarm.test(sound = settings.sound, vibration = settings.vibration) },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            ) {
-                Text(stringResource(R.string.settings_test_alarm))
-            }
         }
     }
 }
 
+/** One line under the task's name: what the task asks the user to do. */
 @Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 20.dp),
-    )
-}
-
-@Composable
-private fun Hint(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-// The whole row is the touch target (at least 48 dp), not just the small control.
-
-@Composable
-private fun RadioRow(text: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .selectable(selected = selected, onClick = onClick, role = Role.RadioButton),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
-    }
-}
-
-@Composable
-private fun CheckboxRow(text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Checkbox),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Checkbox(checked = checked, onCheckedChange = null)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
-    }
-}
-
-@Composable
-private fun SwitchRow(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit, hint: String? = null) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Switch),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            if (hint != null) Hint(hint)
-        }
-        Switch(checked = checked, onCheckedChange = null)
-    }
+private fun taskDescription(task: TaskType): String = when (task) {
+    TaskType.BREATHING -> stringResource(R.string.task_breathing_desc, Config.BREATHING_SECONDS)
+    TaskType.QUESTION -> stringResource(R.string.task_question_desc)
+    TaskType.PHYSICAL -> stringResource(R.string.task_physical_desc, Config.PHYSICAL_SECONDS)
 }

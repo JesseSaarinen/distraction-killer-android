@@ -45,7 +45,10 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
-  ui/theme/Theme.kt        # kaikki värit
+  ui/theme/Theme.kt        # kaikki värit, fontit ja kulmat (ks. DESIGN.md)
+  ui/components/SunMark.kt # N18: tunnus, aurinko nousee horisontin yli
+  ui/components/Layout.kt  # N18: alanäkymän runko, kortit, otsakkeet, palkit, tauon tausta
+  ui/components/Controls.kt # N18: napit, valitsimet ja kytkinrivit
   detection/AppMarkers.kt          # valvotut sovellukset ja niiden lyhytvideomerkit (N5)
   detection/ShortVideoClassifier.kt # N5: mitä vieritystapahtuma tarkoittaa (yksikkötestit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
@@ -66,9 +69,14 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   data/EventLog.kt                 # N11: ainoa paikka, joka tallentaa lokin; JSON-vienti
   data/Stats.kt                    # N11: tilastojen laskenta lokista
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
+app/src/main/res/drawable/ic_*.xml    # N18: viivaikonit (24 dp, värjätään käyttöpaikassa) ja sovelluksen kuvake
+app/src/main/res/font/                # N18: otsikkofontti Fraunces
+app/src/main/assets/licenses/         # N18: fontin lisenssi (SIL OFL)
 app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
 .github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
+DESIGN.md                             # N18: ulkoasun säännöt (värit, fontit, ikonit, komponentit)
+docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen
 ```
 
 ## Tehtävät
@@ -97,6 +105,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**
+- ◐ N18 Ulkoasun uudistus: uusi teema (värit, Fraunces-otsikot, kulmat), viivaikonit, aurinkotunnus ja sovelluksen kuvake, kaikki näkymät uudelleen vaaleana ja tummana. Säännöt `DESIGN.md`:ssä. Puhelimella tarkistamatta (`TESTING.md`, kohta 7)
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**
