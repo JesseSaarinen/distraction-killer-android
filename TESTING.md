@@ -54,6 +54,14 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
 
+## 7. Ulkoasu
+
+- [ ] Sovelluksen kuvake on aurinko horisontin yllä ja näyttää siistiltä aloitusnäytöllä.
+- [ ] Käy läpi koti, asetukset, tilastot, banneri, tauko (kaikki kolme tehtävää) ja kiitosnäkymä sekä vaaleana että tummana (Asetukset → Näyttö → Tumma). Kaikki tekstit erottuvat taustastaan.
+- [ ] Tummana tauko ja kiitosnäkymä eivät välähdä vaaleina auetessaan.
+- [ ] Fonttikoko suurimmaksi (Asetukset → Näyttö → fonttikoko): mikään teksti ei leikkaudu tai mene päällekkäin, ja kaikki napit toimivat.
+- [ ] Kysymystehtävä: näppäimistö ei peitä tekstikenttää tai *Vastaa*-nappia.
+
 ## Jos jokin ei toimi
 
 - **APK ei asennu:** Auto Blocker on päällä. Jos puhelin sanoo "Sovellusta ei asennettu", puhelimessa on uudempi versio kuin asennettava (esim. vanha PR-build uudemman päälle). Asenna uusin, tai poista sovellus ensin, jolloin tilastot ja asetukset häviävät.
