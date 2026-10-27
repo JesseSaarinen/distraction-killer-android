@@ -20,7 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,9 +53,10 @@ private val CHALLENGES = listOf(
  */
 @Composable
 fun PhysicalTask(onDone: () -> Unit) {
-    val challenge = remember { CHALLENGES.random() }
-    var left by remember { mutableIntStateOf(Config.PHYSICAL_SECONDS) }
-    var done by remember { mutableStateOf(false) }
+    // Saved, so turning the phone keeps the same challenge and time.
+    val challenge = CHALLENGES[rememberSaveable { CHALLENGES.indices.random() }]
+    var left by rememberSaveable { mutableIntStateOf(Config.PHYSICAL_SECONDS) }
+    var done by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         while (left > 0) {

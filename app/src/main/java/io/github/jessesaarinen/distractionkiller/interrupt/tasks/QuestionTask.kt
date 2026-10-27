@@ -16,7 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +38,10 @@ import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 @Composable
 fun QuestionTask(onDone: (answer: String) -> Unit) {
     val options = stringArrayResource(R.array.question_options)
-    var selected by remember { mutableStateOf<String?>(null) }
-    var ownWords by remember { mutableStateOf("") }
-    var submitted by remember { mutableStateOf(false) }
+    // Saved, so turning the phone keeps the choice and the typed words.
+    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    var ownWords by rememberSaveable { mutableStateOf("") }
+    var submitted by rememberSaveable { mutableStateOf(false) }
     val answer = ownWords.trim().ifEmpty { selected }
     val focusManager = LocalFocusManager.current
 

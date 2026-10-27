@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,9 +57,10 @@ fun Level2Screen(
     scrollSeconds: Int,
     onFinish: (outcome: String, answer: String?) -> Unit,
 ) {
-    var taskDone by remember { mutableStateOf(false) }
-    var answer by remember { mutableStateOf<String?>(null) }
-    var skipVisible by remember { mutableStateOf(false) }
+    // rememberSaveable keeps these when the phone turns and Android builds the screen again.
+    var taskDone by rememberSaveable { mutableStateOf(false) }
+    var answer by rememberSaveable { mutableStateOf<String?>(null) }
+    var skipVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         delay(Config.SKIP_DELAY_SECONDS * 1000L)
