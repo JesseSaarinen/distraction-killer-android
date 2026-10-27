@@ -19,6 +19,17 @@ fun durationText(seconds: Int): String {
     }
 }
 
+/** A decision time on the stats screen: "1,5 s" under 10 seconds, otherwise like durationText. */
+@Composable
+fun decisionText(millis: Long): String {
+    val tenths = ((millis + 50) / 100).toInt()
+    return if (tenths < 100) {
+        stringResource(R.string.duration_seconds_decimal, tenths / 10, tenths % 10)
+    } else {
+        durationText(((millis + 500) / 1000).toInt())
+    }
+}
+
 /** The task's name on the settings and stats screens. */
 @StringRes
 fun taskLabel(task: TaskType): Int = when (task) {

@@ -31,8 +31,8 @@ Tason 1 banneri piirretään Accessibility Servicen omaan ikkunaan, joten "Näyt
 
 ## Asetukset ja tapahtumat
 
-- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps, interruptionsOn }`. `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s, demotilassa aina 10 s). `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä, mutta tarkastelu näyttää tapahtumat. Tallennus: `data/SettingsStore.kt` (SharedPreferences).
-- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer }`. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
+- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps, interruptionsOn, tester }`. `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s, demotilassa aina 10 s). `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä, mutta tarkastelu näyttää tapahtumat. `tester` on käynnissä olevan RT8-testin testaajan numero (N19), 0 = testi ei ole käynnissä. Tallennus: `data/SettingsStore.kt` (SharedPreferences).
+- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer, tester }`. `ts` on millisekunteina. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). `tester` = testaajan numero asetuksista (N19). Vanhoissa riveissä sitä ei ole, ja ne luetaan nollana. Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
 
 ## Tiedostorakenne (kasvaa tehtävien mukana)
 
@@ -67,7 +67,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   data/SettingsStore.kt            # N10: ainoa paikka, joka tallentaa asetukset puhelimeen
   data/LogEvent.kt                 # N11: yksi lokirivi
   data/EventLog.kt                 # N11: ainoa paikka, joka tallentaa lokin; JSON-vienti
-  data/Stats.kt                    # N11: tilastojen laskenta lokista
+  data/Stats.kt                    # N11: tilastojen laskenta lokista; N19: päätöksen nopeus, testaajien numerot
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
 app/src/main/res/drawable/ic_*.xml    # N18: viivaikonit (24 dp, värjätään käyttöpaikassa) ja sovelluksen kuvake
 app/src/main/res/font/                # N18: otsikkofontti Fraunces
@@ -76,7 +76,7 @@ app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen 
 .github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
 DESIGN.md                             # N18: ulkoasun säännöt (värit, fontit, ikonit, komponentit)
-docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen
+docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen; N19: testaajat ja päätöksen nopeus
 ```
 
 ## Tehtävät
@@ -106,6 +106,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 
 **RT8 (5.11.)**
 - ◐ N18 Ulkoasun uudistus: uusi teema (värit, Fraunces-otsikot, kulmat), viivaikonit, aurinkotunnus ja sovelluksen kuvake, kaikki näkymät uudelleen vaaleana ja tummana. Säännöt `DESIGN.md`:ssä. Puhelimella tarkistamatta (`TESTING.md`, kohta 7)
+- ◐ N19 RT8-testaajat ja päätöksen nopeus: tilastoissa *Aloita testaaja N*, testaajan numero jokaiseen tapahtumaan ja vientiin, tilastot testaajittain tai kaikki. Uusi kortti *Päätöksen nopeus*: aika bannerin tulosta *Jatka*- ja *Lopeta tähän* -valintaan (mediaani) ja kuinka usein *Ohita* painettiin heti (`Config.QUICK_SKIP_SECONDS`). Puhelimella tarkistamatta (`TESTING.md`, kohta 6)
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**

@@ -14,6 +14,9 @@ import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
  *
  * interruptionsOn: false pauses the app. Nothing is counted and nothing
  * interrupts, but the inspector still shows what the service sees.
+ *
+ * tester: the RT8 tester whose test is running (task N19). Every event gets
+ * this number, so the testers' results stay apart. 0 = no test running.
  */
 data class Settings(
     val intervalMin: Int = Config.DEFAULT_INTERVAL_MIN,
@@ -25,6 +28,7 @@ data class Settings(
     val demoMode: Boolean = Config.DEFAULT_DEMO_MODE,
     val watchedApps: Set<String> = AppMarkers.labels.toSet(),
     val interruptionsOn: Boolean = Config.DEFAULT_INTERRUPTIONS_ON,
+    val tester: Int = 0,
 ) {
     /** Active scrolling before level 1. Demo mode uses seconds instead of minutes. */
     val level1Seconds: Int

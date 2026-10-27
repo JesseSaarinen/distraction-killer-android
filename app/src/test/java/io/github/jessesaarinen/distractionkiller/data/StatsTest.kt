@@ -2,9 +2,10 @@ package io.github.jessesaarinen.distractionkiller.data
 
 import io.github.jessesaarinen.distractionkiller.TaskType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** The numbers on the stats screen (task N11). */
+/** The numbers on the stats screen (tasks N11 and N19). */
 class StatsTest {
 
     @Test
@@ -76,5 +77,57 @@ class StatsTest {
             LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 70, level = 2, outcome = "stopped"),
         )
         assertEquals(100, summarize(events).stopRate)
+    }
+
+    @Test
+    fun decisionSpeedPairsEachChoiceWithItsInterruption() {
+        val events = listOf(
+            // Banner at 0 s, Jatka after 1.5 s, then the break: Ohita right after it appeared.
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, ts = 0),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 60, level = 1, outcome = "continued", ts = 1_500),
+            LogEvent(type = "level2", app = "TikTok", scrollSeconds = 90, task = "breathing", ts = 30_000),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 90, level = 2, outcome = "skipped", ts = 36_000),
+            // Banner, Lopeta after 4 s.
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, ts = 100_000),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 60, level = 1, outcome = "stopped", ts = 104_000),
+            // Banner ignored, the break replaced it. Ohita only after 20 s.
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, ts = 200_000),
+            LogEvent(type = "level2", app = "TikTok", scrollSeconds = 90, task = "question", ts = 230_000),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 90, level = 2, outcome = "skipped", ts = 250_000),
+            // Banner, Jatka after 2.5 s. Left the app while the banner was up does not count.
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, ts = 300_000),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 60, level = 1, outcome = "continued", ts = 302_500),
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, ts = 400_000),
+            LogEvent(type = "outcome", app = "TikTok", scrollSeconds = 60, level = 1, outcome = "dismissed", ts = 400_500),
+        )
+        val speed = summarize(events).speed
+
+        assertEquals(2_000L, speed.continueMillis) // median of 1.5 s and 2.5 s
+        assertEquals(4_000L, speed.stopMillis)
+        assertEquals(2, speed.level2Breaks)
+        assertEquals(1, speed.quickSkips)
+    }
+
+    @Test
+    fun decisionSpeedIsEmptyWithoutChoices() {
+        val speed = summarize(emptyList()).speed
+        assertNull(speed.continueMillis)
+        assertNull(speed.stopMillis)
+        assertEquals(0, speed.level2Breaks)
+        assertEquals(0, speed.quickSkips)
+    }
+
+    @Test
+    fun nextTesterNeverRepeatsANumber() {
+        assertEquals(1, nextTester(emptyList(), current = 0))
+        val events = listOf(
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, tester = 1),
+            LogEvent(type = "level1", app = "TikTok", scrollSeconds = 60, tester = 2),
+        )
+        assertEquals(3, nextTester(events, current = 2))
+        // The test was ended (0), but testers 1 and 2 are still in the log.
+        assertEquals(3, nextTester(events, current = 0))
+        // The log was cleared during the test: go on from the current tester.
+        assertEquals(4, nextTester(emptyList(), current = 3))
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.LogEvent
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.EventKind
 import io.github.jessesaarinen.distractionkiller.detection.InspectorEntry
@@ -97,6 +98,7 @@ class CalmActivity : ComponentActivity() {
                 task = task.id,
                 outcome = outcome,
                 answer = answer,
+                tester = SettingsStore.settings.value.tester,
             )
         )
         val detail = "level2 ${task.id} $outcome" + if (answer != null) " answered" else ""
