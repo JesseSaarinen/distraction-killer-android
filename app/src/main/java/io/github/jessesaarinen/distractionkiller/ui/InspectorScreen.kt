@@ -1,24 +1,27 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
@@ -29,14 +32,19 @@ import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
 import io.github.jessesaarinen.distractionkiller.detection.TimerPhase
 import io.github.jessesaarinen.distractionkiller.detection.TimerState
+import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
+import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
+import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
+import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
 
 // Inspector (tasks N4 and N5): the scroll watcher's state right now, and a list
 // of what it sees, so the short-video markers can be found and checked.
-// Back gesture returns home.
+// Back arrow and back gesture return home.
 @Composable
 fun InspectorScreen(
     serviceEnabled: Boolean,
     onShare: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val entries by InspectorLog.entries.collectAsState()
     val counts by InspectorLog.counts.collectAsState()
@@ -49,14 +57,22 @@ fun InspectorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(24.dp),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {
+                IconButton(onClick = onBack, modifier = Modifier.offset(x = (-12).dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_back),
+                        contentDescription = stringResource(R.string.back),
+                    )
+                }
+            }
+            item {
                 Text(
                     text = stringResource(R.string.inspector_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.semantics { heading() },
                 )
             }
             item {
@@ -76,16 +92,23 @@ fun InspectorScreen(
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = onShare, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text(stringResource(R.string.inspector_share))
-                    }
-                    OutlinedButton(onClick = { InspectorLog.clear() }, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text(stringResource(R.string.inspector_clear))
-                    }
+                    PrimaryButton(
+                        text = stringResource(R.string.inspector_share),
+                        onClick = onShare,
+                        icon = R.drawable.ic_share,
+                        modifier = Modifier.weight(1f),
+                    )
+                    SecondaryButton(
+                        text = stringResource(R.string.inspector_clear),
+                        onClick = { InspectorLog.clear() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .align(Alignment.CenterVertically),
+                    )
                 }
             }
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                SectionCard {
                     val started = status.serviceStartedAt
                     StatusLine(
                         if (started != null) {
@@ -120,15 +143,13 @@ fun InspectorScreen(
                 }
             }
             item {
-                OutlinedButton(onClick = { ScrollTimer.reset() }, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.inspector_reset_timer))
-                }
+                SecondaryButton(
+                    text = stringResource(R.string.inspector_reset_timer),
+                    onClick = { ScrollTimer.reset() },
+                )
             }
             item {
-                Text(
-                    text = stringResource(R.string.inspector_counts_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                SectionLabel(stringResource(R.string.inspector_counts_title))
             }
             items(counts.entries.toList()) { (packageName, kinds) ->
                 Text(
@@ -138,10 +159,7 @@ fun InspectorScreen(
                 )
             }
             item {
-                Text(
-                    text = stringResource(R.string.inspector_events_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                SectionLabel(stringResource(R.string.inspector_events_title))
             }
             if (entries.isEmpty()) {
                 item {

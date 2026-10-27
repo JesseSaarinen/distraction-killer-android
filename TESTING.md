@@ -27,8 +27,8 @@ Avaa *Tarkastelu (kehittäjille)* ja paina *Tyhjennä*. Yläosassa pitää lukea
 - [ ] **Instagram**, etusivu: `id=list … → other (not the feed)`. Ajastin ei kasva.
 - [ ] Instagram, Reels: `id=clips_viewer_view_pager … → swipe`. Ajastin kasvaa. Takaisin etusivulle ja vieritä: `FRONT short videos not in front (scrolled list)`.
 - [ ] **YouTube**, etusivu ja tavallinen video: ei `FRONT short videos in front` -riviä.
-- [ ] YouTube, Shorts: `FRONT short videos in front (player on screen)`.
-- [ ] **Tärkein tarkistus:** pyyhkäise viisi Shortsia. Jokaisesta pitäisi tulla `SCROLLED id=reel_recycler … → swipe` tai `ITEM item N → swipe (new item on screen)`, ja ajastimen pitää kasvaa koko ajan. Jaa loki, niin nähdään, kumpi tapa toimii. Jos ajastin pysähtyy noin minuutin päästä, Shortsin pyyhkäisyt eivät näy tunnistukselle.
+- [ ] YouTube, Shorts: `FRONT short videos in front (player on screen)` ja heti perään `ITEM feed: …`. Se kertoo, miten tunnistus löytää ruudulla olevan Shortsin. Paras on `items by their place in the list`.
+- [ ] **Tärkein tarkistus:** pyyhkäise viisi Shortsia. Jokaisesta pitäisi tulla `SCROLLED id=reel_recycler … → swipe` tai `ITEM item N → swipe (new item on screen)`, ja ajastimen pitää kasvaa koko ajan. Jaa loki, niin nähdään, kumpi tapa toimii. Jos ajastin pysähtyy noin minuutin päästä, Shortsin pyyhkäisyt eivät näy tunnistukselle, ja `ITEM feed:` -rivi kertoo, mihin uuden Shortsin tunnistus jäi.
 - [ ] Paina *Jaa* ja lähetä teksti. Tekstin alussa on tila, asetukset ja versio, joten tyhjäkin loki kertoo syyn.
 
 ## 4. Keskeytykset (demotila)
@@ -53,13 +53,25 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
+- [ ] Tilastot → *Aloita testaaja 1*. Kotinäkymän tilakortissa lukee "Testaaja 1". Tee yksi keskeytys: tilastojen ylälaidassa on valinta *Testaaja 1* / *Kaikki*.
+- [ ] *Aloita testaaja 2* → testaajan 2 luvut alkavat nollasta, ja *Kaikki* näyttää molempien keskeytykset. Jaetussa JSONissa jokaisella rivillä on `"tester"`.
+- [ ] *Päätöksen nopeus*: paina bannerissa *Jatka* heti ja seuraavalla kerralla *Lopeta tähän* muutaman sekunnin päästä. Ajat näyttävät järkeviltä. Paina tauossa *Ohita* heti, kun se tulee näkyviin → "Ohita heti tauossa" kasvaa.
+- [ ] *Lopeta testaus* → "Testaaja"-merkki katoaa kotinäkymästä.
 
-## 7. Ruudunlukija (valinnainen, N16)
+## 7. Ulkoasu
+
+- [ ] Sovelluksen kuvake on aurinko horisontin yllä ja näyttää siistiltä aloitusnäytöllä.
+- [ ] Käy läpi koti, asetukset, tilastot, banneri, tauko (kaikki kolme tehtävää) ja kiitosnäkymä sekä vaaleana että tummana (Asetukset → Näyttö → Tumma). Kaikki tekstit erottuvat taustastaan.
+- [ ] Tummana tauko ja kiitosnäkymä eivät välähdä vaaleina auetessaan.
+- [ ] Fonttikoko suurimmaksi (Asetukset → Näyttö → fonttikoko): mikään teksti ei leikkaudu tai mene päällekkäin, ja kaikki napit toimivat.
+- [ ] Kysymystehtävä: näppäimistö ei peitä tekstikenttää tai *Vastaa*-nappia.
+
+## 8. Ruudunlukija (valinnainen, N16)
 
 Asetukset → Esteettömyys → TalkBack päälle. Liiku pyyhkäisemällä oikealle.
 
-- [ ] Kotinäkymä: vaiheen ympyrä luetaan "Vaihe 1" tai "Vaihe 1, tehty". Otsikot ovat otsikoita (TalkBackin otsikkonavigointi hyppää niihin).
-- [ ] Tilastot: laatikko luetaan kerralla, esim. "50 %, …", ja taulukon rivi kokonaisena.
+- [ ] Kotinäkymä: käyttöönoton vaiheen ympyrä luetaan "Vaihe 1" tai "Vaihe 1, tehty". Otsikot ovat otsikoita (TalkBackin otsikkonavigointi hyppää niihin, myös tilakortin otsikkoon).
+- [ ] Tilastot: iso prosenttikortti ja jokainen numeroruutu luetaan kerralla, esim. "3 keskeytystä". Palkkirivi luetaan kokonaisena.
 - [ ] Banneri ilmoitetaan, kun se tulee näkyviin.
 - [ ] Hengitysharjoitus: TalkBack sanoo "Hengitä sisään" ja "Hengitä ulos" niiden vaihtuessa.
 - [ ] Asetukset: kun yrität poistaa viimeisen tehtävän, TalkBack lukee "Valitse vähintään yksi tehtävä."
@@ -70,9 +82,11 @@ Asetukset → Esteettömyys → TalkBack päälle. Liiku pyyhkäisemällä oikea
 - **Tyhjä loki:** katso jaetun tekstin rivi "Tunnistus: …". "EI käynnissä" tarkoittaa, että esteettömyysasetus on pois tai puhelin pysäytti palvelun. Laita se päälle ja tarkista akkuasetus.
 - **Tunnistus pysähtyy taustalla:** Akku → Rajoittamaton. Tarkastelussa näkyy `NOTE service started` aina, kun palvelu käynnistyy uudelleen.
 - **ERROR-rivi tarkastelussa:** sovellus jatkoi virheen jälkeen. Jaa loki, niin virhe voidaan korjata.
+- **Pyyhkäisyt eivät laske sovelluspäivityksen jälkeen:** TikTokin tai Reelsin pyyhkäisyistä tulee `→ other (not the feed)`, tai Shortsissa ei tule `FRONT short videos in front` -riviä. Päivitys on luultavasti vaihtanut näkymän tunnisteen. Jaa loki: uusi tunniste näkyy `SCROLLED`-rivin kohdassa `id=…` ja `SNAPSHOT`-riveillä. Se vaihdetaan vain tiedostoon `detection/AppMarkers.kt`.
 
 ## Ennen `rt8`-tagia (N13)
 
 - [ ] Kaikki yllä toimii, tai poikkeamat on kirjattu.
+- [ ] Tyhjennä tilastot. Jokaisen testin alussa Tilastot → *Aloita testaaja N*, ja testin jälkeen *Jaa loki (JSON)*.
 - [ ] Play Kauppa → TikTok, Instagram ja YouTube → ⋮ → automaattinen päivitys pois, ettei näkymien tunnisteet muutu ennen testejä.
 - [ ] Tagi tehdään testatusta commitista: `git tag rt8 <commit>` ja `git push origin rt8`. Actions tekee siitä pysyvän julkaisun. Älä tee julkaisua GitHubin Releases-sivulla käsin, koska Actions luo sen itse.

@@ -9,6 +9,7 @@ package io.github.jessesaarinen.distractionkiller.data
  * - task: "breathing", "question" or "physical", on level 2 rows
  * - outcome: "stopped", "continued", "skipped" or "dismissed" (left the app some other way)
  * - answer: what the user answered in the question task, if anything
+ * - tester: the RT8 tester number (task N19), 0 when no test is running
  */
 data class LogEvent(
     val type: String,
@@ -18,5 +19,6 @@ data class LogEvent(
     val task: String? = null,
     val outcome: String? = null,
     val answer: String? = null,
+    val tester: Int = 0,
     val ts: Long = System.currentTimeMillis(),
 )

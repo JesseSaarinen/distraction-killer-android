@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark mode window background, so a screen does not flash light before
+         Compose draws it. The same colour as the dark background in ui/theme/Theme.kt. -->
+    <color name="background">#111A1C</color>
+</resources>

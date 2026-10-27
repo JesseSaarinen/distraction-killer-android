@@ -58,6 +58,9 @@ object Config {
     /** The Ohita button appears after this long. */
     const val SKIP_DELAY_SECONDS = 5
 
+    /** Stats (task N19): Ohita counts as tapped right away within this long after it appeared. */
+    const val QUICK_SKIP_SECONDS = 3
+
     const val BREATHING_SECONDS = 15
     const val BREATHING_PHASE_SECONDS = 4
     const val PHYSICAL_SECONDS = 10

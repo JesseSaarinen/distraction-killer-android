@@ -80,7 +80,7 @@ data class InspectorStatus(
  * MAX_ENTRIES lines. The event counters count only while the app runs.
  */
 object InspectorLog {
-    private const val MAX_ENTRIES = 300
+    private const val MAX_ENTRIES = 500
     private const val MAX_SHARE_CHARS = 100_000
     private const val FILE_NAME = "inspector.log"
     private const val SAME_ERROR_PAUSE_MS = 60_000L
