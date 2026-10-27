@@ -105,8 +105,8 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**
-- ◐ N18 Ulkoasun uudistus: uusi teema (värit, Fraunces-otsikot, kulmat), viivaikonit, aurinkotunnus ja sovelluksen kuvake, kaikki näkymät uudelleen vaaleana ja tummana. Säännöt `DESIGN.md`:ssä. Puhelimella tarkistamatta (`TESTING.md`, kohta 7)
-- ◐ N19 RT8-testaajat ja päätöksen nopeus: tilastoissa *Aloita testaaja N*, testaajan numero jokaiseen tapahtumaan ja vientiin, tilastot testaajittain tai kaikki. Uusi kortti *Päätöksen nopeus*: aika bannerin tulosta *Jatka*- ja *Lopeta tähän* -valintaan (mediaani) ja kuinka usein *Ohita* painettiin heti (`Config.QUICK_SKIP_SECONDS`). Puhelimella tarkistamatta (`TESTING.md`, kohta 6)
+- ☑ N18 Ulkoasun uudistus: uusi teema (värit, Fraunces-otsikot, kulmat), viivaikonit, aurinkotunnus ja sovelluksen kuvake, kaikki näkymät uudelleen vaaleana ja tummana. Säännöt `DESIGN.md`:ssä. Puhelimella 27.10. (0.1.62) käyty läpi banneri, tauko hengitys- ja liiketehtävällä, kiitosnäkymä ja tilastot. Kuvake, tumma tila, suurin fontti ja kysymystehtävän näppäimistö (`TESTING.md`, kohta 7) tarkistettu vain koodista ja kuvista, ei puhelimella
+- ☑ N19 RT8-testaajat ja päätöksen nopeus: tilastoissa *Aloita testaaja N*, testaajan numero jokaiseen tapahtumaan ja vientiin, tilastot testaajittain tai kaikki. Uusi kortti *Päätöksen nopeus*: aika bannerin tulosta *Jatka*- ja *Lopeta tähän* -valintaan (mediaani) ja kuinka usein *Ohita* painettiin heti (`Config.QUICK_SKIP_SECONDS`). Puhelimella 27.10. (0.1.62) tarkistettu testaajat 1 ja 2, testaajan numero viennissä sekä *Jatka*- ja *Lopeta tähän* -ajat. *Ohita heti* (`TESTING.md`, kohta 6) tarkistettu vain yksikkötestillä
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**
