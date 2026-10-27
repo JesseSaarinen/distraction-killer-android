@@ -45,6 +45,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
+  ui/DayChart.kt           # N16: tilastojen pylväät viimeisiltä 7 päivältä, päivän luvut napauttamalla
   ui/theme/Theme.kt        # kaikki värit, fontit ja kulmat (ks. DESIGN.md)
   ui/components/SunMark.kt # N18: tunnus, aurinko nousee horisontin yli
   ui/components/Layout.kt  # N18: alanäkymän runko, kortit, otsakkeet, palkit, tauon tausta

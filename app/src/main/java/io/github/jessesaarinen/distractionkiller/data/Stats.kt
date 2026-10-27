@@ -2,11 +2,17 @@ package io.github.jessesaarinen.distractionkiller.data
 
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 data class TaskStats(val task: TaskType, val total: Int, val stopped: Int)
 
 data class AppStats(val app: String, val rounds: Int, val stopped: Int)
+
+/** One day in the stats chart (N16): its interruptions, and how many of them ended the scrolling. */
+data class DayStats(val date: LocalDate, val rounds: Int, val stopped: Int)
 
 /** The numbers on the stats screen. */
 data class Summary(
@@ -133,3 +139,20 @@ private fun median(values: List<Long>): Long? {
  */
 fun nextTester(events: List<LogEvent>, current: Int): Int =
     maxOf(current, events.maxOfOrNull { it.tester } ?: 0) + 1
+
+/**
+ * The last [days] days up to [today] for the stats chart (N16), oldest first.
+ * A day changes at midnight in [zone], and a day without interruptions has zeros.
+ */
+fun lastDays(events: List<LogEvent>, today: LocalDate, zone: ZoneId, days: Int = 7): List<DayStats> {
+    val byDate = events.groupBy { Instant.ofEpochMilli(it.ts).atZone(zone).toLocalDate() }
+    return (days - 1 downTo 0).map { daysAgo ->
+        val date = today.minusDays(daysAgo.toLong())
+        val sameDay = byDate[date].orEmpty()
+        DayStats(
+            date = date,
+            rounds = sameDay.count { it.type == "level1" },
+            stopped = sameDay.count { it.type == "outcome" && it.outcome == "stopped" },
+        )
+    }
+}

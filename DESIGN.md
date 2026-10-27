@@ -96,7 +96,7 @@ Käytä näitä ennen kuin teet uuden. Jos sama rakenne toistuu kolmessa paikass
 
 - **Koti:** tunnus ja otsikko, tilakortti (päällä: tumma petrolikortti ja aurinko, persikkamerkit demotilasta ja testaajasta; tauolla: persikkakortti ja nappi päälle; ei päällä: valkoinen kortti), käyttöönotto-opas kunnes kaikki vaiheet ovat valmiita, Asetukset- ja Tilastot-laatat, yksityisyysrivi.
 - **Asetukset:** pääkytkin ylimpänä, sitten kortit Ajoitus, Keskeytyksen tehtävät, Hälytys, Valvotut sovellukset ja Esittely.
-- **Tilastot:** lopetusprosentti isona, sitten luvut ja palkit. Testin aikana ylimpänä valinta *Testaaja N* / *Kaikki*. Testaajan vaihto ja lokin jako alimpana.
+- **Tilastot:** lopetusprosentti isona, sitten luvut, viimeisten 7 päivän pylväät (`ui/DayChart.kt`: lopetukset petroolina, muut keskeytykset harmaana eli `onSurfaceVariant` 70 %:n peittävyydellä, jolloin kontrasti on vähintään 3:1 molemmissa teemoissa, ja 2 dp rako osien välissä) ja palkit. Testin aikana ylimpänä valinta *Testaaja N* / *Kaikki*. Testaajan vaihto ja lokin jako alimpana.
 - **Taso 1 (banneri):** liukuu ylhäältä videon päälle. *Lopeta tähän* on isompi kuin *Jatka*.
 - **Taso 2:** tehtävä keskellä, valintanapit alhaalla vasta tehtävän jälkeen. *Ohita* tulee näkyviin 5 s jälkeen.
 - **Kiitosnäkymä:** aurinko nousee 1,6 sekunnissa.

@@ -52,6 +52,7 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 ## 6. Tilastot ja lokit
 
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
+- [ ] *Viimeiset 7 päivää*: kaavion alla lukee "Tänään: keskeytyksiä N, lopetit M", ja luvut täsmäävät tämän päivän keskeytyksiin. Pylvään petrooli alaosa on lopetukset. Napauta toista päivää: sen luvut tulevat näkyviin.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
 - [ ] Tilastot → *Aloita testaaja 1*. Kotinäkymän tilakortissa lukee "Testaaja 1". Tee yksi keskeytys: tilastojen ylälaidassa on valinta *Testaaja 1* / *Kaikki*.
 - [ ] *Aloita testaaja 2* → testaajan 2 luvut alkavat nollasta, ja *Kaikki* näyttää molempien keskeytykset. Jaetussa JSONissa jokaisella rivillä on `"tester"`.

@@ -97,6 +97,38 @@
         <item quantity="other">kertaa poistuit sovelluksesta keskeytyksen aikana</item>
     </plurals>
     <string name="stats_avg_before_stop">scrollausta keskimäärin ennen lopettamista</string>
+    <string name="stats_days_title">Viimeiset 7 päivää</string>
+    <string name="stats_days_stopped">Lopetit scrollauksen</string>
+    <string name="stats_days_other">Muut keskeytykset</string>
+    <string name="stats_days_hint">Napauta päivää, niin näet sen luvut.</string>
+    <string name="stats_days_today">Tänään</string>
+    <string name="stats_days_yesterday">Eilen</string>
+    <!-- An older day in the chart: the weekday from the array weekdays and the date, for example "Maanantai 2.11.". -->
+    <string name="stats_days_date">%1$s %2$d.%3$d.</string>
+    <!-- The chosen day under the chart, also what a screen reader reads for each day,
+         for example "Tänään: keskeytyksiä 3, lopetit 1". The numbers come last,
+         so the words fit any number (1 keskeytys, 3 keskeytystä). -->
+    <string name="stats_day">%1$s: keskeytyksiä %2$d, lopetit %3$d</string>
+    <!-- Under the chart's columns, Monday first. -->
+    <string-array name="weekdays_short">
+        <item>ma</item>
+        <item>ti</item>
+        <item>ke</item>
+        <item>to</item>
+        <item>pe</item>
+        <item>la</item>
+        <item>su</item>
+    </string-array>
+    <!-- At the start of the chosen day's line, Monday first. -->
+    <string-array name="weekdays">
+        <item>Maanantai</item>
+        <item>Tiistai</item>
+        <item>Keskiviikko</item>
+        <item>Torstai</item>
+        <item>Perjantai</item>
+        <item>Lauantai</item>
+        <item>Sunnuntai</item>
+    </string-array>
     <string name="stats_where_title">Missä vaiheessa lopetit</string>
     <string name="stats_where_level1">Kevyt keskeytys (banneri)</string>
     <string name="stats_where_level2">Koko näytön keskeytys</string>

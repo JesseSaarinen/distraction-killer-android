@@ -34,10 +34,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.R
+import io.github.jessesaarinen.distractionkiller.data.DayStats
 import io.github.jessesaarinen.distractionkiller.data.DecisionSpeed
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.data.Summary
+import io.github.jessesaarinen.distractionkiller.data.lastDays
 import io.github.jessesaarinen.distractionkiller.data.nextTester
 import io.github.jessesaarinen.distractionkiller.data.summarize
 import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
@@ -51,6 +53,8 @@ import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
 import io.github.jessesaarinen.distractionkiller.ui.components.SegmentedChoice
 import io.github.jessesaarinen.distractionkiller.ui.components.SideBySide
 import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
+import java.time.LocalDate
+import java.time.ZoneId
 
 // Stats (task N11), like views/stats.js in the web demo: numbers from the
 // event log, and the log export for the RT8 test. Back arrow and gesture return home.
@@ -62,9 +66,11 @@ fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
     val tester = settings.tester
     // During a test the numbers are the current tester's, unless "Kaikki" is chosen.
     var showAll by remember { mutableStateOf(false) }
-    val summary = remember(events, tester, showAll) {
-        summarize(if (tester > 0 && !showAll) events.filter { it.tester == tester } else events)
+    val shown = remember(events, tester, showAll) {
+        if (tester > 0 && !showAll) events.filter { it.tester == tester } else events
     }
+    val summary = remember(shown) { summarize(shown) }
+    val days = remember(shown) { lastDays(shown, LocalDate.now(), ZoneId.systemDefault()) }
     var confirmClear by remember { mutableStateOf(false) }
 
     ScreenScaffold(title = stringResource(R.string.stats_title), onBack = onBack) {
@@ -81,7 +87,7 @@ fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
         if (summary.rounds == 0) {
             EmptyState()
         } else {
-            Numbers(summary)
+            Numbers(summary, days)
         }
 
         SectionLabel(stringResource(R.string.stats_testers_title))
@@ -181,7 +187,7 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun Numbers(summary: Summary) {
+private fun Numbers(summary: Summary, days: List<DayStats>) {
     // The main number: how often an interruption ended the scrolling.
     val onHero = MaterialTheme.colorScheme.onTertiary
     Surface(
@@ -231,6 +237,12 @@ private fun Numbers(summary: Summary) {
         durationText(summary.avgScrollBeforeStop) to stringResource(R.string.stats_avg_before_stop),
         summary.dismissed.toString() to pluralStringResource(R.plurals.stats_dismissed, summary.dismissed),
     )
+
+    // Task N16: the last 7 days as columns.
+    SectionLabel(stringResource(R.string.stats_days_title))
+    SectionCard {
+        DayChart(days)
+    }
 
     SectionLabel(stringResource(R.string.stats_where_title))
     SectionCard {
