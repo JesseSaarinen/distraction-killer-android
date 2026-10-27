@@ -1,7 +1,12 @@
 package io.github.jessesaarinen.distractionkiller.interrupt
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,10 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,6 +39,10 @@ import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.interrupt.tasks.BreathingTask
 import io.github.jessesaarinen.distractionkiller.interrupt.tasks.PhysicalTask
 import io.github.jessesaarinen.distractionkiller.interrupt.tasks.QuestionTask
+import io.github.jessesaarinen.distractionkiller.ui.components.CalmBackground
+import io.github.jessesaarinen.distractionkiller.ui.components.Hint
+import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
+import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
 import io.github.jessesaarinen.distractionkiller.ui.durationText
 import kotlinx.coroutines.delay
 
@@ -62,70 +71,103 @@ fun Level2Screen(
         if (skipVisible && !taskDone) onFinish("skipped", null)
     }
 
-    // safeDrawing includes the keyboard, so the answer field in the question
-    // task stays above it.
-    Scaffold(contentWindowInsets = WindowInsets.safeDrawing) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.level2_scrolled, durationText(scrollSeconds)),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = stringResource(R.string.level2_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+    CalmBackground {
+        // safeDrawing includes the keyboard, so the answer field in the
+        // question task stays above it.
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            contentWindowInsets = WindowInsets.safeDrawing,
+        ) { innerPadding ->
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+            ) {
+                // At least screen-high, so the task sits in the middle and the
+                // buttons at the bottom. Scrolls if the keyboard needs room.
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .heightIn(min = maxHeight)
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.level2_title).uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            text = stringResource(R.string.level2_scrolled, durationText(scrollSeconds)),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
 
-            when (task) {
-                TaskType.BREATHING -> BreathingTask(onDone = { taskDone = true })
-                TaskType.QUESTION -> QuestionTask(onDone = {
-                    answer = it
-                    taskDone = true
-                })
-                TaskType.PHYSICAL -> PhysicalTask(onDone = { taskDone = true })
-            }
+                    Box(modifier = Modifier.padding(vertical = 24.dp)) {
+                        when (task) {
+                            TaskType.BREATHING -> BreathingTask(onDone = { taskDone = true })
+                            TaskType.QUESTION -> QuestionTask(onDone = {
+                                answer = it
+                                taskDone = true
+                            })
+                            TaskType.PHYSICAL -> PhysicalTask(onDone = { taskDone = true })
+                        }
+                    }
 
-            if (taskDone) {
-                Text(
-                    text = stringResource(R.string.level2_prompt),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-                Button(
-                    onClick = { onFinish("stopped", answer) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                ) {
-                    Text(stringResource(R.string.level2_stop))
+                    // The same place for Ohita and the final choice, so nothing jumps.
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
+                    ) {
+                        if (taskDone) {
+                            // Fades in when the task is done.
+                            val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+                            AnimatedVisibility(visibleState = shown, enter = fadeIn()) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.level2_prompt),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    PrimaryButton(
+                                        text = stringResource(R.string.level2_stop),
+                                        onClick = { onFinish("stopped", answer) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    SecondaryButton(
+                                        text = stringResource(R.string.level2_continue),
+                                        onClick = { onFinish("continued", answer) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                            }
+                        } else if (skipVisible) {
+                            TextButton(
+                                onClick = { onFinish("skipped", null) },
+                                modifier = Modifier.heightIn(min = 48.dp),
+                            ) {
+                                Text(stringResource(R.string.level2_skip), style = MaterialTheme.typography.labelLarge)
+                            }
+                        } else {
+                            Box(modifier = Modifier.heightIn(min = 48.dp), contentAlignment = Alignment.Center) {
+                                Hint(stringResource(R.string.level2_skip_wait))
+                            }
+                        }
+                    }
                 }
-                OutlinedButton(
-                    onClick = { onFinish("continued", answer) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                ) {
-                    Text(stringResource(R.string.level2_continue))
-                }
-            } else if (skipVisible) {
-                TextButton(
-                    onClick = { onFinish("skipped", null) },
-                    modifier = Modifier.heightIn(min = 48.dp),
-                ) {
-                    Text(stringResource(R.string.level2_skip))
-                }
-            } else {
-                Text(
-                    text = stringResource(R.string.level2_skip_wait),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
     }
