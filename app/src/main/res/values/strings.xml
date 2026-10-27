@@ -10,6 +10,7 @@
     <string name="home_service_on">Keskeytys tulee %1$s aktiivisen selauksen jälkeen.</string>
     <string name="home_no_apps">Yhtään sovellusta ei ole valittu. Valitse sovellukset asetuksista.</string>
     <string name="home_demo_on">Demotila päällä</string>
+    <string name="home_tester_on">Testaaja %1$d</string>
     <string name="home_paused_label">Tauolla</string>
     <string name="home_paused_title">Keskeytykset ovat tauolla</string>
     <string name="home_paused">Scrollausta ei nyt lasketa, eikä keskeytyksiä tule.</string>
@@ -104,8 +105,21 @@
     <string name="stats_bar_legend">Lopetit / kertoja yhteensä</string>
     <string name="stats_of">%1$d / %2$d</string>
     <string name="stats_answers_title">Mitä olit tekemässä</string>
+    <string name="stats_speed_title">Päätöksen nopeus</string>
+    <string name="stats_speed_continue">Jatka bannerissa</string>
+    <string name="stats_speed_stop">Lopeta bannerissa</string>
+    <string name="stats_speed_quick_skip">Ohita heti tauossa</string>
+    <string name="stats_speed_none">–</string>
+    <string name="stats_speed_hint">Aika bannerin tulosta valintaan (mediaani). Hyvin nopea Jatka voi kertoa, että banneri suljettiin tottumuksesta. Ohita heti: Ohita-nappia painettiin %1$d sekunnin sisällä sen ilmestymisestä.</string>
+    <string name="stats_filter_all">Kaikki</string>
+    <string name="stats_tester">Testaaja %1$d</string>
+    <string name="stats_tester_none">Testi ei ole käynnissä</string>
+    <string name="stats_tester_running_hint">Uudet keskeytykset kirjataan testaajalle %1$d. Ylhäältä voit valita, näytetäänkö vain hänen vai kaikkien tulokset.</string>
+    <string name="stats_tester_none_hint">Aloita testaaja ennen jokaista testiä, niin jokaisen testaajan tulokset pysyvät lokissa erillään.</string>
+    <string name="stats_tester_start">Aloita testaaja %1$d</string>
+    <string name="stats_tester_end">Lopeta testaus</string>
     <string name="stats_testers_title">Testaajille</string>
-    <string name="stats_testers_hint">Jaa loki jokaisen testin jälkeen. Tyhjennä tilastot vasta sitten.</string>
+    <string name="stats_testers_hint">Jaa loki jokaisen testin jälkeen, niin mitään ei katoa. Tyhjennä tilastot vasta, kun kaikki on jaettu.</string>
     <string name="stats_share">Jaa loki (JSON)</string>
     <string name="stats_share_title">Jaa tapahtumaloki</string>
     <string name="stats_share_subject">Distraction Killer -loki</string>
@@ -118,6 +132,7 @@
     <string name="accessibility_service_description">Tunnistaa, kun selaat lyhytvideoita TikTokissa, Instagramissa tai YouTubessa. Sovellus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä mikään tieto lähde puhelimesta.</string>
 
     <string name="duration_seconds">%1$d s</string>
+    <string name="duration_seconds_decimal">%1$d,%2$d s</string>
     <string name="duration_minutes">%1$d min</string>
     <string name="duration_minutes_seconds">%1$d min %2$d s</string>
     <string name="level1_label">Pieni muistutus</string>

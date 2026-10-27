@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,28 +32,52 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.R
+import io.github.jessesaarinen.distractionkiller.data.DecisionSpeed
 import io.github.jessesaarinen.distractionkiller.data.EventLog
+import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.data.Summary
+import io.github.jessesaarinen.distractionkiller.data.nextTester
 import io.github.jessesaarinen.distractionkiller.data.summarize
+import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
 import io.github.jessesaarinen.distractionkiller.ui.components.Hint
 import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.ProgressBar
 import io.github.jessesaarinen.distractionkiller.ui.components.ScreenScaffold
+import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
+import io.github.jessesaarinen.distractionkiller.ui.components.SegmentedChoice
 import io.github.jessesaarinen.distractionkiller.ui.components.SideBySide
 import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
 
 // Stats (task N11), like views/stats.js in the web demo: numbers from the
 // event log, and the log export for the RT8 test. Back arrow and gesture return home.
+// Task N19: RT8 tester numbers and how quickly the choices were made.
 @Composable
 fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
     val events by EventLog.events.collectAsState()
-    val summary = remember(events) { summarize(events) }
+    val settings by SettingsStore.settings.collectAsState()
+    val tester = settings.tester
+    // During a test the numbers are the current tester's, unless "Kaikki" is chosen.
+    var showAll by remember { mutableStateOf(false) }
+    val summary = remember(events, tester, showAll) {
+        summarize(if (tester > 0 && !showAll) events.filter { it.tester == tester } else events)
+    }
     var confirmClear by remember { mutableStateOf(false) }
 
     ScreenScaffold(title = stringResource(R.string.stats_title), onBack = onBack) {
+        if (tester > 0) {
+            SegmentedChoice(
+                options = listOf(false, true),
+                selected = showAll,
+                label = { all ->
+                    if (all) stringResource(R.string.stats_filter_all) else stringResource(R.string.stats_tester, tester)
+                },
+                onSelect = { showAll = it },
+            )
+        }
         if (summary.rounds == 0) {
             EmptyState()
         } else {
@@ -61,6 +86,24 @@ fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
 
         SectionLabel(stringResource(R.string.stats_testers_title))
         SectionCard {
+            TesterControls(
+                tester = tester,
+                next = nextTester(events, tester),
+                onStart = { next ->
+                    SettingsStore.update { it.copy(tester = next) }
+                    // The new tester starts from zero.
+                    ScrollTimer.reset()
+                    showAll = false
+                },
+                onEnd = { SettingsStore.update { it.copy(tester = 0) } },
+            )
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant),
+            )
             Hint(stringResource(R.string.stats_testers_hint))
             PrimaryButton(
                 text = stringResource(R.string.stats_share),
@@ -203,6 +246,8 @@ private fun Numbers(summary: Summary) {
         )
     }
 
+    DecisionSpeedCard(summary.speed)
+
     SectionLabel(stringResource(R.string.stats_tasks_title))
     SectionCard {
         Hint(stringResource(R.string.stats_bar_legend))
@@ -251,6 +296,69 @@ private fun Numbers(summary: Summary) {
     }
 }
 
+/** How quickly the choices were made (task N19). Shown once there is something to show. */
+@Composable
+private fun DecisionSpeedCard(speed: DecisionSpeed) {
+    if (speed.continueMillis == null && speed.stopMillis == null && speed.level2Breaks == 0) return
+    val none = stringResource(R.string.stats_speed_none)
+    SectionLabel(stringResource(R.string.stats_speed_title))
+    SectionCard {
+        ValueRow(
+            label = stringResource(R.string.stats_speed_continue),
+            value = speed.continueMillis?.let { decisionText(it) } ?: none,
+        )
+        ValueRow(
+            label = stringResource(R.string.stats_speed_stop),
+            value = speed.stopMillis?.let { decisionText(it) } ?: none,
+        )
+        if (speed.level2Breaks > 0) {
+            BarRow(
+                label = stringResource(R.string.stats_speed_quick_skip),
+                value = stringResource(R.string.stats_of, speed.quickSkips, speed.level2Breaks),
+                fraction = share(speed.quickSkips, speed.level2Breaks),
+            )
+        }
+        Hint(stringResource(R.string.stats_speed_hint, Config.QUICK_SKIP_SECONDS))
+    }
+}
+
+/** The RT8 tester now, and the buttons to start the next one or end the test (task N19). */
+@Composable
+private fun TesterControls(tester: Int, next: Int, onStart: (Int) -> Unit, onEnd: () -> Unit) {
+    Text(
+        text = if (tester > 0) {
+            stringResource(R.string.stats_tester, tester)
+        } else {
+            stringResource(R.string.stats_tester_none)
+        },
+        style = MaterialTheme.typography.titleMedium,
+    )
+    Hint(
+        if (tester > 0) {
+            stringResource(R.string.stats_tester_running_hint, tester)
+        } else {
+            stringResource(R.string.stats_tester_none_hint)
+        }
+    )
+    SecondaryButton(
+        text = stringResource(R.string.stats_tester_start, next),
+        onClick = { onStart(next) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+    )
+    if (tester > 0) {
+        TextButton(
+            onClick = onEnd,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+        ) {
+            Text(text = stringResource(R.string.stats_tester_end), style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
 private fun share(part: Int, whole: Int): Float = if (whole > 0) part / whole.toFloat() else 0f
 
 /** Two number tiles side by side. Each pair is the number and its label. */
@@ -272,6 +380,19 @@ private fun TileRow(first: Pair<String, String>, second: Pair<String, String>) {
                 }
             }
         }
+    }
+}
+
+/** A label and its value on the right. */
+@Composable
+private fun ValueRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+        Text(text = value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
     }
 }
 
