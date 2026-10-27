@@ -1,5 +1,6 @@
 package io.github.jessesaarinen.distractionkiller.data
 
+import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
 import java.time.Instant
 import java.time.LocalDate
@@ -27,6 +28,24 @@ data class Summary(
     val answers: List<String>,
     val byTask: List<TaskStats>,
     val byApp: List<AppStats>,
+    val speed: DecisionSpeed,
+)
+
+/**
+ * How quickly the user chose (task N19), for the RT8 question "is the
+ * friction the right size". Times are medians in milliseconds, null when
+ * nobody made that choice yet.
+ *
+ * - continueMillis, stopMillis: from the banner to Jatka or Lopeta tähän
+ * - level2Breaks: how many level 2 breaks there were
+ * - quickSkips: how often Ohita was tapped within Config.QUICK_SKIP_SECONDS
+ *   after it appeared
+ */
+data class DecisionSpeed(
+    val continueMillis: Long?,
+    val stopMillis: Long?,
+    val level2Breaks: Int,
+    val quickSkips: Int,
 )
 
 /**
@@ -58,12 +77,72 @@ fun summarize(events: List<LogEvent>): Summary {
         byApp = level1Events.map { it.app }.distinct().map { app ->
             AppStats(app, rounds = level1Events.count { it.app == app }, stopped = stops.count { it.app == app })
         },
+        speed = decisionSpeed(events),
     )
 }
 
 /**
- * The last [days] days up to [today] for the stats chart, oldest first. A day
- * changes at midnight in [zone], and a day without interruptions has zeros.
+ * Pairs each choice with the interruption before it: a level 1 outcome with
+ * the level1 row, a level 2 outcome with the level2 row. The log is in time order.
+ */
+fun decisionSpeed(events: List<LogEvent>): DecisionSpeed {
+    val continueTimes = mutableListOf<Long>()
+    val stopTimes = mutableListOf<Long>()
+    // Ohita appears after SKIP_DELAY_SECONDS, so "right away" is up to this long after the break opened.
+    val quickSkipLimit = (Config.SKIP_DELAY_SECONDS + Config.QUICK_SKIP_SECONDS) * 1000L
+    var level1At: Long? = null
+    var level2At: Long? = null
+    var level2Breaks = 0
+    var quickSkips = 0
+    for (event in events) {
+        when (event.type) {
+            "level1" -> {
+                level1At = event.ts
+                level2At = null
+            }
+            "level2" -> {
+                level2At = event.ts
+                level2Breaks++
+            }
+            "outcome" -> {
+                val shownAt = if (event.level == 1) level1At else level2At
+                if (shownAt != null) {
+                    val millis = event.ts - shownAt
+                    when {
+                        event.level == 1 && event.outcome == "continued" -> continueTimes += millis
+                        event.level == 1 && event.outcome == "stopped" -> stopTimes += millis
+                        event.level == 2 && event.outcome == "skipped" && millis <= quickSkipLimit -> quickSkips++
+                    }
+                }
+            }
+        }
+    }
+    return DecisionSpeed(
+        continueMillis = median(continueTimes),
+        stopMillis = median(stopTimes),
+        level2Breaks = level2Breaks,
+        quickSkips = quickSkips,
+    )
+}
+
+/** The middle value, so one long pause (phone left on the table) does not skew it. */
+private fun median(values: List<Long>): Long? {
+    if (values.isEmpty()) return null
+    val sorted = values.sorted()
+    val middle = sorted.size / 2
+    return if (sorted.size % 2 == 1) sorted[middle] else (sorted[middle - 1] + sorted[middle]) / 2
+}
+
+/**
+ * The number for the next RT8 tester (task N19): one more than any tester so
+ * far, so the numbers in the log never repeat.
+ */
+fun nextTester(events: List<LogEvent>, current: Int): Int =
+    maxOf(current, events.maxOfOrNull { it.tester } ?: 0) + 1
+
+/**
+ * The last [days] days up to [today] for the stats chart (N16), oldest first.
+ * A day changes at midnight in [zone], and a day without interruptions has zeros.
  */
 fun lastDays(events: List<LogEvent>, today: LocalDate, zone: ZoneId, days: Int = 7): List<DayStats> {
     val byDate = events.groupBy { Instant.ofEpochMilli(it.ts).atZone(zone).toLocalDate() }

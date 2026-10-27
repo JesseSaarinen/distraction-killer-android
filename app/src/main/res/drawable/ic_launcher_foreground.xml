@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A phone outline with a pause sign: "take a break from scrolling". -->
+<!-- The app's mark: a sun rising over the horizon, "look up from the phone".
+     The same idea as ui/components/SunMark.kt, with rays so it reads at
+     small sizes. Keep it inside the 66 dp safe zone in the middle, because
+     launchers crop the icon to a circle or a rounded square. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Phone outline -->
+    <!-- Rays -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="@color/icon_accent"
+        android:strokeWidth="3.6"
+        android:strokeLineCap="round"
+        android:pathData="M30.98,49.12 L26.75,47.58 M39.95,37.43 L37.37,33.74 M54,33 L54,28.5 M68.05,37.43 L70.63,33.74 M77.02,49.12 L81.25,47.58" />
+    <!-- Sun: the part of a circle that is above the horizon -->
+    <path
+        android:fillColor="@color/icon_accent"
+        android:pathData="M36.25,60.5 A18,18 0 1,1 71.75,60.5 Z" />
+    <!-- Horizon -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="@color/icon_foreground"
-        android:strokeWidth="4"
-        android:pathData="M42,32 L66,32 Q70,32 70,36 L70,72 Q70,76 66,76 L42,76 Q38,76 38,72 L38,36 Q38,32 42,32 Z" />
-    <!-- Pause bars -->
-    <path
-        android:fillColor="@color/icon_accent"
-        android:pathData="M47,45 L52,45 L52,63 L47,63 Z M56,45 L61,45 L61,63 L56,63 Z" />
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:pathData="M30,66 L78,66" />
 </vector>
