@@ -98,7 +98,7 @@ fun DayChart(days: List<DayStats>) {
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             LegendItem(color = MaterialTheme.colorScheme.primary, text = stringResource(R.string.stats_days_stopped))
-            LegendItem(color = MaterialTheme.colorScheme.outline, text = stringResource(R.string.stats_days_other))
+            LegendItem(color = otherColor(), text = stringResource(R.string.stats_days_other))
         }
         Hint(stringResource(R.string.stats_days_hint))
     }
@@ -174,7 +174,7 @@ private fun Bar(day: DayStats, most: Int) {
                     .weight(other.toFloat())
                     .fillMaxWidth()
                     .clip(roundedTop)
-                    .background(MaterialTheme.colorScheme.outline),
+                    .background(otherColor()),
             )
         }
         if (stopped > 0) {
@@ -188,6 +188,13 @@ private fun Bar(day: DayStats, most: Int) {
         }
     }
 }
+
+/**
+ * The grey of the other interruptions: the quiet text colour at 70 %. It is at
+ * least 3:1 against the card in both themes (outline is only 2.7:1 in the dark).
+ */
+@Composable
+private fun otherColor(): Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 
 @Composable
 private fun LegendItem(color: Color, text: String) {
