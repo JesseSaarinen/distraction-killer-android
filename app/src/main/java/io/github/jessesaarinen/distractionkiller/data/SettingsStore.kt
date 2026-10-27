@@ -26,6 +26,7 @@ object SettingsStore {
     private const val KEY_DEMO_MODE = "demoMode"
     private const val KEY_WATCHED_APPS = "watchedApps"
     private const val KEY_INTERRUPTIONS_ON = "interruptionsOn"
+    private const val KEY_TESTER = "tester"
 
     private var prefs: SharedPreferences? = null
     private val _settings = MutableStateFlow(Settings())
@@ -54,6 +55,7 @@ object SettingsStore {
             .putBoolean(KEY_DEMO_MODE, new.demoMode)
             .putStringSet(KEY_WATCHED_APPS, new.watchedApps)
             .putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
+            .putInt(KEY_TESTER, new.tester)
             .apply()
     }
 
@@ -77,6 +79,7 @@ object SettingsStore {
             demoMode = p.getBoolean(KEY_DEMO_MODE, defaults.demoMode),
             watchedApps = if (apps == null) defaults.watchedApps else AppMarkers.labels.filter { it in apps }.toSet(),
             interruptionsOn = p.getBoolean(KEY_INTERRUPTIONS_ON, defaults.interruptionsOn),
+            tester = p.getInt(KEY_TESTER, defaults.tester).coerceAtLeast(0),
         )
     }
 }

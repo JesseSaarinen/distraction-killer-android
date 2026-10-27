@@ -225,20 +225,34 @@ private fun OnCard(settings: Settings) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = onCard.copy(alpha = 0.75f),
                 )
-                if (settings.demoMode) {
-                    Text(
-                        text = stringResource(R.string.home_demo_on),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .background(MaterialTheme.colorScheme.secondary, CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    )
+                if (settings.demoMode || settings.tester > 0) {
+                    // FlowRow puts the second label on its own line when the font is large.
+                    FlowRow(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (settings.demoMode) Pill(stringResource(R.string.home_demo_on))
+                        // Task N19: which RT8 tester's test is running.
+                        if (settings.tester > 0) Pill(stringResource(R.string.home_tester_on, settings.tester))
+                    }
                 }
             }
         }
     }
+}
+
+/** A small peach label on the status card, like "Demotila päällä". */
+@Composable
+private fun Pill(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSecondary,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondary, CircleShape)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    )
 }
 
 /** Status: the user paused the interruptions in the settings. */

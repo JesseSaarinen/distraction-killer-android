@@ -53,6 +53,10 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 
 - [ ] *Tilastot* näyttää keskeytykset ja sen, miten kukin päättyi. *Jaa loki (JSON)* avaa jakovalikon.
 - [ ] Pyyhkäise sovellus pois viimeisimmistä ja avaa uudelleen: tarkastelun rivit ovat tallessa ja lopussa on `NOTE app started`.
+- [ ] Tilastot → *Aloita testaaja 1*. Kotinäkymän tilakortissa lukee "Testaaja 1". Tee yksi keskeytys: tilastojen ylälaidassa on valinta *Testaaja 1* / *Kaikki*.
+- [ ] *Aloita testaaja 2* → testaajan 2 luvut alkavat nollasta, ja *Kaikki* näyttää molempien keskeytykset. Jaetussa JSONissa jokaisella rivillä on `"tester"`.
+- [ ] *Päätöksen nopeus*: paina bannerissa *Jatka* heti ja seuraavalla kerralla *Lopeta tähän* muutaman sekunnin päästä. Ajat näyttävät järkeviltä. Paina tauossa *Ohita* heti, kun se tulee näkyviin → "Ohita heti tauossa" kasvaa.
+- [ ] *Lopeta testaus* → "Testaaja"-merkki katoaa kotinäkymästä.
 
 ## 7. Ulkoasu
 
@@ -72,5 +76,6 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 ## Ennen `rt8`-tagia (N13)
 
 - [ ] Kaikki yllä toimii, tai poikkeamat on kirjattu.
+- [ ] Tyhjennä tilastot. Jokaisen testin alussa Tilastot → *Aloita testaaja N*, ja testin jälkeen *Jaa loki (JSON)*.
 - [ ] Play Kauppa → TikTok, Instagram ja YouTube → ⋮ → automaattinen päivitys pois, ettei näkymien tunnisteet muutu ennen testejä.
 - [ ] Tagi tehdään testatusta commitista: `git tag rt8 <commit>` ja `git push origin rt8`. Actions tekee siitä pysyvän julkaisun. Älä tee julkaisua GitHubin Releases-sivulla käsin, koska Actions luo sen itse.
