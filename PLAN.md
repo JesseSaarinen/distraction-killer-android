@@ -52,7 +52,7 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   detection/AppMarkers.kt          # valvotut sovellukset ja niiden lyhytvideomerkit (N5)
   detection/ShortVideoClassifier.kt # N5: mitä vieritystapahtuma tarkoittaa (yksikkötestit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
-  detection/InspectorLog.kt        # N4: tarkastelun loki (inspector.log, 300 riviä) ja tila, myös jaettavaan tekstiin
+  detection/InspectorLog.kt        # N4: tarkastelun loki (inspector.log, 500 riviä) ja tila, myös jaettavaan tekstiin
   detection/ScrollTimer.kt         # N6: aktiivisen ajan ajastin
   interrupt/InterruptController.kt # N7: näyttää keskeytykset ja toimii valinnan mukaan
   interrupt/OverlayWindow.kt       # N7: Compose-ikkuna muiden sovellusten päälle
