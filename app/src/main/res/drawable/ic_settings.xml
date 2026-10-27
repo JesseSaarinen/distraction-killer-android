@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings: three sliders. Line icon, 24 dp, drawn in black and tinted where it is used (Icon tint). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,7 H14 M18,7 H20 M4,12 H6 M10,12 H20 M4,17 H12 M16,17 H20" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M18,7 A2,2 0 1,1 14,7 A2,2 0 1,1 18,7 Z M10,12 A2,2 0 1,1 6,12 A2,2 0 1,1 10,12 Z M16,17 A2,2 0 1,1 12,17 A2,2 0 1,1 16,17 Z" />
+</vector>
