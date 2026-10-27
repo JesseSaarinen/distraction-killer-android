@@ -60,6 +60,7 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 - **Tyhjä loki:** katso jaetun tekstin rivi "Tunnistus: …". "EI käynnissä" tarkoittaa, että esteettömyysasetus on pois tai puhelin pysäytti palvelun. Laita se päälle ja tarkista akkuasetus.
 - **Tunnistus pysähtyy taustalla:** Akku → Rajoittamaton. Tarkastelussa näkyy `NOTE service started` aina, kun palvelu käynnistyy uudelleen.
 - **ERROR-rivi tarkastelussa:** sovellus jatkoi virheen jälkeen. Jaa loki, niin virhe voidaan korjata.
+- **Pyyhkäisyt eivät laske sovelluspäivityksen jälkeen:** TikTokin tai Reelsin pyyhkäisyistä tulee `→ other (not the feed)`, tai Shortsissa ei tule `FRONT short videos in front` -riviä. Päivitys on luultavasti vaihtanut näkymän tunnisteen. Jaa loki: uusi tunniste näkyy `SCROLLED`-rivin kohdassa `id=…` ja `SNAPSHOT`-riveillä. Se vaihdetaan vain tiedostoon `detection/AppMarkers.kt`.
 
 ## Ennen `rt8`-tagia (N13)
 
