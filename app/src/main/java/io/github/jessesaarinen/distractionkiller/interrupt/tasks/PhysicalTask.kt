@@ -38,7 +38,8 @@ import io.github.jessesaarinen.distractionkiller.ui.components.IconBubble
 import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 import kotlinx.coroutines.delay
 
-private data class Challenge(@DrawableRes val icon: Int, @StringRes val text: Int)
+// @param: puts the annotation on the constructor's parameters, as Kotlin asks.
+private data class Challenge(@param:DrawableRes val icon: Int, @param:StringRes val text: Int)
 
 private val CHALLENGES = listOf(
     Challenge(R.drawable.ic_window, R.string.physical_window),

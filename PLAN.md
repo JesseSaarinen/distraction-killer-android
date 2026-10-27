@@ -73,7 +73,7 @@ app/src/main/res/drawable/ic_*.xml    # N18: viivaikonit (24 dp, värjätään k
 app/src/main/res/font/                # N18: otsikkofontti Fraunces
 app/src/main/assets/licenses/         # N18: fontin lisenssi (SIL OFL)
 app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
-.github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
+.github/workflows/build.yml           # yksikkötestit, lint, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
 DESIGN.md                             # N18: ulkoasun säännöt (värit, fontit, ikonit, komponentit)
 docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen; N19: testaajat ja päätöksen nopeus
@@ -112,7 +112,7 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 **Messuversio (13.–25.11.)**
 - ☐ N14 RT8-palautteen perusteella tehtävät muutokset
 - ☐ N15 Messutila: automaattinen nollaus, nopea vaihto demoaikoihin
-- ☐ N16 Viimeistely, saavutettavuus, tilastojen visualisointi
+- ◐ N16 Viimeistely, saavutettavuus, tilastojen visualisointi. Android lint ajetaan CI:ssä (löydökset buildin lokissa)
 - ☐ N17 Tagi `demo` 25.11.
 
 ## Riskit

@@ -41,7 +41,7 @@ Tämä korvaa aiemman web-demon (repo `distraction-killer`), jota ei enää kehi
 - Oma branch per tehtävä: `feat/<tehtävä-ID>-<lyhyt-kuvaus>` (esim. `feat/N4-inspector`). Älä pushaa `main`iin.
 - Pieni pull request per tehtävä. PR:n kuvaukseen: tehtävän ID, mitä muuttui, miten testattiin.
 - Merkitse tehtävän tila `PLAN.md`:n tehtävälistaan (☐ / ◐ / ☑).
-- **Build:** GitHub Actions rakentaa APK:n jokaisesta PR:stä ja `main`-pushista. PR ei ole valmis, jos build on punainen. Paikallisesti: `./gradlew assembleDebug` (vaatii Android SDK:n).
+- **Build:** GitHub Actions ajaa yksikkötestit ja Android lintin ja rakentaa APK:n jokaisesta PR:stä ja `main`-pushista. PR ei ole valmis, jos build on punainen. Lintin löydökset näkyvät buildin lokissa (Lint-vaihe). Paikallisesti: `./gradlew assembleDebug` (vaatii Android SDK:n).
 - **Testaus:** yksikkötestit `./gradlew testDebugUnitTest` (CI ajaa ne ennen buildia). Kun muutat luokittelua, ajastinta, asetuksia tai tilastoja, lisää tai päivitä testi. Asenna lisäksi APK puhelimeen (ohjeet `README.md`:ssä) ja kokeile muutos oikeasti `TESTING.md`:n listan avulla. Kerro PR:ssä, mitä testasit puhelimella.
 - Allekirjoitusavain `app/demo.keystore` on tarkoituksella julkinen, jotta uusi APK asentuu vanhan päälle. Älä vaihda sitä.
 

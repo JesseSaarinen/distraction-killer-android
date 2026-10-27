@@ -31,5 +31,6 @@ Puhelimella testattavat asiat ovat listana tiedostossa [TESTING.md](TESTING.md).
 - GitHub Actions rakentaa APK:n jokaisesta pull requestista (Actions-välilehti → ajo → Artifacts) ja päivittää `latest`-julkaisun aina, kun `main` muuttuu.
 - Paikallinen build: `./gradlew assembleDebug` (vaatii Android Studion tai Android SDK:n). Android Studion build on versio `0.1.dev`, joten se ei asennu GitHubin buildin päälle. Poista sovellus ensin, tai asenna GitHubin build.
 - Yksikkötestit: `./gradlew testDebugUnitTest`. Ne ajetaan myös GitHubissa ennen jokaista buildia.
+- Lint: `./gradlew lintDebug`. GitHub ajaa sen yksikkötestien jälkeen ja tulostaa löydökset buildin lokiin (Lint-vaihe). Virheet pysäyttävät buildin, varoitukset eivät.
 - Tagit `rt8` ja `demo` tekevät pysyvät julkaisut RT8-testeille ja messuille.
 - Otsikkofontti Fraunces on SIL Open Font License 1.1 -lisenssillä. Lisenssi on sovelluksen mukana: `app/src/main/assets/licenses/fraunces-ofl.txt`.
