@@ -76,7 +76,7 @@ app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen 
 .github/workflows/build.yml           # yksikkötestit, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
 DESIGN.md                             # N18: ulkoasun säännöt (värit, fontit, ikonit, komponentit)
-docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen
+docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen; N19: testaajat ja päätöksen nopeus
 ```
 
 ## Tehtävät
