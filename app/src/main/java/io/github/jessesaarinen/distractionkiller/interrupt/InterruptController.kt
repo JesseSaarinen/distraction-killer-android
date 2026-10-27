@@ -29,7 +29,15 @@ class InterruptController(private val service: AccessibilityService) {
 
     /** Level 1: banner + alarm. */
     fun showLevel1(packageName: String, scrollSeconds: Int) {
-        EventLog.add(LogEvent(type = "level1", app = AppMarkers.label(packageName), scrollSeconds = scrollSeconds))
+        val settings = SettingsStore.settings.value
+        EventLog.add(
+            LogEvent(
+                type = "level1",
+                app = AppMarkers.label(packageName),
+                scrollSeconds = scrollSeconds,
+                tester = settings.tester,
+            )
+        )
         val shown = banner.show {
             Level1Banner(
                 scrollSeconds = scrollSeconds,
@@ -41,7 +49,6 @@ class InterruptController(private val service: AccessibilityService) {
         // either. Level 2 still comes if the scrolling goes on.
         if (!shown) return
         bannerApp = packageName
-        val settings = SettingsStore.settings.value
         alarm.start(sound = settings.sound, vibration = settings.vibration, mode = settings.alarmMode)
     }
 
@@ -61,7 +68,13 @@ class InterruptController(private val service: AccessibilityService) {
         // Like pickTask() in the web demo: one of the chosen tasks at random.
         val task = settings.tasks.ifEmpty { Config.DEFAULT_TASKS }.random()
         EventLog.add(
-            LogEvent(type = "level2", app = AppMarkers.label(packageName), scrollSeconds = scrollSeconds, task = task.id)
+            LogEvent(
+                type = "level2",
+                app = AppMarkers.label(packageName),
+                scrollSeconds = scrollSeconds,
+                task = task.id,
+                tester = settings.tester,
+            )
         )
         openCalmScreen(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
         hideBanner()
@@ -89,6 +102,7 @@ class InterruptController(private val service: AccessibilityService) {
                 scrollSeconds = seconds,
                 level = 1,
                 outcome = outcome,
+                tester = SettingsStore.settings.value.tester,
             )
         )
         InspectorLog.add(

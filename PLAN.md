@@ -31,8 +31,8 @@ Tason 1 banneri piirretään Accessibility Servicen omaan ikkunaan, joten "Näyt
 
 ## Asetukset ja tapahtumat
 
-- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps, interruptionsOn }`. `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s, demotilassa aina 10 s). `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä, mutta tarkastelu näyttää tapahtumat. Tallennus: `data/SettingsStore.kt` (SharedPreferences).
-- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer }`. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
+- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, watchedApps, interruptionsOn, tester }`. `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s, demotilassa aina 10 s). `watchedApps` sisältää sovellusten nimet (`TikTok`, `Instagram`, `YouTube`). `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä, mutta tarkastelu näyttää tapahtumat. `tester` on käynnissä olevan RT8-testin testaajan numero (N19), 0 = testi ei ole käynnissä. Tallennus: `data/SettingsStore.kt` (SharedPreferences).
+- Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer, tester }`. `ts` on millisekunteina. `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). `tester` = testaajan numero asetuksista (N19). Vanhoissa riveissä sitä ei ole, ja ne luetaan nollana. Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
 
 ## Tiedostorakenne (kasvaa tehtävien mukana)
 
@@ -45,11 +45,14 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   ui/InspectorScreen.kt    # N4: tarkastelunäkymä kehittäjille
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/StatsScreen.kt        # N11: tilastot ja lokin jako
-  ui/theme/Theme.kt        # kaikki värit
+  ui/theme/Theme.kt        # kaikki värit, fontit ja kulmat (ks. DESIGN.md)
+  ui/components/SunMark.kt # N18: tunnus, aurinko nousee horisontin yli
+  ui/components/Layout.kt  # N18: alanäkymän runko, kortit, otsakkeet, palkit, tauon tausta
+  ui/components/Controls.kt # N18: napit, valitsimet ja kytkinrivit
   detection/AppMarkers.kt          # valvotut sovellukset ja niiden lyhytvideomerkit (N5)
   detection/ShortVideoClassifier.kt # N5: mitä vieritystapahtuma tarkoittaa (yksikkötestit)
   detection/ScrollWatcherService.kt # N4: Accessibility Service
-  detection/InspectorLog.kt        # N4: tarkastelun loki (inspector.log, 300 riviä) ja tila, myös jaettavaan tekstiin
+  detection/InspectorLog.kt        # N4: tarkastelun loki (inspector.log, 500 riviä) ja tila, myös jaettavaan tekstiin
   detection/ScrollTimer.kt         # N6: aktiivisen ajan ajastin
   interrupt/InterruptController.kt # N7: näyttää keskeytykset ja toimii valinnan mukaan
   interrupt/OverlayWindow.kt       # N7: Compose-ikkuna muiden sovellusten päälle
@@ -64,11 +67,16 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   data/SettingsStore.kt            # N10: ainoa paikka, joka tallentaa asetukset puhelimeen
   data/LogEvent.kt                 # N11: yksi lokirivi
   data/EventLog.kt                 # N11: ainoa paikka, joka tallentaa lokin; JSON-vienti
-  data/Stats.kt                    # N11: tilastojen laskenta lokista
+  data/Stats.kt                    # N11: tilastojen laskenta lokista; N19: päätöksen nopeus, testaajien numerot
 app/src/main/res/values/strings.xml   # kaikki käyttöliittymän tekstit
+app/src/main/res/drawable/ic_*.xml    # N18: viivaikonit (24 dp, värjätään käyttöpaikassa) ja sovelluksen kuvake
+app/src/main/res/font/                # N18: otsikkofontti Fraunces
+app/src/main/assets/licenses/         # N18: fontin lisenssi (SIL OFL)
 app/src/test/java/…                   # yksikkötestit (ajetaan CI:ssä ennen buildia)
 .github/workflows/build.yml           # yksikkötestit, lint, APK-build ja julkaisut
 TESTING.md                            # puhelimella testattavat asiat ennen tagia
+DESIGN.md                             # N18: ulkoasun säännöt (värit, fontit, ikonit, komponentit)
+docs/design/                          # N18: kuvat näkymistä ennen ja jälkeen uudistuksen; N19: testaajat ja päätöksen nopeus
 ```
 
 ## Tehtävät
@@ -97,6 +105,8 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☑ N12 Kotinäkymään käyttöönotto-opas ja palvelun tila
 
 **RT8 (5.11.)**
+- ☑ N18 Ulkoasun uudistus: uusi teema (värit, Fraunces-otsikot, kulmat), viivaikonit, aurinkotunnus ja sovelluksen kuvake, kaikki näkymät uudelleen vaaleana ja tummana. Säännöt `DESIGN.md`:ssä. Puhelimella 27.10. (0.1.62) käyty läpi banneri, tauko hengitys- ja liiketehtävällä, kiitosnäkymä ja tilastot. Kuvake, tumma tila, suurin fontti ja kysymystehtävän näppäimistö (`TESTING.md`, kohta 7) tarkistettu vain koodista ja kuvista, ei puhelimella
+- ☑ N19 RT8-testaajat ja päätöksen nopeus: tilastoissa *Aloita testaaja N*, testaajan numero jokaiseen tapahtumaan ja vientiin, tilastot testaajittain tai kaikki. Uusi kortti *Päätöksen nopeus*: aika bannerin tulosta *Jatka*- ja *Lopeta tähän* -valintaan (mediaani) ja kuinka usein *Ohita* painettiin heti (`Config.QUICK_SKIP_SECONDS`). Puhelimella 27.10. (0.1.62) tarkistettu testaajat 1 ja 2, testaajan numero viennissä sekä *Jatka*- ja *Lopeta tähän* -ajat. *Ohita heti* (`TESTING.md`, kohta 6) tarkistettu vain yksikkötestillä
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**

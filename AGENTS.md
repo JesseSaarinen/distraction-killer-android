@@ -32,6 +32,7 @@ Tämä korvaa aiemman web-demon (repo `distraction-killer`), jota ei enää kehi
 
 - Käyttöliittymän tekstit **suomeksi** ja aina `res/values/strings.xml`:ään, ei kovakoodattuna. Koodi ja nimet **englanniksi** (`camelCase`), kommentit saavat olla kumpaa tahansa.
 - Värit vain tiedostossa `ui/theme/Theme.kt`. Älä kovakoodaa värejä muualle.
+- Ulkoasu: noudata `DESIGN.md`:tä. Käytä teeman värirooleja ja tekstityylejä sekä `ui/components/`-kansion komponentteja.
 - Kosketusalueet vähintään 48 dp. Sävy käyttäjälle: ystävällinen, ei syyllistävä.
 - Pidä koodi yksinkertaisena ja luettavana. Yksi tiedosto = yksi vastuu.
 

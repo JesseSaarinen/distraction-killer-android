@@ -85,6 +85,7 @@ object EventLog {
         .put("outcome", event.outcome ?: JSONObject.NULL)
         .put("scrollSeconds", event.scrollSeconds)
         .put("answer", event.answer ?: JSONObject.NULL)
+        .put("tester", event.tester)
 
     private fun fromJson(json: JSONObject): LogEvent = LogEvent(
         ts = json.getLong("ts"),
@@ -95,6 +96,8 @@ object EventLog {
         outcome = json.stringOrNull("outcome"),
         scrollSeconds = json.getInt("scrollSeconds"),
         answer = json.stringOrNull("answer"),
+        // Rows saved before task N19 have no tester.
+        tester = json.optInt("tester", 0),
     )
 
     private fun JSONObject.stringOrNull(key: String): String? = if (isNull(key)) null else getString(key)
@@ -109,4 +112,5 @@ object EventLog {
         .put("demoMode", settings.demoMode)
         .put("watchedApps", JSONArray(settings.watchedApps.toList()))
         .put("interruptionsOn", settings.interruptionsOn)
+        .put("tester", settings.tester)
 }

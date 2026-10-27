@@ -2,7 +2,7 @@
 
 Kurssin SCI-C1002 (Aalto, ryhmä 5) demo. Sovellus huomaa, kun selaat lyhytvideoita TikTokissa, Instagram Reelsissä tai YouTube Shortsissa, ja keskeyttää selauksen valitsemiesi väliaikojen jälkeen.
 
-Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ohjeet AI-agenteille: [CLAUDE.md](CLAUDE.md) = [AGENTS.md](AGENTS.md).
+Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ulkoasun säännöt: [DESIGN.md](DESIGN.md). Ohjeet AI-agenteille: [CLAUDE.md](CLAUDE.md) = [AGENTS.md](AGENTS.md).
 
 ## Asennus puhelimeen (Samsung Galaxy)
 
@@ -33,3 +33,4 @@ Puhelimella testattavat asiat ovat listana tiedostossa [TESTING.md](TESTING.md).
 - Yksikkötestit: `./gradlew testDebugUnitTest`. Ne ajetaan myös GitHubissa ennen jokaista buildia.
 - Lint: `./gradlew lintDebug`. GitHub ajaa sen yksikkötestien jälkeen ja tulostaa löydökset buildin lokiin (Lint-vaihe). Virheet pysäyttävät buildin, varoitukset eivät.
 - Tagit `rt8` ja `demo` tekevät pysyvät julkaisut RT8-testeille ja messuille.
+- Otsikkofontti Fraunces on SIL Open Font License 1.1 -lisenssillä. Lisenssi on sovelluksen mukana: `app/src/main/assets/licenses/fraunces-ofl.txt`.
