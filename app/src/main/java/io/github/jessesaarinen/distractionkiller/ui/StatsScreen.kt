@@ -6,11 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +40,7 @@ import io.github.jessesaarinen.distractionkiller.ui.components.ProgressBar
 import io.github.jessesaarinen.distractionkiller.ui.components.ScreenScaffold
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
+import io.github.jessesaarinen.distractionkiller.ui.components.SideBySide
 import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
 
 // Stats (task N11), like views/stats.js in the web demo: numbers from the
@@ -75,7 +74,7 @@ fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
                 enabled = events.isNotEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .heightIn(min = 48.dp),
             ) {
                 Text(
                     text = stringResource(R.string.stats_clear),
@@ -255,15 +254,9 @@ private fun share(part: Int, whole: Int): Float = if (whole > 0) part / whole.to
 /** Two number tiles side by side. Each pair is the number and its label. */
 @Composable
 private fun TileRow(first: Pair<String, String>, second: Pair<String, String>) {
-    Row(
-        modifier = Modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    SideBySide {
         for ((value, label) in listOf(first, second)) {
             Surface(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surface,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),

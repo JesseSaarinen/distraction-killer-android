@@ -57,6 +57,7 @@ Otsikot ja isot numerot: **Fraunces**, pehmeä serif (`display*`- ja `headline*`
 
 - Käytä aina teeman tyylejä. Älä kirjoita `fontSize = 18.sp` näkymiin.
 - Tekstit skaalautuvat puhelimen fonttikoon mukaan. Suomenkieliset sanat ovat pitkiä, joten anna tekstin rivittyä, äläkä katkaise sitä (`maxLines = 1`) ilman syytä.
+- Kun rivillä on teksti ja sen vieressä jotain muuta (esim. "0/3 valmis" tai versionumero), käytä `FlowRow`-asettelua. Isolla fonttikoolla jälkimmäinen siirtyy silloin omalle rivilleen eikä purista tekstiä kapeaksi. Kiinteä korkeus (`height(48.dp)`) leikkaa isoa tekstiä, joten käytä `heightIn(min = 48.dp)`.
 - Fonttitiedosto `res/font/fraunces_medium.ttf` on Fraunces-muuttuvafontista tehty kiinteä versio (paino 500, opsz 72, SOFT 100, WONK 0). Lisenssi on SIL Open Font License 1.1: `app/src/main/assets/licenses/fraunces-ofl.txt`. Uusia fontteja ei lisätä ilman ihmisen hyväksyntää.
 
 ## Muodot ja välit
@@ -83,6 +84,7 @@ Käytä näitä ennen kuin teet uuden. Jos sama rakenne toistuu kolmessa paikass
 | `IconBubble` | `Layout.kt` | Ikoni pehmeässä ympyrässä |
 | `ProgressBar` | `Layout.kt` | Ohut pyöreä palkki (tilastot, käyttöönotto) |
 | `CalmBackground` | `Layout.kt` | Taso 2 ja kiitosnäkymä: tausta, jonka alareunasta nousee lämmin hehku |
+| `SideBySide` | `Layout.kt` | Kortit rinnakkain samankorkuisina (kotinäkymän laatat, tilastojen luvut). Isolla fonttikoolla allekkain, jos pitkä sana ei mahdu |
 | `PrimaryButton` | `ui/components/Controls.kt` | Näkymän tai kortin yksi päätoiminto |
 | `SecondaryButton` | `Controls.kt` | Hiljaisempi vaihtoehto päätoiminnon vieressä |
 | `SegmentedChoice` | `Controls.kt` | Yksi valinta 2–5 lyhyestä vaihtoehdosta (esim. 1 / 3 / 5 / 10 / 15 min) |

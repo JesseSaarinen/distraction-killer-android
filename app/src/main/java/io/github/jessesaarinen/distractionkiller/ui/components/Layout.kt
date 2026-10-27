@@ -33,10 +33,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
@@ -110,6 +112,43 @@ fun SectionCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             content = content,
         )
+    }
+}
+
+/**
+ * Cards side by side with the same width and height, like the Asetukset and
+ * Tilastot tiles. With a very large font a long word would not fit in a
+ * narrow card, so then the cards go on top of each other instead.
+ */
+@Composable
+fun SideBySide(
+    modifier: Modifier = Modifier,
+    spacing: Dp = 12.dp,
+    content: @Composable () -> Unit,
+) {
+    Layout(content = content, modifier = modifier) { cards, constraints ->
+        if (cards.isEmpty()) return@Layout layout(0, 0) {}
+        val gap = spacing.roundToPx()
+        val width = constraints.maxWidth
+        val cardWidth = (width - gap * (cards.size - 1)) / cards.size
+        // minIntrinsicWidth is the width of the longest word (plus padding).
+        val fits = cards.all { it.minIntrinsicWidth(Constraints.Infinity) <= cardWidth }
+        if (fits) {
+            val height = cards.maxOf { it.maxIntrinsicHeight(cardWidth) }
+            val placed = cards.map { it.measure(Constraints.fixed(cardWidth, height)) }
+            layout(width, height) {
+                placed.forEachIndexed { i, card -> card.placeRelative(i * (cardWidth + gap), 0) }
+            }
+        } else {
+            val placed = cards.map { it.measure(Constraints.fixedWidth(width)) }
+            layout(width, placed.sumOf { it.height } + gap * (placed.size - 1)) {
+                var y = 0
+                placed.forEach { card ->
+                    card.placeRelative(0, y)
+                    y += card.height + gap
+                }
+            }
+        }
     }
 }
 

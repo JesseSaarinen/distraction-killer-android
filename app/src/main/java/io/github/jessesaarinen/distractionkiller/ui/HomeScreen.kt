@@ -7,12 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -49,6 +47,7 @@ import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.ProgressBar
 import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
+import io.github.jessesaarinen.distractionkiller.ui.components.SideBySide
 import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
 import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
 
@@ -117,16 +116,12 @@ fun HomeScreen(
                 )
             }
 
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+            SideBySide {
                 NavTile(
                     icon = R.drawable.ic_settings,
                     title = stringResource(R.string.home_open_settings),
                     subtitle = stringResource(R.string.home_settings_sub, durationText(settings.level1Seconds)),
                     onClick = onOpenSettings,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
                 NavTile(
                     icon = R.drawable.ic_stats,
@@ -137,7 +132,6 @@ fun HomeScreen(
                         stringResource(R.string.home_stats_empty_sub)
                     },
                     onClick = onOpenStats,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 )
             }
 
@@ -153,7 +147,11 @@ fun HomeScreen(
                 )
                 Hint(stringResource(R.string.home_privacy), modifier = Modifier.weight(1f))
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // FlowRow moves the version under the button when the font is large.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 TextButton(
                     onClick = onOpenInspector,
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
@@ -169,8 +167,10 @@ fun HomeScreen(
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }
-                Box(modifier = Modifier.weight(1f))
-                Hint(stringResource(R.string.home_version, BuildConfig.VERSION_NAME))
+                Hint(
+                    text = stringResource(R.string.home_version, BuildConfig.VERSION_NAME),
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                )
             }
         }
     }
@@ -322,18 +322,23 @@ private fun SetupCard(
 ) {
     val steps = listOf(serviceEnabled, batteryUnrestricted, firstInterruptionSeen)
     SectionCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // FlowRow moves "0/3 valmis" under the title when the font is large.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             Text(
                 text = stringResource(R.string.home_setup_title),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
-                    .weight(1f)
+                    .padding(end = 12.dp)
                     .semantics { heading() },
             )
             Text(
                 text = stringResource(R.string.home_setup_progress, steps.count { it }, steps.size),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterVertically),
             )
         }
         ProgressBar(fraction = steps.count { it } / steps.size.toFloat(), modifier = Modifier.padding(bottom = 8.dp))
