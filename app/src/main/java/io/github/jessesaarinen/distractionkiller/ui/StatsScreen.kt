@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.Config
@@ -185,7 +186,10 @@ private fun Numbers(summary: Summary) {
     // The main number: how often an interruption ended the scrolling.
     val onHero = MaterialTheme.colorScheme.onTertiary
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        // A screen reader reads the label, the number and the text together.
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {},
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.tertiary,
         contentColor = onHero,
@@ -367,6 +371,8 @@ private fun TileRow(first: Pair<String, String>, second: Pair<String, String>) {
     SideBySide {
         for ((value, label) in listOf(first, second)) {
             Surface(
+                // A screen reader reads the number and its label together.
+                modifier = Modifier.semantics(mergeDescendants = true) {},
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surface,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -387,7 +393,10 @@ private fun TileRow(first: Pair<String, String>, second: Pair<String, String>) {
 @Composable
 private fun ValueRow(label: String, value: String) {
     Row(
-        modifier = Modifier.padding(vertical = 6.dp),
+        // A screen reader reads the whole row at once.
+        modifier = Modifier
+            .padding(vertical = 6.dp)
+            .semantics(mergeDescendants = true) {},
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -405,7 +414,10 @@ private fun BarRow(
     @DrawableRes icon: Int? = null,
 ) {
     Column(
-        modifier = Modifier.padding(vertical = 6.dp),
+        // A screen reader reads the label and the number together.
+        modifier = Modifier
+            .padding(vertical = 6.dp)
+            .semantics(mergeDescendants = true) {},
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

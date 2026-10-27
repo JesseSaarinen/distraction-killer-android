@@ -22,6 +22,9 @@
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
     <string name="home_setup_title">Käyttöönotto</string>
     <string name="home_setup_progress">%1$d/%2$d valmis</string>
+    <!-- Read by a screen reader instead of the step number or the check mark. -->
+    <string name="setup_step">Vaihe %1$d</string>
+    <string name="setup_step_done">Vaihe %1$d, tehty</string>
     <string name="setup_accessibility_title">Laita selauksen tunnistus päälle</string>
     <string name="setup_accessibility_text">Avaa esteettömyysasetukset ja valitse Asennetut sovellukset → Distraction Killer: selauksen tunnistus → päälle.</string>
     <string name="setup_restricted_text">Jos puhelin sanoo, että asetus on rajoitettu: avaa sovelluksen tiedot, paina oikean yläkulman ⋮ ja valitse Salli rajoitetut asetukset. Kokeile sitten uudelleen.</string>

@@ -15,6 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
@@ -127,11 +130,12 @@ fun SettingsScreen(onBack: () -> Unit) {
                     },
                 )
             }
-            if (tasksError) {
-                Hint(stringResource(R.string.settings_tasks_min_one), color = MaterialTheme.colorScheme.error)
-            } else {
-                Hint(stringResource(R.string.settings_tasks_hint))
-            }
+            // One note whose text changes, so a screen reader reads the new text out.
+            Hint(
+                text = stringResource(if (tasksError) R.string.settings_tasks_min_one else R.string.settings_tasks_hint),
+                color = if (tasksError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
         }
 
         SectionLabel(stringResource(R.string.settings_section_alarm))

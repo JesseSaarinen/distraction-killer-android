@@ -66,6 +66,16 @@ Asetukset → *Demotila* päälle. Ensimmäinen keskeytys tulee 15 s ja koko nä
 - [ ] Fonttikoko suurimmaksi (Asetukset → Näyttö → fonttikoko): mikään teksti ei leikkaudu tai mene päällekkäin, ja kaikki napit toimivat.
 - [ ] Kysymystehtävä: näppäimistö ei peitä tekstikenttää tai *Vastaa*-nappia.
 
+## 8. Ruudunlukija (valinnainen, N16)
+
+Asetukset → Esteettömyys → TalkBack päälle. Liiku pyyhkäisemällä oikealle.
+
+- [ ] Kotinäkymä: käyttöönoton vaiheen ympyrä luetaan "Vaihe 1" tai "Vaihe 1, tehty". Otsikot ovat otsikoita (TalkBackin otsikkonavigointi hyppää niihin, myös tilakortin otsikkoon).
+- [ ] Tilastot: iso prosenttikortti ja jokainen numeroruutu luetaan kerralla, esim. "3 keskeytystä". Palkkirivi luetaan kokonaisena.
+- [ ] Banneri ilmoitetaan, kun se tulee näkyviin.
+- [ ] Hengitysharjoitus: TalkBack sanoo "Hengitä sisään" ja "Hengitä ulos" niiden vaihtuessa.
+- [ ] Asetukset: kun yrität poistaa viimeisen tehtävän, TalkBack lukee "Valitse vähintään yksi tehtävä."
+
 ## Jos jokin ei toimi
 
 - **APK ei asennu:** Auto Blocker on päällä. Jos puhelin sanoo "Sovellusta ei asennettu", puhelimessa on uudempi versio kuin asennettava (esim. vanha PR-build uudemman päälle). Asenna uusin, tai poista sovellus ensin, jolloin tilastot ja asetukset häviävät.

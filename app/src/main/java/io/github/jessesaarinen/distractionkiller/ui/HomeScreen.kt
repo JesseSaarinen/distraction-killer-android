@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -209,7 +211,9 @@ private fun OnCard(settings: Settings) {
                 Text(
                     text = stringResource(R.string.home_on_title),
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(end = 72.dp),
+                    modifier = Modifier
+                        .padding(end = 72.dp)
+                        .semantics { heading() },
                 )
                 Text(
                     text = stringResource(R.string.home_service_on, durationText(settings.level1Seconds)),
@@ -271,7 +275,11 @@ private fun PausedCard() {
             StatusLabel(text = stringResource(R.string.home_paused_label)) {
                 Icon(painter = painterResource(R.drawable.ic_pause), contentDescription = null, modifier = Modifier.size(16.dp))
             }
-            Text(text = stringResource(R.string.home_paused_title), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = stringResource(R.string.home_paused_title),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.semantics { heading() },
+            )
             Text(text = stringResource(R.string.home_paused), style = MaterialTheme.typography.bodyLarge)
             PrimaryButton(
                 text = stringResource(R.string.home_resume),
@@ -300,7 +308,11 @@ private fun OffCard() {
             StatusLabel(text = stringResource(R.string.home_off_label), color = MaterialTheme.colorScheme.primary) {
                 Icon(painter = painterResource(R.drawable.ic_power), contentDescription = null, modifier = Modifier.size(16.dp))
             }
-            Text(text = stringResource(R.string.home_off_title), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = stringResource(R.string.home_off_title),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.semantics { heading() },
+            )
             Text(
                 text = stringResource(R.string.home_service_off),
                 style = MaterialTheme.typography.bodyLarge,
@@ -408,6 +420,8 @@ private fun SetupStep(
     text: String,
     actions: @Composable () -> Unit = {},
 ) {
+    // A screen reader says "Vaihe 1" or "Vaihe 1, tehty" instead of "1" or nothing.
+    val stepLabel = stringResource(if (done) R.string.setup_step_done else R.string.setup_step, number)
     Row(
         modifier = Modifier.padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -418,7 +432,8 @@ private fun SetupStep(
                 .background(
                     color = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                     shape = CircleShape,
-                ),
+                )
+                .clearAndSetSemantics { contentDescription = stepLabel },
             contentAlignment = Alignment.Center,
         ) {
             if (done) {
@@ -440,7 +455,9 @@ private fun SetupStep(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 3.dp),
+                modifier = Modifier
+                    .padding(top = 3.dp)
+                    .semantics { heading() },
             )
             if (!done) {
                 Text(

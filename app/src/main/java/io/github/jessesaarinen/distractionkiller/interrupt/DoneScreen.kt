@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
@@ -60,6 +62,7 @@ fun DoneScreen(scrollSeconds: Int, onClose: () -> Unit) {
                     text = stringResource(R.string.done_title),
                     style = MaterialTheme.typography.displaySmall,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { heading() },
                 )
                 Text(
                     text = if (scrollSeconds > 0) {

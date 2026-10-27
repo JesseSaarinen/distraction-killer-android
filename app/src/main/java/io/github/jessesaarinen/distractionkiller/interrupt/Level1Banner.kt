@@ -20,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
@@ -39,6 +41,7 @@ fun Level1Banner(
     onStop: () -> Unit,
     onContinue: () -> Unit,
 ) {
+    val title = stringResource(R.string.level1_title, durationText(scrollSeconds))
     DistractionKillerTheme {
         val visible = remember { MutableTransitionState(false).apply { targetState = true } }
         AnimatedVisibility(
@@ -48,7 +51,9 @@ fun Level1Banner(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(12.dp)
+                    // A screen reader announces the banner when it appears.
+                    .semantics { paneTitle = title },
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.background,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -70,7 +75,7 @@ fun Level1Banner(
                                 color = MaterialTheme.colorScheme.primary,
                             )
                             Text(
-                                text = stringResource(R.string.level1_title, durationText(scrollSeconds)),
+                                text = title,
                                 style = MaterialTheme.typography.headlineSmall,
                             )
                         }
