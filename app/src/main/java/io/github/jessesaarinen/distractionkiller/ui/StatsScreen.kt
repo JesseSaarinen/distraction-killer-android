@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -121,14 +122,17 @@ private fun Numbers(summary: Summary) {
         ProgressBar(fraction = summary.stopRate / 100f)
     }
     StatRow(
-        summary.rounds to R.string.stats_rounds,
-        summary.stopped to R.string.stats_stopped,
+        summary.rounds to R.plurals.stats_rounds,
+        summary.stopped to R.plurals.stats_stopped,
     )
     StatRow(
-        summary.continued to R.string.stats_continued,
-        summary.skipped to R.string.stats_skipped,
+        summary.continued to R.plurals.stats_continued,
+        summary.skipped to R.plurals.stats_skipped,
     )
-    StatBox(value = summary.dismissed.toString(), label = stringResource(R.string.stats_dismissed))
+    StatBox(
+        value = summary.dismissed.toString(),
+        label = pluralStringResource(R.plurals.stats_dismissed, summary.dismissed),
+    )
     StatBox(
         value = durationText(summary.avgScrollBeforeStop),
         label = stringResource(R.string.stats_avg_before_stop),
@@ -166,7 +170,7 @@ private fun Numbers(summary: Summary) {
     }
 }
 
-/** Two numbers side by side, each with its label. */
+/** Two numbers side by side, each with its label (a plurals resource, so "1 keskeytys" reads right). */
 @Composable
 private fun StatRow(first: Pair<Int, Int>, second: Pair<Int, Int>) {
     Row(
@@ -176,7 +180,7 @@ private fun StatRow(first: Pair<Int, Int>, second: Pair<Int, Int>) {
         for ((number, label) in listOf(first, second)) {
             StatBox(
                 value = number.toString(),
-                label = stringResource(label),
+                label = pluralStringResource(label, number),
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }

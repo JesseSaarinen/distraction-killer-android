@@ -52,11 +52,27 @@
     <string name="stats_empty">Ei vielä keskeytyksiä. Scrollaa lyhytvideoita, niin näet tilastot täällä.</string>
     <string name="stats_percent">%1$d %%</string>
     <string name="stats_stop_rate">keskeytyksistä päättyi siihen, että lopetit scrollauksen</string>
-    <string name="stats_rounds">keskeytystä</string>
-    <string name="stats_stopped">kertaa lopetit</string>
-    <string name="stats_continued">kertaa jatkoit</string>
-    <string name="stats_skipped">kertaa ohitit</string>
-    <string name="stats_dismissed">kertaa poistuit sovelluksesta keskeytyksen aikana</string>
+    <!-- Labels under a number: "1 keskeytys" but "0 keskeytystä" and "3 keskeytystä". -->
+    <plurals name="stats_rounds">
+        <item quantity="one">keskeytys</item>
+        <item quantity="other">keskeytystä</item>
+    </plurals>
+    <plurals name="stats_stopped">
+        <item quantity="one">kerran lopetit</item>
+        <item quantity="other">kertaa lopetit</item>
+    </plurals>
+    <plurals name="stats_continued">
+        <item quantity="one">kerran jatkoit</item>
+        <item quantity="other">kertaa jatkoit</item>
+    </plurals>
+    <plurals name="stats_skipped">
+        <item quantity="one">kerran ohitit</item>
+        <item quantity="other">kertaa ohitit</item>
+    </plurals>
+    <plurals name="stats_dismissed">
+        <item quantity="one">kerran poistuit sovelluksesta keskeytyksen aikana</item>
+        <item quantity="other">kertaa poistuit sovelluksesta keskeytyksen aikana</item>
+    </plurals>
     <string name="stats_avg_before_stop">scrollausta keskimäärin ennen lopettamista</string>
     <string name="stats_where_title">Missä vaiheessa lopetit</string>
     <string name="stats_where_level1">Kevyt keskeytys (banneri)</string>
