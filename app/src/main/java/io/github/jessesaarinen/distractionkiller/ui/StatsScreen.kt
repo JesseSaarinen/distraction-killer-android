@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -174,17 +175,18 @@ private fun Numbers(summary: Summary) {
         }
     }
 
+    // The labels are plurals, so one reads "1 keskeytys" and "1 kerran lopetit" (#27).
     TileRow(
-        summary.rounds.toString() to stringResource(R.string.stats_rounds),
-        summary.stopped.toString() to stringResource(R.string.stats_stopped),
+        summary.rounds.toString() to pluralStringResource(R.plurals.stats_rounds, summary.rounds),
+        summary.stopped.toString() to pluralStringResource(R.plurals.stats_stopped, summary.stopped),
     )
     TileRow(
-        summary.continued.toString() to stringResource(R.string.stats_continued),
-        summary.skipped.toString() to stringResource(R.string.stats_skipped),
+        summary.continued.toString() to pluralStringResource(R.plurals.stats_continued, summary.continued),
+        summary.skipped.toString() to pluralStringResource(R.plurals.stats_skipped, summary.skipped),
     )
     TileRow(
         durationText(summary.avgScrollBeforeStop) to stringResource(R.string.stats_avg_before_stop),
-        summary.dismissed.toString() to stringResource(R.string.stats_dismissed),
+        summary.dismissed.toString() to pluralStringResource(R.plurals.stats_dismissed, summary.dismissed),
     )
 
     SectionLabel(stringResource(R.string.stats_where_title))
