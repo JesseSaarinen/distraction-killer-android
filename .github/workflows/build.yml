@@ -1,7 +1,8 @@
 # Runs the unit tests and builds the APK on every push and pull request.
-# - Pushes to main update the "latest" pre-release, so the newest APK is always
-#   one tap away on the phone.
-# - Tags (for example rt8 and demo) get a permanent release of their own.
+# - Pushes to main update the "latest" release and mark it as GitHub's Latest,
+#   so the newest APK is always one tap away on the phone.
+# - Tags (for example rt8 and demo) get a permanent release of their own, which
+#   never takes the Latest mark from the main build.
 name: Build APK
 
 on:
@@ -51,14 +52,14 @@ jobs:
           name: distraction-killer-apk
           path: distraction-killer.apk
 
-      - name: Update the "latest" pre-release
+      - name: Update the "latest" release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest distraction-killer.apk \
-            --prerelease \
+            --latest \
             --target "$GITHUB_SHA" \
             --title "Uusin versio (build ${{ github.run_number }})" \
             --notes "Uusin main-haaran build. Avaa puhelimella ja asenna distraction-killer.apk."
@@ -69,5 +70,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" distraction-killer.apk \
+            --latest=false \
             --title "$GITHUB_REF_NAME (build ${{ github.run_number }})" \
             --notes "Jäädytetty versio $GITHUB_REF_NAME."
