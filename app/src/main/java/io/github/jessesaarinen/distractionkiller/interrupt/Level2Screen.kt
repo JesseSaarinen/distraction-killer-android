@@ -53,7 +53,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun Level2Screen(
     task: TaskType,
-    scrollSeconds: Int,
+    usedSeconds: Int,
     onFinish: (outcome: String, answer: String?) -> Unit,
 ) {
     var taskDone by remember { mutableStateOf(false) }
@@ -102,7 +102,7 @@ fun Level2Screen(
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Text(
-                            text = stringResource(R.string.level2_scrolled, durationText(scrollSeconds)),
+                            text = stringResource(R.string.level2_scrolled, durationText(usedSeconds)),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

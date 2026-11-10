@@ -110,7 +110,8 @@ object EventLog {
         .put("sound", settings.sound)
         .put("vibration", settings.vibration)
         .put("demoMode", settings.demoMode)
-        .put("watchedApps", JSONArray(settings.watchedApps.toList()))
+        .put("watchedApps", JSONArray(settings.apps.map { it.label }))
+        .put("allowanceMin", JSONObject(settings.apps.associate { it.label to it.allowanceMin }))
         .put("interruptionsOn", settings.interruptionsOn)
         .put("tester", settings.tester)
 }

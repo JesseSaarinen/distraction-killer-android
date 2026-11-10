@@ -1,12 +1,9 @@
 package io.github.jessesaarinen.distractionkiller
 
-import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.PowerManager
 import android.provider.Settings
-import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -18,7 +15,8 @@ import androidx.compose.runtime.setValue
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
-import io.github.jessesaarinen.distractionkiller.detection.ScrollWatcherService
+import io.github.jessesaarinen.distractionkiller.detection.Permissions
+import io.github.jessesaarinen.distractionkiller.detection.UsageWatcherService
 import io.github.jessesaarinen.distractionkiller.ui.HomeScreen
 import io.github.jessesaarinen.distractionkiller.ui.InspectorScreen
 import io.github.jessesaarinen.distractionkiller.ui.SettingsScreen
@@ -31,7 +29,8 @@ enum class Screen { HOME, SETTINGS, STATS, INSPECTOR }
 class MainActivity : ComponentActivity() {
 
     // Checked again every time the app comes back from the phone's settings.
-    private var serviceEnabled by mutableStateOf(false)
+    private var usageAccess by mutableStateOf(false)
+    private var overlayAllowed by mutableStateOf(false)
     private var batteryUnrestricted by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,9 +41,11 @@ class MainActivity : ComponentActivity() {
                 var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
                 when (screen) {
                     Screen.HOME -> HomeScreen(
-                        serviceEnabled = serviceEnabled,
+                        usageAccess = usageAccess,
+                        overlayAllowed = overlayAllowed,
                         batteryUnrestricted = batteryUnrestricted,
-                        onOpenAccessibilitySettings = ::openAccessibilitySettings,
+                        onOpenUsageAccess = ::openUsageAccessSettings,
+                        onOpenOverlay = ::openOverlaySettings,
                         onOpenAppInfo = ::openAppInfo,
                         onOpenSettings = { screen = Screen.SETTINGS },
                         onOpenStats = { screen = Screen.STATS },
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     Screen.INSPECTOR -> {
                         BackHandler { screen = Screen.HOME }
                         InspectorScreen(
-                            serviceEnabled = serviceEnabled,
+                            serviceEnabled = usageAccess,
                             onShare = ::shareInspectorLog,
                             onBack = { screen = Screen.HOME },
                         )
@@ -73,29 +74,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        serviceEnabled = isServiceEnabled()
-        batteryUnrestricted = isBatteryUnrestricted()
+        usageAccess = Permissions.hasUsageAccess(this)
+        overlayAllowed = Permissions.canDrawOverlays(this)
+        batteryUnrestricted = Permissions.isBatteryUnrestricted(this)
+        // Starts the watcher once usage access is granted. Does nothing while it already runs.
+        UsageWatcherService.start(this)
     }
 
-    private fun isServiceEnabled(): Boolean {
-        val manager = getSystemService(AccessibilityManager::class.java) ?: return false
-        return manager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK).any {
-            val info = it.resolveInfo.serviceInfo
-            info.packageName == packageName && info.name == ScrollWatcherService::class.java.name
-        }
+    private fun openUsageAccessSettings() {
+        startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
-    // "Unrestricted" battery use, so Samsung does not stop the service in the background.
-    private fun isBatteryUnrestricted(): Boolean {
-        val power = getSystemService(PowerManager::class.java) ?: return false
-        return power.isIgnoringBatteryOptimizations(packageName)
+    private fun openOverlaySettings() {
+        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.fromParts("package", packageName, null)))
     }
 
-    private fun openAccessibilitySettings() {
-        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-    }
-
-    // "Allow restricted settings" (Android 13+) and the battery setting live in the app info.
+    // The battery setting, and "Allow restricted settings" if the phone asks for it, live in the app info.
     private fun openAppInfo() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }

@@ -35,7 +35,7 @@ import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
  */
 @Composable
 fun Level1Banner(
-    scrollSeconds: Int,
+    usedSeconds: Int,
     onStop: () -> Unit,
     onContinue: () -> Unit,
 ) {
@@ -70,7 +70,7 @@ fun Level1Banner(
                                 color = MaterialTheme.colorScheme.primary,
                             )
                             Text(
-                                text = stringResource(R.string.level1_title, durationText(scrollSeconds)),
+                                text = stringResource(R.string.level1_title, durationText(usedSeconds)),
                                 style = MaterialTheme.typography.headlineSmall,
                             )
                         }
@@ -103,5 +103,5 @@ fun Level1Banner(
 @Preview
 @Composable
 private fun Level1BannerPreview() {
-    Level1Banner(scrollSeconds = 60, onStop = {}, onContinue = {})
+    Level1Banner(usedSeconds = 60, onStop = {}, onContinue = {})
 }

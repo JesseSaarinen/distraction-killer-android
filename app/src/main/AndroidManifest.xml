@@ -1,9 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- No INTERNET permission on purpose: nothing can leave the phone. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Alarm vibration on levels 1 and 2. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- "Usage access": which app is in front. The user grants it in the
+         phone's settings. Only the system can grant it, hence tools:ignore. -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- "Display over other apps": the level 1 banner, and opening the level 2
+         break screen while another app is in front. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- The watcher runs as a foreground service, so Android keeps it alive. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Start the watcher again after the phone restarts. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Lets the settings list the apps that have a home screen icon, so the
+         user can add one to the watched apps (N20). No permission is needed,
+         and Android 10 and older show every app anyway. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 
     <application
         android:name=".DistractionKillerApp"
@@ -31,19 +59,25 @@
             android:taskAffinity=""
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Scroll watcher. Only the system can bind to it (BIND_ACCESSIBILITY_SERVICE). -->
+        <!-- Counts the time in the watched apps. specialUse: none of Android's
+             other foreground service types fits a screen time app. -->
         <service
-            android:name=".detection.ScrollWatcherService"
-            android:exported="true"
-            android:label="@string/accessibility_service_label"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
+            android:name=".detection.UsageWatcherService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Counts the time the user spends in apps they chose and reminds them when their daily time is used up." />
         </service>
+
+        <receiver
+            android:name=".detection.StartReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

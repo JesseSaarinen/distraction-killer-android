@@ -1,6 +1,5 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
-import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -51,13 +50,15 @@ import io.github.jessesaarinen.distractionkiller.ui.components.SideBySide
 import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
 import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
 
-// Home screen (task N12): a status card that says whether the scroll watcher
-// is on, a setup guide until everything works, and the way to settings and stats.
+// Home screen (task N12): a status card that says whether the watcher is on,
+// a setup guide until everything works, and the way to settings and stats.
 @Composable
 fun HomeScreen(
-    serviceEnabled: Boolean,
+    usageAccess: Boolean,
+    overlayAllowed: Boolean,
     batteryUnrestricted: Boolean,
-    onOpenAccessibilitySettings: () -> Unit,
+    onOpenUsageAccess: () -> Unit,
+    onOpenOverlay: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
@@ -68,7 +69,8 @@ fun HomeScreen(
     val interruptions = events.count { it.type == "level1" }
     // The whole chain works once the first interruption has happened.
     val firstInterruptionSeen = interruptions > 0
-    val setupDone = serviceEnabled && batteryUnrestricted && firstInterruptionSeen
+    val watching = usageAccess && overlayAllowed
+    val setupDone = watching && batteryUnrestricted && firstInterruptionSeen
 
     Scaffold { innerPadding ->
         Column(
@@ -101,17 +103,19 @@ fun HomeScreen(
             )
 
             when {
-                !serviceEnabled -> OffCard()
+                !watching -> OffCard()
                 !settings.interruptionsOn -> PausedCard()
                 else -> OnCard(settings)
             }
 
             if (!setupDone) {
                 SetupCard(
-                    serviceEnabled = serviceEnabled,
+                    usageAccess = usageAccess,
+                    overlayAllowed = overlayAllowed,
                     batteryUnrestricted = batteryUnrestricted,
                     firstInterruptionSeen = firstInterruptionSeen,
-                    onOpenAccessibilitySettings = onOpenAccessibilitySettings,
+                    onOpenUsageAccess = onOpenUsageAccess,
+                    onOpenOverlay = onOpenOverlay,
                     onOpenAppInfo = onOpenAppInfo,
                 )
             }
@@ -120,7 +124,7 @@ fun HomeScreen(
                 NavTile(
                     icon = R.drawable.ic_settings,
                     title = stringResource(R.string.home_open_settings),
-                    subtitle = stringResource(R.string.home_settings_sub, durationText(settings.level1Seconds)),
+                    subtitle = stringResource(R.string.home_settings_sub),
                     onClick = onOpenSettings,
                 )
                 NavTile(
@@ -212,15 +216,18 @@ private fun OnCard(settings: Settings) {
                     modifier = Modifier.padding(end = 72.dp),
                 )
                 Text(
-                    text = stringResource(R.string.home_service_on, durationText(settings.level1Seconds)),
+                    text = stringResource(R.string.home_service_on),
                     style = MaterialTheme.typography.bodyLarge,
                     color = onCard.copy(alpha = 0.9f),
                 )
                 Text(
-                    text = if (settings.watchedApps.isEmpty()) {
+                    text = if (settings.apps.isEmpty()) {
                         stringResource(R.string.home_no_apps)
                     } else {
-                        settings.watchedApps.sorted().joinToString("  ·  ")
+                        // No-break spaces, so "YouTube 30 min" never splits across lines.
+                        settings.apps
+                            .map { "${it.label} ${allowanceText(it.allowanceMin)}".replace(' ', '\u00A0') }
+                            .joinToString("  ·  ")
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = onCard.copy(alpha = 0.75f),
@@ -284,7 +291,7 @@ private fun PausedCard() {
     }
 }
 
-/** Status: the accessibility service is not on yet. The setup guide follows. */
+/** Status: a permission is still missing. The setup guide follows. */
 @Composable
 private fun OffCard() {
     Surface(
@@ -328,15 +335,17 @@ private fun StatusLabel(
 
 @Composable
 private fun SetupCard(
-    serviceEnabled: Boolean,
+    usageAccess: Boolean,
+    overlayAllowed: Boolean,
     batteryUnrestricted: Boolean,
     firstInterruptionSeen: Boolean,
-    onOpenAccessibilitySettings: () -> Unit,
+    onOpenUsageAccess: () -> Unit,
+    onOpenOverlay: () -> Unit,
     onOpenAppInfo: () -> Unit,
 ) {
-    val steps = listOf(serviceEnabled, batteryUnrestricted, firstInterruptionSeen)
+    val steps = listOf(usageAccess, overlayAllowed, batteryUnrestricted, firstInterruptionSeen)
     SectionCard {
-        // FlowRow moves "0/3 valmis" under the title when the font is large.
+        // FlowRow moves "0/4 valmis" under the title when the font is large.
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -359,27 +368,37 @@ private fun SetupCard(
 
         SetupStep(
             number = 1,
-            done = serviceEnabled,
-            title = stringResource(R.string.setup_accessibility_title),
-            text = stringResource(R.string.setup_accessibility_text),
+            done = usageAccess,
+            title = stringResource(R.string.setup_usage_title),
+            text = stringResource(R.string.setup_usage_text),
         ) {
             PrimaryButton(
-                text = stringResource(R.string.home_open_accessibility),
-                onClick = onOpenAccessibilitySettings,
+                text = stringResource(R.string.home_open_usage_access),
+                onClick = onOpenUsageAccess,
                 modifier = Modifier.fillMaxWidth(),
             )
-            // Android 13+ blocks this switch for apps installed from an APK file.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Hint(stringResource(R.string.setup_restricted_text), modifier = Modifier.padding(top = 4.dp))
-                SecondaryButton(
-                    text = stringResource(R.string.home_open_app_info),
-                    onClick = onOpenAppInfo,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
         }
         SetupStep(
             number = 2,
+            done = overlayAllowed,
+            title = stringResource(R.string.setup_overlay_title),
+            text = stringResource(R.string.setup_overlay_text),
+        ) {
+            PrimaryButton(
+                text = stringResource(R.string.home_open_overlay),
+                onClick = onOpenOverlay,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            // Some phones block these switches for apps installed from an APK file.
+            Hint(stringResource(R.string.setup_restricted_text), modifier = Modifier.padding(top = 4.dp))
+            SecondaryButton(
+                text = stringResource(R.string.home_open_app_info),
+                onClick = onOpenAppInfo,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        SetupStep(
+            number = 3,
             done = batteryUnrestricted,
             title = stringResource(R.string.setup_battery_title),
             text = stringResource(R.string.setup_battery_text),
@@ -391,10 +410,10 @@ private fun SetupCard(
             )
         }
         SetupStep(
-            number = 3,
+            number = 4,
             done = firstInterruptionSeen,
             title = stringResource(R.string.setup_try_title),
-            text = stringResource(R.string.setup_try_text, Config.DEMO_LEVEL1_SECONDS),
+            text = stringResource(R.string.setup_try_text, Config.DEMO_ALLOWANCE_SECONDS),
         )
     }
 }
@@ -488,9 +507,11 @@ private fun NavTile(
 private fun HomeScreenPreview() {
     DistractionKillerTheme {
         HomeScreen(
-            serviceEnabled = false,
+            usageAccess = false,
+            overlayAllowed = false,
             batteryUnrestricted = false,
-            onOpenAccessibilitySettings = {},
+            onOpenUsageAccess = {},
+            onOpenOverlay = {},
             onOpenAppInfo = {},
             onOpenSettings = {},
             onOpenStats = {},
@@ -504,9 +525,11 @@ private fun HomeScreenPreview() {
 private fun HomeScreenOnPreview() {
     DistractionKillerTheme {
         HomeScreen(
-            serviceEnabled = true,
+            usageAccess = true,
+            overlayAllowed = true,
             batteryUnrestricted = true,
-            onOpenAccessibilitySettings = {},
+            onOpenUsageAccess = {},
+            onOpenOverlay = {},
             onOpenAppInfo = {},
             onOpenSettings = {},
             onOpenStats = {},

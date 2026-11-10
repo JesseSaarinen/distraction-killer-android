@@ -1,16 +1,15 @@
 package io.github.jessesaarinen.distractionkiller.interrupt
 
-import android.accessibilityservice.AccessibilityService
+import android.content.Context
 import android.content.Intent
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.LogEvent
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
-import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.EventKind
 import io.github.jessesaarinen.distractionkiller.detection.InspectorEntry
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
-import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
+import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
 
 /**
  * Shows the interruptions on top of the watched app and acts on the user's
@@ -19,7 +18,7 @@ import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
  * Every interruption and choice goes to the event log, and to the inspector
  * for debugging.
  */
-class InterruptController(private val service: AccessibilityService) {
+class InterruptController(private val service: Context) {
     private val banner = OverlayWindow(service, fullScreen = false)
     private val alarm = Alarm(service)
 
@@ -28,19 +27,20 @@ class InterruptController(private val service: AccessibilityService) {
         private set
 
     /** Level 1: banner + alarm. */
-    fun showLevel1(packageName: String, scrollSeconds: Int) {
+    /** usedSeconds: the app's time in front today. */
+    fun showLevel1(packageName: String, usedSeconds: Int) {
         val settings = SettingsStore.settings.value
         EventLog.add(
             LogEvent(
                 type = "level1",
-                app = AppMarkers.label(packageName),
-                scrollSeconds = scrollSeconds,
+                app = SettingsStore.settings.value.appLabel(packageName),
+                scrollSeconds = usedSeconds,
                 tester = settings.tester,
             )
         )
         val shown = banner.show {
             Level1Banner(
-                scrollSeconds = scrollSeconds,
+                usedSeconds = usedSeconds,
                 onStop = { finishLevel1("stopped") },
                 onContinue = { finishLevel1("continued") },
             )
@@ -60,9 +60,8 @@ class InterruptController(private val service: AccessibilityService) {
     /**
      * Level 2: the calm full screen with one random task. It replaces the
      * banner, and like in the web demo level 1 then gets no outcome.
-     * CalmActivity resets the timer when the break ends.
      */
-    fun showLevel2(packageName: String, scrollSeconds: Int) {
+    fun showLevel2(packageName: String, usedSeconds: Int) {
         val settings = SettingsStore.settings.value
         alarm.notifyLevel2(sound = settings.sound, vibration = settings.vibration)
         // Like pickTask() in the web demo: one of the chosen tasks at random.
@@ -70,13 +69,13 @@ class InterruptController(private val service: AccessibilityService) {
         EventLog.add(
             LogEvent(
                 type = "level2",
-                app = AppMarkers.label(packageName),
-                scrollSeconds = scrollSeconds,
+                app = SettingsStore.settings.value.appLabel(packageName),
+                scrollSeconds = usedSeconds,
                 task = task.id,
                 tester = settings.tester,
             )
         )
-        openCalmScreen(CalmActivity.level2Intent(service, packageName, task, scrollSeconds))
+        openCalmScreen(CalmActivity.level2Intent(service, packageName, task, usedSeconds))
         hideBanner()
     }
 
@@ -88,17 +87,17 @@ class InterruptController(private val service: AccessibilityService) {
 
     private fun finishLevel1(outcome: String) {
         val packageName = bannerApp ?: return
-        val seconds = ScrollTimer.state.value.activeSeconds
+        val seconds = UsageTimer.state.value.usage(packageName).usedSeconds
         if (outcome == "stopped") {
-            // "Lopeta tähän" leaves the video app for the thank-you screen.
-            ScrollTimer.reset()
+            // "Lopeta tähän" leaves the app for the thank-you screen, and level 2 does not come.
+            UsageTimer.stoppedAtLevel1(packageName)
             openCalmScreen(CalmActivity.doneIntent(service, packageName, seconds))
         }
         hideBanner()
         EventLog.add(
             LogEvent(
                 type = "outcome",
-                app = AppMarkers.label(packageName),
+                app = SettingsStore.settings.value.appLabel(packageName),
                 scrollSeconds = seconds,
                 level = 1,
                 outcome = outcome,
@@ -106,7 +105,7 @@ class InterruptController(private val service: AccessibilityService) {
             )
         )
         InspectorLog.add(
-            InspectorEntry(System.currentTimeMillis(), packageName, EventKind.OUTCOME, detail = "level1 $outcome")
+            InspectorEntry(System.currentTimeMillis(), SettingsStore.settings.value.appLabel(packageName), EventKind.OUTCOME, "level1 $outcome")
         )
     }
 

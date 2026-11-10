@@ -1,6 +1,6 @@
 # Distraction Killer (Android)
 
-Kurssin SCI-C1002 (Aalto, ryhmä 5) demo. Sovellus huomaa, kun selaat lyhytvideoita TikTokissa, Instagram Reelsissä tai YouTube Shortsissa, ja keskeyttää selauksen valitsemiesi väliaikojen jälkeen.
+Kurssin SCI-C1002 (Aalto, ryhmä 5) demo. Jokaiselle valitsemallesi sovellukselle (oletuksena TikTok, Instagram ja YouTube) on oma päivittäinen aika. Kun se on käytetty, sovellus muistuttaa sinua pitämään tauon: ensin banneri, sitten koko näytön tauko.
 
 Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ulkoasun säännöt: [DESIGN.md](DESIGN.md). Ohjeet AI-agenteille: [CLAUDE.md](CLAUDE.md) = [AGENTS.md](AGENTS.md).
 
@@ -11,20 +11,21 @@ Suunnitelma ja tehtävät: [PLAN.md](PLAN.md). Ulkoasun säännöt: [DESIGN.md](
 3. Salli Chromelle tuntemattomien sovellusten asennus, kun sitä kysytään. Jos Play Protect varoittaa, valitse "Asenna silti".
 4. Päivitykset asennetaan samalla tavalla vanhan version päälle. Lokit ja asetukset säilyvät.
 
-## Selauksen tunnistuksen käyttöönotto
+## Ajanseurannan käyttöönotto
 
-1. Asetukset → Esteettömyys → Asennetut sovellukset → **Distraction Killer: selauksen tunnistus** → päälle. Sovelluksen kotinäkymän nappi vie suoraan esteettömyysasetuksiin.
-2. Jos kytkin on harmaana (Android 13+ sivuladatuille sovelluksille): Asetukset → Sovellukset → Distraction Killer → ⋮ → **Salli rajoitetut asetukset**, ja sitten kohta 1 uudelleen.
-3. Sovelluksen tiedot → Akku → **Rajoittamaton**, jotta Samsung ei pysäytä tunnistusta taustalla.
-4. Auto Blockerin voi nyt kytkeä takaisin päälle.
+1. **Salli käyttötietojen käyttö:** Asetukset → Sovellukset → Erityiset käyttöoikeudet → Käyttötietojen käyttö → Distraction Killer → päälle. Sovelluksen kotinäkymän nappi vie suoraan oikeaan kohtaan.
+2. **Näytä muiden sovellusten päällä:** samasta Erityiset käyttöoikeudet -valikosta → Distraction Killer → päälle. Kotinäkymässä on tähänkin nappi.
+3. Jos puhelin sanoo, että asetus on rajoitettu: Asetukset → Sovellukset → Distraction Killer → ⋮ → **Salli rajoitetut asetukset**, ja kohdat 1–2 uudelleen.
+4. Sovelluksen tiedot → Akku → **Rajoittamaton**, jotta Samsung ei pysäytä ajanseurantaa taustalla.
+5. Auto Blockerin voi nyt kytkeä takaisin päälle.
 
-Sovelluksen kotinäkymässä on samat vaiheet, ja valmis vaihe saa ✓-merkin. "Näytä muiden sovellusten päällä" -oikeutta ei tarvita, koska banneri piirretään tunnistuksen omaan ikkunaan.
+Sovelluksen kotinäkymässä on samat vaiheet, ja valmis vaihe saa ✓-merkin. Kun ajanseuranta toimii, ilmoituksissa näkyy "Ajanseuranta on päällä".
 
-Tunnistus lukee vain, mikä sovellus on auki, näkymien tunnisteet ja vierityksen kohdan. Se ei lue tekstejä, viestejä tai videoiden sisältöä, eikä sovelluksella ole internet-oikeutta.
+Sovellus näkee vain, mikä sovellus on edessä ja kuinka kauan. Se ei näe, mitä ruudulla on, eikä sillä ole internet-oikeutta. Esteettömyyspalvelua ei käytetä (se poistettiin tehtävässä N21, koska pankkisovellukset ja Play Protect eivät hyväksy sitä).
 
 ## Testaus
 
-Puhelimella testattavat asiat ovat listana tiedostossa [TESTING.md](TESTING.md). Jos jokin ei toimi, avaa sovelluksessa *Tarkastelu (kehittäjille)* → *Jaa*. Jaetun tekstin alussa on tunnistuksen tila, asetukset ja versio.
+Puhelimella testattavat asiat ovat listana tiedostossa [TESTING.md](TESTING.md). Jos jokin ei toimi, avaa sovelluksessa *Tarkastelu (kehittäjille)* → *Jaa*. Jaetun tekstin alussa on ajanseurannan tila, sovellusten päivän ajat, asetukset ja versio.
 
 ## Kehitys
 

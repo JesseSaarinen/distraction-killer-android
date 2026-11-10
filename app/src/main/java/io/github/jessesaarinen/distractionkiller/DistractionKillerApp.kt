@@ -6,7 +6,7 @@ import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 
 /**
- * Starts before any screen and before the scroll watcher service, and loads
+ * Starts before any screen and before the watcher service, and loads
  * the saved settings, event log and inspector log once.
  */
 class DistractionKillerApp : Application() {

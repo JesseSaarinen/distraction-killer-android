@@ -34,7 +34,7 @@ import io.github.jessesaarinen.distractionkiller.ui.durationText
  * The sun rises while the screen opens.
  */
 @Composable
-fun DoneScreen(scrollSeconds: Int, onClose: () -> Unit) {
+fun DoneScreen(usedSeconds: Int, onClose: () -> Unit) {
     BackHandler(onBack = onClose)
     val rise = remember { Animatable(0.05f) }
     LaunchedEffect(Unit) {
@@ -62,8 +62,8 @@ fun DoneScreen(scrollSeconds: Int, onClose: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    text = if (scrollSeconds > 0) {
-                        stringResource(R.string.done_text_seconds, durationText(scrollSeconds))
+                    text = if (usedSeconds > 0) {
+                        stringResource(R.string.done_text_seconds, durationText(usedSeconds))
                     } else {
                         stringResource(R.string.done_text)
                     },

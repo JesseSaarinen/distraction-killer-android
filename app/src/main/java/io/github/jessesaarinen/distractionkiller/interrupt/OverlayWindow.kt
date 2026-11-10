@@ -17,9 +17,9 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 
 /**
- * A window drawn with Compose on top of other apps. It uses the accessibility
- * service's own overlay type, so no "display over other apps" permission is
- * needed. Create it with the AccessibilityService as the context.
+ * A window drawn with Compose on top of other apps. Needs the "display over
+ * other apps" permission. Banking apps and other apps that hide overlays
+ * simply do not show it on their screens.
  */
 class OverlayWindow(private val context: Context, private val fullScreen: Boolean) {
     private val windowManager = checkNotNull(context.getSystemService(WindowManager::class.java))
@@ -38,7 +38,7 @@ class OverlayWindow(private val context: Context, private val fullScreen: Boolea
         try {
             windowManager.addView(newView, layoutParams())
         } catch (e: RuntimeException) {
-            // The service is not connected (anymore). Nothing to show.
+            // The "display over other apps" permission was taken away. Nothing to show.
             InspectorLog.error("overlay", e)
             newOwner.destroy()
             return false
@@ -53,7 +53,7 @@ class OverlayWindow(private val context: Context, private val fullScreen: Boolea
             try {
                 windowManager.removeView(it)
             } catch (e: RuntimeException) {
-                // Android removed it already, for example when the service was turned off.
+                // Android removed it already.
             }
         }
         owner?.destroy()
@@ -64,7 +64,7 @@ class OverlayWindow(private val context: Context, private val fullScreen: Boolea
     private fun layoutParams() = WindowManager.LayoutParams(
         WindowManager.LayoutParams.MATCH_PARENT,
         if (fullScreen) WindowManager.LayoutParams.MATCH_PARENT else WindowManager.LayoutParams.WRAP_CONTENT,
-        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
         // The banner lets touches outside it reach the app below.
         // The full-screen overlay (N9) takes focus so the user can type.
         if (fullScreen) 0 else WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,

@@ -15,75 +15,61 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
- * What an inspector entry is about: an accessibility event, a snapshot, the
- * short videos coming to or leaving the front, a new item of the feed on
- * screen, a reached level, an outcome, a note about the app itself (started,
- * log cleared) or a caught error.
+ * What an inspector entry is about: the app in front changed, a reached
+ * level, an outcome, a note about the app itself (started, log cleared) or a
+ * caught error.
  */
-enum class EventKind { SCROLLED, WINDOW, CONTENT, SNAPSHOT, FRONT, ITEM, LEVEL1, LEVEL2, OUTCOME, NOTE, ERROR }
+enum class EventKind { FRONT, LEVEL1, LEVEL2, OUTCOME, NOTE, ERROR }
 
 /**
- * One line in the inspector. Only technical data: app package, event kind,
- * view ID, class name and scroll numbers. Never any text from the screen.
+ * One line in the inspector. Only technical data: which app, what happened
+ * and when. Never anything from the screen.
  */
 data class InspectorEntry(
     val timeMillis: Long,
-    val packageName: String,
+    val app: String,
     val kind: EventKind,
-    val viewId: String? = null,
-    val className: String? = null,
     val detail: String? = null,
 ) {
     /** One line of the saved file: the fields separated by tabs, empty for none. */
     fun toLine(): String =
-        listOf(timeMillis.toString(), packageName, kind.name, viewId.orEmpty(), className.orEmpty(), detail.orEmpty())
+        listOf(timeMillis.toString(), app, kind.name, detail.orEmpty())
             .joinToString(SEPARATOR) { it.replace(LINE_BREAKS, " ") }
 
     companion object {
         private const val SEPARATOR = "\t"
         private val LINE_BREAKS = Regex("[\\t\\r\\n]")
 
-        /** Reads a line written by toLine(), or null for a broken line. */
+        /** Reads a line written by toLine(), or null for a broken line or one from the old scroll watcher. */
         fun fromLine(line: String): InspectorEntry? {
-            val parts = line.split(SEPARATOR, limit = 6)
-            if (parts.size != 6) return null
+            val parts = line.split(SEPARATOR)
+            if (parts.size != 4) return null
             val time = parts[0].toLongOrNull() ?: return null
             val kind = EventKind.entries.firstOrNull { it.name == parts[2] } ?: return null
-            return InspectorEntry(
-                timeMillis = time,
-                packageName = parts[1],
-                kind = kind,
-                viewId = parts[3].ifEmpty { null },
-                className = parts[4].ifEmpty { null },
-                detail = parts[5].ifEmpty { null },
-            )
+            return InspectorEntry(time, parts[1], kind, parts[3].ifEmpty { null })
         }
     }
 }
 
-/** The scroll watcher's state right now, for the top of the inspector and the shared text. */
+/** The watcher's state right now, for the top of the inspector and the shared text. */
 data class InspectorStatus(
-    /** When the scroll watcher started, or null when it is not running. */
+    /** When the watcher service started, or null when it is not running. */
     val serviceStartedAt: Long? = null,
-    /** The app whose short videos are in front, or null. */
+    /** The app in front as the inspector shows it, or null when the screen is off. */
     val inFrontApp: String? = null,
-    /** The newest event of any kind from a watched app. */
-    val lastEventAt: Long? = null,
-    val lastEventApp: String? = null,
-    /** The newest scroll line, with its verdict. */
-    val lastScroll: InspectorEntry? = null,
 )
 
 /**
- * The inspector's log (tasks N4 and N5). Saved in the app's own storage as
- * inspector.log, so it is still there after the phone closes the app. At most
- * MAX_ENTRIES lines. The event counters count only while the app runs.
+ * The inspector's log (task N4, simplified in N21). Saved in the app's own
+ * storage as inspector.log, so it is still there after the phone closes the
+ * app. At most MAX_ENTRIES lines.
  */
 object InspectorLog {
     private const val MAX_ENTRIES = 500
     private const val MAX_SHARE_CHARS = 100_000
     private const val FILE_NAME = "inspector.log"
     private const val SAME_ERROR_PAUSE_MS = 60_000L
+    private const val APP_NAME = "Distraction Killer"
 
     private val clockFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
     private val dateFormat = DateTimeFormatter.ofPattern("d.M.")
@@ -91,7 +77,6 @@ object InspectorLog {
 
     private var file: File? = null
     private var linesInFile = 0
-    private var appPackage = "app"
     private var startedAt = System.currentTimeMillis()
     private var lastError: String? = null
     private var lastErrorAt = 0L
@@ -101,22 +86,14 @@ object InspectorLog {
     /** Newest first. */
     val entries: StateFlow<List<InspectorEntry>> = _entries.asStateFlow()
 
-    private val _counts = MutableStateFlow<Map<String, Map<EventKind, Int>>>(emptyMap())
-
-    /** How many events of each kind each app has sent since the app started. */
-    val counts: StateFlow<Map<String, Map<EventKind, Int>>> = _counts.asStateFlow()
-
     private val _status = MutableStateFlow(InspectorStatus())
     val status: StateFlow<InspectorStatus> = _status.asStateFlow()
-
-    private val lastSnapshot = mutableMapOf<String, List<String>>()
 
     /** Reads the saved log once. DistractionKillerApp calls this when the app starts. */
     fun init(context: Context) {
         if (file != null) return
         val saved = File(context.filesDir, FILE_NAME)
         file = saved
-        appPackage = context.packageName
         startedAt = System.currentTimeMillis()
         val lines = read(saved)
         linesInFile = lines.size
@@ -126,13 +103,12 @@ object InspectorLog {
 
     fun add(entry: InspectorEntry) {
         _entries.update { (listOf(entry) + it).take(MAX_ENTRIES) }
-        if (entry.kind == EventKind.SCROLLED) _status.update { it.copy(lastScroll = entry) }
         save(entry)
     }
 
     /** A note about the app itself, like "service started". */
     fun note(text: String) {
-        add(InspectorEntry(System.currentTimeMillis(), appPackage, EventKind.NOTE, detail = text))
+        add(InspectorEntry(System.currentTimeMillis(), APP_NAME, EventKind.NOTE, text))
     }
 
     /**
@@ -146,16 +122,7 @@ object InspectorLog {
         if (text == lastError && now - lastErrorAt < SAME_ERROR_PAUSE_MS) return
         lastError = text
         lastErrorAt = now
-        add(InspectorEntry(now, appPackage, EventKind.ERROR, detail = text))
-    }
-
-    fun count(packageName: String, kind: EventKind) {
-        _counts.update { all ->
-            val forApp = all[packageName].orEmpty()
-            val newCount = (forApp[kind] ?: 0) + 1
-            all + (packageName to (forApp + (kind to newCount)))
-        }
-        _status.update { it.copy(lastEventAt = System.currentTimeMillis(), lastEventApp = packageName) }
+        add(InspectorEntry(now, APP_NAME, EventKind.ERROR, text))
     }
 
     /** The service calls this when it starts and stops. */
@@ -165,23 +132,13 @@ object InspectorLog {
         }
     }
 
-    /** The service calls this when the short videos come to or leave the front. */
-    fun setInFront(packageName: String?) {
-        _status.update { it.copy(inFrontApp = packageName) }
-    }
-
-    /** Adds a snapshot entry only when the app's view IDs changed since its last snapshot. */
-    fun addSnapshotIfChanged(timeMillis: Long, packageName: String, viewIds: List<String>) {
-        if (lastSnapshot[packageName] == viewIds) return
-        lastSnapshot[packageName] = viewIds
-        add(InspectorEntry(timeMillis, packageName, EventKind.SNAPSHOT, detail = viewIds.joinToString(" ")))
+    /** The service calls this when the app in front changes. */
+    fun setInFront(app: String?) {
+        _status.update { it.copy(inFrontApp = app) }
     }
 
     fun clear() {
         _entries.value = emptyList()
-        _counts.value = emptyMap()
-        _status.update { it.copy(lastEventAt = null, lastEventApp = null, lastScroll = null) }
-        lastSnapshot.clear()
         file?.delete()
         linesInFile = 0
         note("log cleared")
@@ -191,15 +148,10 @@ object InspectorLog {
     fun formatClock(millis: Long): String = format(millis, clockFormat)
 
     fun formatEntry(entry: InspectorEntry): String {
-        val parts = mutableListOf(formatClock(entry.timeMillis), entry.packageName, entry.kind.name)
-        entry.viewId?.let { parts.add("id=$it") }
-        entry.className?.let { parts.add("class=$it") }
+        val parts = mutableListOf(formatClock(entry.timeMillis), entry.kind.name, entry.app)
         entry.detail?.let { parts.add(it) }
         return parts.joinToString(" ")
     }
-
-    fun formatCounts(kinds: Map<EventKind, Int>): String =
-        kinds.entries.joinToString(" ") { "${it.key.name.lowercase()}=${it.value}" }
 
     /**
      * Plain text for the share sheet: first the state, so that even an empty
@@ -208,7 +160,7 @@ object InspectorLog {
     fun toShareText(settings: Settings): String = buildString {
         val now = System.currentTimeMillis()
         val state = status.value
-        val timer = ScrollTimer.state.value
+        val usage = UsageTimer.state.value
         appendLine("Distraction Killer – tarkastelu")
         appendLine(
             "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}), " +
@@ -220,28 +172,19 @@ object InspectorLog {
             if (started != null) {
                 "Tunnistus: käynnissä ${format(started, dateTimeFormat)} alkaen"
             } else {
-                "Tunnistus: EI käynnissä (esteettömyysasetus on pois, tai puhelin pysäytti palvelun)"
+                "Tunnistus: EI käynnissä (käyttötietojen lupa puuttuu, tai puhelin pysäytti palvelun)"
             }
         )
-        appendLine("Edessä: " + (state.inFrontApp?.let { "lyhytvideot (${AppMarkers.label(it)})" } ?: "ei lyhytvideoita"))
-        appendLine("Ajastin: ${timer.activeSeconds} s aktiivista selausta (${timer.phase.name})")
-        val lastEventAt = state.lastEventAt
-        appendLine(
-            "Viimeisin tapahtuma: " +
-                if (lastEventAt != null) "${format(lastEventAt, dateTimeFormat)} ${state.lastEventApp}" else "ei yhtään"
-        )
-        appendLine("Viimeisin vieritys: " + (state.lastScroll?.let(::formatEntry) ?: "ei yhtään"))
-        appendLine("Asetukset: ${settingsSummary(settings)}")
-        appendLine(
-            "Sovellus käynnistyi ${format(startedAt, dateTimeFormat)}. " +
-                "Laskurit ovat siitä alkaen, tapahtumat säilyvät uudelleenkäynnistyksen yli."
-        )
-        appendLine()
-        appendLine("Laskurit:")
-        if (counts.value.isEmpty()) appendLine("(ei tapahtumia)")
-        for ((packageName, kinds) in counts.value) {
-            appendLine("$packageName ${formatCounts(kinds)}")
+        appendLine("Edessä: " + (state.inFrontApp ?: "ei mitään (näyttö pois, lukittu tai vaihtumassa)"))
+        for (app in settings.apps) {
+            val day = usage.usage(app.packageName)
+            appendLine(
+                "${app.label}: tänään ${day.usedSeconds} s / ${settings.allowanceSeconds(app)} s " +
+                    "(${day.phase.name} ${day.phaseSeconds} s)"
+            )
         }
+        appendLine("Asetukset: ${settingsSummary(settings)}")
+        appendLine("Sovellus käynnistyi ${format(startedAt, dateTimeFormat)}.")
         appendLine()
         appendLine("Tapahtumat:")
         // The newest lines that fit, so a long log loses its oldest lines, not its newest.
@@ -267,18 +210,16 @@ object InspectorLog {
 
     private fun settingsSummary(settings: Settings): String {
         fun onOff(on: Boolean) = if (on) "päällä" else "pois"
-        val watched = AppMarkers.labels.filter { it in settings.watchedApps }
         return listOf(
             "keskeytykset ${if (settings.interruptionsOn) "päällä" else "tauolla"}",
-            "väli ${settings.intervalMin} min",
+            "muistutusväli ${settings.intervalSeconds} s",
             "demotila ${onOff(settings.demoMode)}",
-            "taso 1 ${settings.level1Seconds} s",
             "taso 2 +${settings.level2DelaySeconds} s",
             "hälytys ${settings.alarmMode.id}",
             "ääni ${onOff(settings.sound)}",
             "värinä ${onOff(settings.vibration)}",
             "tehtävät ${settings.tasks.joinToString("+") { it.id }}",
-            "valvotut ${watched.joinToString("+").ifEmpty { "ei yhtään" }}",
+            "valvotut ${settings.apps.joinToString("+") { "${it.label} ${it.allowanceMin} min" }.ifEmpty { "ei yhtään" }}",
         ).joinToString(", ")
     }
 

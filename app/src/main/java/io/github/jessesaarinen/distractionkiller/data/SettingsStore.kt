@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
-import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,9 @@ object SettingsStore {
     private const val KEY_SOUND = "sound"
     private const val KEY_VIBRATION = "vibration"
     private const val KEY_DEMO_MODE = "demoMode"
-    private const val KEY_WATCHED_APPS = "watchedApps"
+    // "watchedApps" and "customApps" held the apps before the daily times (N21). They are not read anymore.
+    private const val KEY_APPS = "apps"
+    private const val SEPARATOR = "\t"
     private const val KEY_INTERRUPTIONS_ON = "interruptionsOn"
     private const val KEY_TESTER = "tester"
 
@@ -53,7 +54,7 @@ object SettingsStore {
             .putBoolean(KEY_SOUND, new.sound)
             .putBoolean(KEY_VIBRATION, new.vibration)
             .putBoolean(KEY_DEMO_MODE, new.demoMode)
-            .putStringSet(KEY_WATCHED_APPS, new.watchedApps)
+            .putStringSet(KEY_APPS, new.apps.map { it.packageName + SEPARATOR + it.allowanceMin + SEPARATOR + it.label }.toSet())
             .putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
             .putInt(KEY_TESTER, new.tester)
             .apply()
@@ -67,8 +68,6 @@ object SettingsStore {
         val level2After = p.getInt(KEY_LEVEL2_AFTER_SEC, defaults.level2AfterSec)
         val taskIds = p.getStringSet(KEY_TASKS, null).orEmpty()
         val tasks = TaskType.entries.filter { it.id in taskIds }.toSet()
-        // null = never saved, so every app is watched. An empty set means the user turned all off.
-        val apps = p.getStringSet(KEY_WATCHED_APPS, null)
         return Settings(
             intervalMin = if (interval in Config.INTERVAL_OPTIONS_MIN) interval else defaults.intervalMin,
             level2AfterSec = if (level2After in Config.LEVEL2_DELAY_OPTIONS_SECONDS) level2After else defaults.level2AfterSec,
@@ -77,9 +76,26 @@ object SettingsStore {
             sound = p.getBoolean(KEY_SOUND, defaults.sound),
             vibration = p.getBoolean(KEY_VIBRATION, defaults.vibration),
             demoMode = p.getBoolean(KEY_DEMO_MODE, defaults.demoMode),
-            watchedApps = if (apps == null) defaults.watchedApps else AppMarkers.labels.filter { it in apps }.toSet(),
+            apps = readApps(p) ?: defaults.apps,
             interruptionsOn = p.getBoolean(KEY_INTERRUPTIONS_ON, defaults.interruptionsOn),
             tester = p.getInt(KEY_TESTER, defaults.tester).coerceAtLeast(0),
         )
     }
+
+    // Saved as "package<TAB>minutes<TAB>name". A package name cannot hold a tab, and the name
+    // comes last, so it may hold anything. null = never saved, so the default apps are watched.
+    // An empty list means the user removed them all.
+    private fun readApps(p: SharedPreferences): List<WatchedApp>? =
+        p.getStringSet(KEY_APPS, null)
+            ?.mapNotNull { entry ->
+                val parts = entry.split(SEPARATOR, limit = 3)
+                val minutes = parts.getOrNull(1)?.toIntOrNull()
+                val label = parts.getOrNull(2).orEmpty()
+                if (parts[0].isEmpty() || minutes == null || minutes < 0 || label.isEmpty()) {
+                    null
+                } else {
+                    WatchedApp(parts[0], label, minutes)
+                }
+            }
+            ?.sortedBy { it.label.lowercase() }
 }

@@ -19,6 +19,18 @@ fun durationText(seconds: Int): String {
     }
 }
 
+/** A daily time: "30 min", "1 h" or "1 h 30 min". */
+@Composable
+fun allowanceText(minutes: Int): String {
+    val hours = minutes / 60
+    val rest = minutes % 60
+    return when {
+        hours == 0 -> stringResource(R.string.duration_minutes, rest)
+        rest == 0 -> stringResource(R.string.duration_hours, hours)
+        else -> stringResource(R.string.duration_hours_minutes, hours, rest)
+    }
+}
+
 /** A decision time on the stats screen: "1,5 s" under 10 seconds, otherwise like durationText. */
 @Composable
 fun decisionText(millis: Long): String {

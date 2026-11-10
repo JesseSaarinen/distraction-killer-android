@@ -1,7 +1,14 @@
 package io.github.jessesaarinen.distractionkiller.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -12,8 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.AlarmMode
@@ -21,7 +31,8 @@ import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.R
 import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
-import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
+import io.github.jessesaarinen.distractionkiller.data.WatchedApp
+import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
 import io.github.jessesaarinen.distractionkiller.interrupt.Alarm
 import io.github.jessesaarinen.distractionkiller.ui.components.Hint
 import io.github.jessesaarinen.distractionkiller.ui.components.ScreenScaffold
@@ -38,6 +49,9 @@ import io.github.jessesaarinen.distractionkiller.ui.components.SwitchRow
 fun SettingsScreen(onBack: () -> Unit) {
     val settings by SettingsStore.settings.collectAsState()
     var tasksError by remember { mutableStateOf(false) }
+    var pickingApp by remember { mutableStateOf(false) }
+    var editingApp by remember { mutableStateOf<WatchedApp?>(null) }
+    val usage by UsageTimer.state.collectAsState()
 
     // For the test button. Released when the user leaves the screen.
     val context = LocalContext.current
@@ -77,8 +91,9 @@ fun SettingsScreen(onBack: () -> Unit) {
                 Text(
                     text = stringResource(
                         R.string.settings_demo_active,
-                        Config.DEMO_LEVEL1_SECONDS,
+                        Config.DEMO_ALLOWANCE_SECONDS,
                         Config.DEMO_LEVEL2_DELAY_SECONDS,
+                        Config.DEMO_INTERVAL_SECONDS,
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -172,17 +187,23 @@ fun SettingsScreen(onBack: () -> Unit) {
 
         SectionLabel(stringResource(R.string.settings_apps_title))
         SectionCard {
-            for (label in AppMarkers.labels) {
-                SwitchRow(
-                    title = label,
-                    checked = label in settings.watchedApps,
-                    onCheckedChange = { on ->
-                        SettingsStore.update {
-                            it.copy(watchedApps = if (on) it.watchedApps + label else it.watchedApps - label)
-                        }
-                    },
+            for (app in settings.apps) {
+                AppRow(
+                    app = app,
+                    usedSeconds = usage.usage(app.packageName).usedSeconds,
+                    onEdit = { editingApp = app },
+                    onRemove = { SettingsStore.update { it.removeApp(app.packageName) } },
                 )
             }
+            if (settings.apps.isEmpty()) Hint(stringResource(R.string.home_no_apps))
+            SecondaryButton(
+                text = stringResource(R.string.settings_apps_add),
+                onClick = { pickingApp = true },
+                icon = R.drawable.ic_plus,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+            )
             Hint(stringResource(R.string.settings_apps_hint), modifier = Modifier.padding(bottom = 4.dp))
         }
 
@@ -192,11 +213,75 @@ fun SettingsScreen(onBack: () -> Unit) {
                 title = stringResource(R.string.settings_demo),
                 hint = stringResource(
                     R.string.settings_demo_hint,
-                    Config.DEMO_LEVEL1_SECONDS,
+                    Config.DEMO_ALLOWANCE_SECONDS,
                     Config.DEMO_LEVEL2_DELAY_SECONDS,
+                    Config.DEMO_INTERVAL_SECONDS,
                 ),
                 checked = settings.demoMode,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(demoMode = on) } },
+            )
+        }
+    }
+
+    if (pickingApp) {
+        AppPickerDialog(
+            exclude = settings.apps.map { it.packageName }.toSet(),
+            onPick = { app ->
+                SettingsStore.update { it.addApp(app) }
+                pickingApp = false
+                // Right away to its daily time, so the user sees it can be changed.
+                editingApp = app
+            },
+            onDismiss = { pickingApp = false },
+        )
+    }
+    editingApp?.let { app ->
+        AllowanceDialog(
+            app = app,
+            onSave = { minutes ->
+                SettingsStore.update { it.setAllowance(app.packageName, minutes) }
+                editingApp = null
+            },
+            onDismiss = { editingApp = null },
+        )
+    }
+}
+
+/**
+ * A watched app: its name, its daily time and how much of it is used today.
+ * Tapping the row opens the daily time carousels, the cross removes the app.
+ */
+@Composable
+private fun AppRow(app: WatchedApp, usedSeconds: Int, onEdit: () -> Unit, onRemove: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClickLabel = stringResource(R.string.settings_apps_edit), onClick = onEdit)
+                .heightIn(min = 48.dp)
+                .padding(end = 16.dp, top = 6.dp, bottom = 6.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(text = app.label, style = MaterialTheme.typography.titleMedium)
+            Hint(
+                stringResource(
+                    R.string.settings_apps_allowance,
+                    allowanceText(app.allowanceMin),
+                    allowanceText(usedSeconds / 60),
+                )
+            )
+        }
+        IconButton(onClick = onRemove) {
+            Icon(
+                painter = painterResource(R.drawable.ic_close),
+                contentDescription = stringResource(R.string.settings_apps_remove, app.label),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

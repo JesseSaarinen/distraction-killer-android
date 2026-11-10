@@ -12,18 +12,16 @@ class InspectorEntryTest {
     fun entryComesBackFromItsLine() {
         val entry = InspectorEntry(
             timeMillis = 1_761_508_800_000,
-            packageName = "com.zhiliaoapp.musically",
-            kind = EventKind.SCROLLED,
-            viewId = "viewpager",
-            className = "androidx.viewpager.widget.ViewPager",
-            detail = "dy=291 → swipe (in the feed)",
+            app = "TikTok",
+            kind = EventKind.LEVEL1,
+            detail = "used today 1800s",
         )
         assertEquals(entry, InspectorEntry.fromLine(entry.toLine()))
     }
 
     @Test
     fun emptyFieldsComeBackAsNull() {
-        val entry = InspectorEntry(1L, "io.github.jessesaarinen.distractionkiller", EventKind.NOTE, detail = "service started")
+        val entry = InspectorEntry(1L, "TikTok", EventKind.FRONT)
         assertEquals(entry, InspectorEntry.fromLine(entry.toLine()))
     }
 
@@ -39,7 +37,13 @@ class InspectorEntryTest {
     fun brokenLinesAreSkipped() {
         assertNull(InspectorEntry.fromLine(""))
         assertNull(InspectorEntry.fromLine("1\tapp\tNOTE"))
-        assertNull(InspectorEntry.fromLine("soon\tapp\tNOTE\t\t\t"))
-        assertNull(InspectorEntry.fromLine("1\tapp\tNO_SUCH_KIND\t\t\t"))
+        assertNull(InspectorEntry.fromLine("soon\tapp\tNOTE\t"))
+        assertNull(InspectorEntry.fromLine("1\tapp\tNO_SUCH_KIND\t"))
+    }
+
+    @Test
+    fun linesOfTheOldScrollWatcherAreSkipped() {
+        assertNull(InspectorEntry.fromLine("1\tcom.zhiliaoapp.musically\tSCROLLED\tviewpager\t\tdy=291"))
+        assertNull(InspectorEntry.fromLine("1\tapp\tNOTE\t\t\tservice started"))
     }
 }

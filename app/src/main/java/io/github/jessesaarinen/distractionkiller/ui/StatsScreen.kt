@@ -40,7 +40,7 @@ import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.data.Summary
 import io.github.jessesaarinen.distractionkiller.data.nextTester
 import io.github.jessesaarinen.distractionkiller.data.summarize
-import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
+import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
 import io.github.jessesaarinen.distractionkiller.ui.components.Hint
 import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.ProgressBar
@@ -92,7 +92,7 @@ fun StatsScreen(onShare: () -> Unit, onBack: () -> Unit) {
                 onStart = { next ->
                     SettingsStore.update { it.copy(tester = next) }
                     // The new tester starts from zero.
-                    ScrollTimer.reset()
+                    UsageTimer.reset(System.currentTimeMillis())
                     showAll = false
                 },
                 onEnd = { SettingsStore.update { it.copy(tester = 0) } },

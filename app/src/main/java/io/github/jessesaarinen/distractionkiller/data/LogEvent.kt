@@ -4,7 +4,9 @@ package io.github.jessesaarinen.distractionkiller.data
  * One row of the event log, like logEvent() in the web demo's state.js.
  *
  * - type: "level1", "level2" or "outcome"
- * - app: "TikTok", "Instagram" or "YouTube"
+ * - app: the watched app's name, like "TikTok"
+ * - scrollSeconds: the app's time in front today when this happened. The name
+ *   is from the old scroll counting, kept so old and new logs read the same way.
  * - level: 1 or 2, only on outcome rows
  * - task: "breathing", "question" or "physical", on level 2 rows
  * - outcome: "stopped", "continued", "skipped" or "dismissed" (left the app some other way)

@@ -1,5 +1,7 @@
 package io.github.jessesaarinen.distractionkiller
 
+import io.github.jessesaarinen.distractionkiller.data.WatchedApp
+
 /** How long the level 1 alarm rings. The id is what the settings store, same as in the web demo. */
 enum class AlarmMode(val id: String) {
     /** "Kunnes sammutan": until the user taps a banner button. */
@@ -26,23 +28,32 @@ enum class TaskType(val id: String) {
 
 /** All timings and choices in one place, like config.js in the web demo. */
 object Config {
-    /** Interval choices for level 1, in minutes. */
+    /** The apps watched before the user changes anything, with their daily time in minutes. */
+    val DEFAULT_APPS = listOf(
+        WatchedApp("com.zhiliaoapp.musically", "TikTok", 30),
+        WatchedApp("com.instagram.android", "Instagram", 30),
+        WatchedApp("com.google.android.youtube", "YouTube", 30),
+    )
+
+    /** Daily time for an app the user adds. */
+    const val DEFAULT_ALLOWANCE_MIN = 30
+
+    /** The daily time pickers: 0 to ALLOWANCE_MAX_HOURS hours, minutes in steps of ALLOWANCE_STEP_MIN. */
+    const val ALLOWANCE_MAX_HOURS = 12
+    const val ALLOWANCE_STEP_MIN = 5
+
+    /** After the daily time is used up: how often level 1 comes again, in minutes. */
     val INTERVAL_OPTIONS_MIN = listOf(1, 3, 5, 10, 15)
-    const val DEFAULT_INTERVAL_MIN = 1
+    const val DEFAULT_INTERVAL_MIN = 5
 
-    /** A second counts as active scrolling if the user swiped within this time. */
-    const val SWIPE_WINDOW_SECONDS = 60
-
-    /** Choices for how many more active seconds after level 1 bring level 2. */
+    /** Choices for how many more seconds in the app after level 1 bring level 2. */
     val LEVEL2_DELAY_OPTIONS_SECONDS = listOf(15, 30, 60, 120)
     const val DEFAULT_LEVEL2_DELAY_SECONDS = 30
 
-    /** This long without active scrolling starts a new session from zero. */
-    const val SESSION_BREAK_SECONDS = 10 * 60
-
     // Demo mode: fast timings for showing the app at the fair.
-    const val DEMO_LEVEL1_SECONDS = 15
+    const val DEMO_ALLOWANCE_SECONDS = 15
     const val DEMO_LEVEL2_DELAY_SECONDS = 10
+    const val DEMO_INTERVAL_SECONDS = 30
 
     /** Level 1 alarm: a chime and a short vibration every ALARM_BEAT_MS. */
     const val ALARM_BEAT_MS = 1_500L

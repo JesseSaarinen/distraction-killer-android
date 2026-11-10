@@ -25,20 +25,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.jessesaarinen.distractionkiller.R
-import io.github.jessesaarinen.distractionkiller.data.Settings
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
-import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
-import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
-import io.github.jessesaarinen.distractionkiller.detection.TimerPhase
-import io.github.jessesaarinen.distractionkiller.detection.TimerState
+import io.github.jessesaarinen.distractionkiller.detection.UsagePhase
+import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
 import io.github.jessesaarinen.distractionkiller.ui.components.PrimaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionCard
 import io.github.jessesaarinen.distractionkiller.ui.components.SectionLabel
 
-// Inspector (tasks N4 and N5): the scroll watcher's state right now, and a list
-// of what it sees, so the short-video markers can be found and checked.
+// Inspector (task N4, simplified in N21): the watcher's state right now, each
+// watched app's time today, and a list of what happened, for checking on a phone.
 // Back arrow and back gesture return home.
 @Composable
 fun InspectorScreen(
@@ -47,8 +44,7 @@ fun InspectorScreen(
     onBack: () -> Unit,
 ) {
     val entries by InspectorLog.entries.collectAsState()
-    val counts by InspectorLog.counts.collectAsState()
-    val timer by ScrollTimer.state.collectAsState()
+    val usage by UsageTimer.state.collectAsState()
     val status by InspectorLog.status.collectAsState()
     val settings by SettingsStore.settings.collectAsState()
 
@@ -117,45 +113,26 @@ fun InspectorScreen(
                             stringResource(R.string.inspector_status_stopped)
                         }
                     )
-                    val front = status.inFrontApp
-                    StatusLine(
-                        if (front != null) {
-                            stringResource(R.string.inspector_in_front, AppMarkers.label(front))
-                        } else {
-                            stringResource(R.string.inspector_not_in_front)
-                        }
-                    )
-                    StatusLine(timerText(timer, settings))
-                    if (!settings.interruptionsOn) StatusLine(stringResource(R.string.inspector_paused))
-                    val lastAt = status.lastEventAt
-                    StatusLine(
-                        if (lastAt != null) {
+                    StatusLine(stringResource(R.string.inspector_in_front, status.inFrontApp ?: "–"))
+                    for (app in settings.apps) {
+                        val day = usage.usage(app.packageName)
+                        StatusLine(
                             stringResource(
-                                R.string.inspector_last_event,
-                                InspectorLog.formatClock(lastAt),
-                                AppMarkers.label(status.lastEventApp.orEmpty()),
+                                R.string.inspector_app_today,
+                                app.label,
+                                durationText(day.usedSeconds),
+                                durationText(settings.allowanceSeconds(app)),
+                                phaseText(day.phase),
                             )
-                        } else {
-                            stringResource(R.string.inspector_last_event_none)
-                        }
-                    )
-                    status.lastScroll?.let { StatusLine(stringResource(R.string.inspector_last_scroll, InspectorLog.formatEntry(it))) }
+                        )
+                    }
+                    if (!settings.interruptionsOn) StatusLine(stringResource(R.string.inspector_paused))
                 }
             }
             item {
                 SecondaryButton(
                     text = stringResource(R.string.inspector_reset_timer),
-                    onClick = { ScrollTimer.reset() },
-                )
-            }
-            item {
-                SectionLabel(stringResource(R.string.inspector_counts_title))
-            }
-            items(counts.entries.toList()) { (packageName, kinds) ->
-                Text(
-                    text = "$packageName ${InspectorLog.formatCounts(kinds)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = FontFamily.Monospace,
+                    onClick = { UsageTimer.reset(System.currentTimeMillis()) },
                 )
             }
             item {
@@ -181,17 +158,12 @@ fun InspectorScreen(
     }
 }
 
-/** How far the timer is, and when the next level comes. */
+/** Where the app is in its day, in a few words. */
 @Composable
-private fun timerText(timer: TimerState, settings: Settings): String = when (timer.phase) {
-    TimerPhase.COUNTING ->
-        stringResource(R.string.inspector_timer_level1, timer.activeSeconds, settings.level1Seconds)
-    TimerPhase.AFTER_LEVEL1 -> {
-        // Level 2 comes level2DelaySeconds after the second where level 1 came.
-        val level2At = timer.activeSeconds - timer.secondsAfterLevel1 + settings.level2DelaySeconds
-        stringResource(R.string.inspector_timer_level2, timer.activeSeconds, level2At)
-    }
-    TimerPhase.PAUSED -> stringResource(R.string.inspector_timer_paused, timer.activeSeconds)
+private fun phaseText(phase: UsagePhase): String = when (phase) {
+    UsagePhase.ALLOWANCE -> stringResource(R.string.inspector_phase_allowance)
+    UsagePhase.AFTER_LEVEL1 -> stringResource(R.string.inspector_phase_after_level1)
+    UsagePhase.BETWEEN_REMINDERS -> stringResource(R.string.inspector_phase_between)
 }
 
 @Composable

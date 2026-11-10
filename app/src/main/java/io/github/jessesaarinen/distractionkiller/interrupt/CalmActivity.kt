@@ -14,32 +14,30 @@ import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.LogEvent
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
-import io.github.jessesaarinen.distractionkiller.detection.AppMarkers
 import io.github.jessesaarinen.distractionkiller.detection.EventKind
 import io.github.jessesaarinen.distractionkiller.detection.InspectorEntry
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
-import io.github.jessesaarinen.distractionkiller.detection.ScrollTimer
 import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
 
 /**
  * The calm full screen: the level 2 task, and the thank-you screen after
  * stopping. It is an Activity rather than an overlay, so the video app goes
  * to the background (its video pauses) and the keyboard works for the
- * question task. The scroll watcher service starts it.
+ * question task. UsageWatcherService starts it.
  */
 class CalmActivity : ComponentActivity() {
 
     private var level2Open = false
     private var app = ""
     private var task = TaskType.BREATHING
-    private var scrollSeconds = 0
+    private var usedSeconds = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         app = intent.getStringExtra(EXTRA_APP).orEmpty()
         task = TaskType.fromId(intent.getStringExtra(EXTRA_TASK))
-        scrollSeconds = intent.getIntExtra(EXTRA_SECONDS, 0)
+        usedSeconds = intent.getIntExtra(EXTRA_SECONDS, 0)
         val startWithDone = intent.getBooleanExtra(EXTRA_DONE, false)
         level2Open = savedInstanceState?.getBoolean(STATE_LEVEL2_OPEN) ?: !startWithDone
         if (savedInstanceState == null) {
@@ -51,11 +49,11 @@ class CalmActivity : ComponentActivity() {
             DistractionKillerTheme {
                 var showDone by rememberSaveable { mutableStateOf(startWithDone) }
                 if (showDone) {
-                    DoneScreen(scrollSeconds = scrollSeconds, onClose = ::goHome)
+                    DoneScreen(usedSeconds = usedSeconds, onClose = ::goHome)
                 } else {
                     Level2Screen(
                         task = task,
-                        scrollSeconds = scrollSeconds,
+                        usedSeconds = usedSeconds,
                         onFinish = { outcome, answer ->
                             finishLevel2(outcome, answer)
                             if (outcome == "stopped") {
@@ -88,12 +86,11 @@ class CalmActivity : ComponentActivity() {
     private fun finishLevel2(outcome: String, answer: String?) {
         if (!level2Open) return
         level2Open = false
-        ScrollTimer.reset()
         EventLog.add(
             LogEvent(
                 type = "outcome",
-                app = AppMarkers.label(app),
-                scrollSeconds = scrollSeconds,
+                app = SettingsStore.settings.value.appLabel(app),
+                scrollSeconds = usedSeconds,
                 level = 2,
                 task = task.id,
                 outcome = outcome,
@@ -102,7 +99,7 @@ class CalmActivity : ComponentActivity() {
             )
         )
         val detail = "level2 ${task.id} $outcome" + if (answer != null) " answered" else ""
-        InspectorLog.add(InspectorEntry(System.currentTimeMillis(), app, EventKind.OUTCOME, detail = detail))
+        InspectorLog.add(InspectorEntry(System.currentTimeMillis(), SettingsStore.settings.value.appLabel(app), EventKind.OUTCOME, detail))
     }
 
     private fun goHome() {
@@ -118,17 +115,17 @@ class CalmActivity : ComponentActivity() {
         private const val STATE_LEVEL2_OPEN = "level2Open"
 
         /** Level 2 with one task. */
-        fun level2Intent(context: Context, app: String, task: TaskType, scrollSeconds: Int): Intent =
-            baseIntent(context, app, scrollSeconds).putExtra(EXTRA_TASK, task.id)
+        fun level2Intent(context: Context, app: String, task: TaskType, usedSeconds: Int): Intent =
+            baseIntent(context, app, usedSeconds).putExtra(EXTRA_TASK, task.id)
 
         /** Straight to the thank-you screen (after "Lopeta tähän" on level 1). */
-        fun doneIntent(context: Context, app: String, scrollSeconds: Int): Intent =
-            baseIntent(context, app, scrollSeconds).putExtra(EXTRA_DONE, true)
+        fun doneIntent(context: Context, app: String, usedSeconds: Int): Intent =
+            baseIntent(context, app, usedSeconds).putExtra(EXTRA_DONE, true)
 
-        private fun baseIntent(context: Context, app: String, scrollSeconds: Int): Intent =
+        private fun baseIntent(context: Context, app: String, usedSeconds: Int): Intent =
             Intent(context, CalmActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra(EXTRA_APP, app)
-                .putExtra(EXTRA_SECONDS, scrollSeconds)
+                .putExtra(EXTRA_SECONDS, usedSeconds)
     }
 }
