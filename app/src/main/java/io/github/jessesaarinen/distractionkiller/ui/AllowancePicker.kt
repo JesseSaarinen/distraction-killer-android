@@ -27,9 +27,7 @@ import io.github.jessesaarinen.distractionkiller.ui.components.WheelPicker
  */
 @Composable
 fun AllowanceDialog(app: WatchedApp, onSave: (Int) -> Unit, onDismiss: () -> Unit) {
-    var hours by remember { mutableIntStateOf(app.allowanceMin / 60) }
-    // Rounded to the carousel's steps.
-    var minutes by remember { mutableIntStateOf(app.allowanceMin % 60 / Config.ALLOWANCE_STEP_MIN * Config.ALLOWANCE_STEP_MIN) }
+    var minutes by remember { mutableIntStateOf(app.allowanceMin) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -37,27 +35,12 @@ fun AllowanceDialog(app: WatchedApp, onSave: (Int) -> Unit, onDismiss: () -> Uni
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.allowance_question), style = MaterialTheme.typography.bodyLarge)
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    WheelPicker(
-                        values = (0..Config.ALLOWANCE_MAX_HOURS).toList(),
-                        current = hours,
-                        onSelect = { hours = it },
-                        label = { stringResource(R.string.duration_hours, it) },
-                        modifier = Modifier.weight(1f),
-                    )
-                    WheelPicker(
-                        values = (0 until 60 step Config.ALLOWANCE_STEP_MIN).toList(),
-                        current = minutes,
-                        onSelect = { minutes = it },
-                        label = { stringResource(R.string.duration_minutes, it) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                AllowanceWheels(minutes = minutes, onChange = { minutes = it })
                 Hint(stringResource(R.string.allowance_hint))
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(hours * 60 + minutes) }) {
+            TextButton(onClick = { onSave(minutes) }) {
                 Text(stringResource(R.string.allowance_save))
             }
         },
@@ -67,4 +50,28 @@ fun AllowanceDialog(app: WatchedApp, onSave: (Int) -> Unit, onDismiss: () -> Uni
             }
         },
     )
+}
+
+/** The hour and minute carousels for a daily time. Also used in the setup steps (task N22). */
+@Composable
+fun AllowanceWheels(minutes: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val hours = minutes / 60
+    // Rounded to the carousel's steps.
+    val rest = minutes % 60 / Config.ALLOWANCE_STEP_MIN * Config.ALLOWANCE_STEP_MIN
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        WheelPicker(
+            values = (0..Config.ALLOWANCE_MAX_HOURS).toList(),
+            current = hours,
+            onSelect = { onChange(it * 60 + rest) },
+            label = { stringResource(R.string.duration_hours, it) },
+            modifier = Modifier.weight(1f),
+        )
+        WheelPicker(
+            values = (0 until 60 step Config.ALLOWANCE_STEP_MIN).toList(),
+            current = rest,
+            onSelect = { onChange(hours * 60 + it) },
+            label = { stringResource(R.string.duration_minutes, it) },
+            modifier = Modifier.weight(1f),
+        )
+    }
 }

@@ -114,12 +114,13 @@ class UsageWatcherService : Service() {
         if (awayTicks >= 2) interrupts?.dismissLevel1()
         if (watched == null || !settings.interruptionsOn) return
 
+        // Task N22: one repeat time. Level 1 and level 2 take turns, every repeatSeconds of use.
         val level = UsageTimer.tick(
             day = LocalDate.now().toEpochDay(),
             packageName = watched.packageName,
             allowanceSeconds = settings.allowanceSeconds(watched),
-            intervalSeconds = settings.intervalSeconds,
-            level2DelaySeconds = settings.level2DelaySeconds,
+            intervalSeconds = settings.repeatSeconds,
+            level2DelaySeconds = settings.repeatSeconds,
         ) ?: return
 
         val used = UsageTimer.state.value.usage(watched.packageName).usedSeconds

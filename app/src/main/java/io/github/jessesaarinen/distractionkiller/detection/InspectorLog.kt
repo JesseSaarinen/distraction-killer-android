@@ -212,10 +212,9 @@ object InspectorLog {
         fun onOff(on: Boolean) = if (on) "päällä" else "pois"
         return listOf(
             "keskeytykset ${if (settings.interruptionsOn) "päällä" else "tauolla"}",
-            "muistutusväli ${settings.intervalSeconds} s",
-            "demotila ${onOff(settings.demoMode)}",
-            "taso 2 +${settings.level2DelaySeconds} s",
-            "hälytys ${settings.alarmMode.id}",
+            "muistutus toistuu ${settings.repeatSeconds} s välein",
+            "demotila ${onOff(settings.demoMode)}${if (settings.demoMode) ", päivän aika ${settings.demoAllowanceSec} s" else ""}",
+            "hälytysääni ${settings.alarmSound.id}",
             "ääni ${onOff(settings.sound)}",
             "värinä ${onOff(settings.vibration)}",
             "tehtävät ${settings.tasks.joinToString("+") { it.id }}",

@@ -1,6 +1,6 @@
 package io.github.jessesaarinen.distractionkiller.data
 
-import io.github.jessesaarinen.distractionkiller.AlarmMode
+import io.github.jessesaarinen.distractionkiller.AlarmSound
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
 
@@ -14,11 +14,17 @@ data class WatchedApp(val packageName: String, val label: String, val allowanceM
  * The user's choices on the settings screen, like DEFAULT_SETTINGS in the web
  * demo. apps are the watched apps, sorted by name.
  *
- * intervalMin: after an app's daily time is used up, how often level 1 comes
- * again, one of Config.INTERVAL_OPTIONS_MIN.
+ * repeatSeconds: after an app's daily time is used up, the reminder repeats
+ * every this many seconds of use, and every other one brings a level 2 task
+ * (task N22). Between Config.REPEAT_MIN_SECONDS and Config.REPEAT_MAX_MINUTES.
  *
- * level2AfterSec: more seconds in the app after level 1 before level 2, one of
- * Config.LEVEL2_DELAY_OPTIONS_SECONDS.
+ * alarmSound: what the reminder sounds like when sound is on.
+ *
+ * demoAllowanceSec: in demo mode, every app's daily time in seconds, one of
+ * Config.DEMO_ALLOWANCE_OPTIONS_SECONDS.
+ *
+ * setupDone: false shows the setup steps when the app opens (first start, or
+ * "Aloita uusi demo").
  *
  * interruptionsOn: false pauses the app. Nothing is counted and nothing interrupts.
  *
@@ -26,25 +32,18 @@ data class WatchedApp(val packageName: String, val label: String, val allowanceM
  * this number, so the testers' results stay apart. 0 = no test running.
  */
 data class Settings(
-    val intervalMin: Int = Config.DEFAULT_INTERVAL_MIN,
-    val level2AfterSec: Int = Config.DEFAULT_LEVEL2_DELAY_SECONDS,
+    val repeatSeconds: Int = Config.DEFAULT_REPEAT_SECONDS,
     val tasks: Set<TaskType> = Config.DEFAULT_TASKS,
-    val alarmMode: AlarmMode = Config.DEFAULT_ALARM_MODE,
+    val alarmSound: AlarmSound = Config.DEFAULT_ALARM_SOUND,
     val sound: Boolean = Config.DEFAULT_SOUND,
     val vibration: Boolean = Config.DEFAULT_VIBRATION,
     val demoMode: Boolean = Config.DEFAULT_DEMO_MODE,
+    val demoAllowanceSec: Int = Config.DEFAULT_DEMO_ALLOWANCE_SECONDS,
     val apps: List<WatchedApp> = Config.DEFAULT_APPS.sortedBy { it.label.lowercase() },
     val interruptionsOn: Boolean = Config.DEFAULT_INTERRUPTIONS_ON,
+    val setupDone: Boolean = false,
     val tester: Int = 0,
 ) {
-    /** Time between reminders after the daily time is used up. Demo mode uses seconds instead of minutes. */
-    val intervalSeconds: Int
-        get() = if (demoMode) Config.DEMO_INTERVAL_SECONDS else intervalMin * 60
-
-    /** More time in the app after level 1 before level 2. Demo mode has its own short time. */
-    val level2DelaySeconds: Int
-        get() = if (demoMode) Config.DEMO_LEVEL2_DELAY_SECONDS else level2AfterSec
-
     /** The names of every watched app. */
     val watchedLabels: List<String>
         get() = apps.map { it.label }
@@ -54,7 +53,7 @@ data class Settings(
 
     /** How long the app may be used today before the reminders start. Demo mode uses seconds. */
     fun allowanceSeconds(app: WatchedApp): Int =
-        if (demoMode) Config.DEMO_ALLOWANCE_SECONDS else app.allowanceMin * 60
+        if (demoMode) demoAllowanceSec else app.allowanceMin * 60
 
     /** Adds an app to the watched apps, keeping the list sorted by name. */
     fun addApp(app: WatchedApp): Settings =
@@ -68,4 +67,27 @@ data class Settings(
 
     /** The app's name for the logs, or the package name for an app that is not watched. */
     fun appLabel(packageName: String): String = watchedApp(packageName)?.label ?: packageName
+
+    /**
+     * "Aloita uusi demo": demo mode with the default apps and short times, and
+     * the setup steps again, so the next visitor starts from the beginning.
+     * The stats and the sound choices stay.
+     */
+    fun newDemo(): Settings = copy(
+        demoMode = true,
+        demoAllowanceSec = Config.DEFAULT_DEMO_ALLOWANCE_SECONDS,
+        repeatSeconds = Config.DEMO_REPEAT_SECONDS,
+        apps = Config.DEFAULT_APPS.sortedBy { it.label.lowercase() },
+        interruptionsOn = true,
+        setupDone = false,
+        tester = 0,
+    )
+
+    companion object {
+        /** The longest repeat time the picker offers. */
+        const val REPEAT_MAX_SECONDS = Config.REPEAT_MAX_MINUTES * 60 + 60 - Config.REPEAT_STEP_SECONDS
+
+        /** A repeat time the picker can show: within the limits, never 0. */
+        fun clampRepeat(seconds: Int): Int = seconds.coerceIn(Config.REPEAT_MIN_SECONDS, REPEAT_MAX_SECONDS)
+    }
 }

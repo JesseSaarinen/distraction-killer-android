@@ -36,6 +36,16 @@ class UsageTimerTest {
     }
 
     @Test
+    fun oneRepeatTimeMakesTheLevelsTakeTurns() {
+        // Task N22: the service passes the same repeat time for both, so every other reminder is level 2.
+        val levels = mutableMapOf<Int, Int>()
+        for (second in 1..40) {
+            UsageTimer.tick(DAY, TIKTOK, 10, REPEAT, REPEAT)?.let { levels[second] = it }
+        }
+        assertEquals(mapOf(10 to 1, 20 to 2, 30 to 1, 40 to 2), levels)
+    }
+
+    @Test
     fun zeroDailyTimeRemindsOnTheFirstSecond() {
         assertEquals(mapOf(1 to 1), use(1, allowance = 0))
     }
@@ -100,5 +110,6 @@ class UsageTimerTest {
         const val READER = "com.example.reader"
         const val INTERVAL = 20
         const val LEVEL2_DELAY = 5
+        const val REPEAT = 10
     }
 }

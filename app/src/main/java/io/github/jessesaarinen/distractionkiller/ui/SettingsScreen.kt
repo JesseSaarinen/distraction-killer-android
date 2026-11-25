@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,18 +22,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.github.jessesaarinen.distractionkiller.AlarmMode
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.R
 import io.github.jessesaarinen.distractionkiller.TaskType
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.data.WatchedApp
 import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
-import io.github.jessesaarinen.distractionkiller.interrupt.Alarm
 import io.github.jessesaarinen.distractionkiller.ui.components.Hint
 import io.github.jessesaarinen.distractionkiller.ui.components.ScreenScaffold
 import io.github.jessesaarinen.distractionkiller.ui.components.SecondaryButton
@@ -43,22 +40,16 @@ import io.github.jessesaarinen.distractionkiller.ui.components.SegmentedChoice
 import io.github.jessesaarinen.distractionkiller.ui.components.SelectRow
 import io.github.jessesaarinen.distractionkiller.ui.components.SwitchRow
 
-// Settings (task N10), like views/settings.js in the web demo.
+// Settings (tasks N10 and N22), like views/settings.js in the web demo.
 // Every change is saved right away. The back arrow and back gesture return home.
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onOpenPermissions: () -> Unit, onNewDemo: () -> Unit) {
     val settings by SettingsStore.settings.collectAsState()
     var tasksError by remember { mutableStateOf(false) }
     var pickingApp by remember { mutableStateOf(false) }
     var editingApp by remember { mutableStateOf<WatchedApp?>(null) }
+    var editingRepeat by remember { mutableStateOf(false) }
     val usage by UsageTimer.state.collectAsState()
-
-    // For the test button. Released when the user leaves the screen.
-    val context = LocalContext.current
-    val alarm = remember { Alarm(context) }
-    DisposableEffect(alarm) {
-        onDispose { alarm.release() }
-    }
 
     ScreenScaffold(title = stringResource(R.string.settings_title), onBack = onBack) {
         // The main switch, in petrol while the app is on.
@@ -81,7 +72,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         if (settings.demoMode) {
-            // Demo mode overrides the times below, so say it where the times are.
+            // Demo mode overrides the daily times below, so say it where the times are.
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.large,
@@ -89,41 +80,41 @@ fun SettingsScreen(onBack: () -> Unit) {
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             ) {
                 Text(
-                    text = stringResource(
-                        R.string.settings_demo_active,
-                        Config.DEMO_ALLOWANCE_SECONDS,
-                        Config.DEMO_LEVEL2_DELAY_SECONDS,
-                        Config.DEMO_INTERVAL_SECONDS,
-                    ),
+                    text = stringResource(R.string.settings_demo_active, settings.demoAllowanceSec),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                 )
             }
         }
 
-        SectionLabel(stringResource(R.string.settings_section_timing))
+        SectionLabel(stringResource(R.string.settings_apps_title))
         SectionCard {
-            Text(text = stringResource(R.string.settings_interval_title), style = MaterialTheme.typography.titleMedium)
-            SegmentedChoice(
-                options = Config.INTERVAL_OPTIONS_MIN,
-                selected = settings.intervalMin,
-                label = { minutes -> stringResource(R.string.duration_minutes, minutes) },
-                onSelect = { minutes -> SettingsStore.update { it.copy(intervalMin = minutes) } },
+            for (app in settings.apps) {
+                AppRow(
+                    app = app,
+                    usedSeconds = usage.usage(app.packageName).usedSeconds,
+                    onEdit = { editingApp = app },
+                    onRemove = { SettingsStore.update { it.removeApp(app.packageName) } },
+                )
+            }
+            if (settings.apps.isEmpty()) Hint(stringResource(R.string.home_no_apps))
+            SecondaryButton(
+                text = stringResource(R.string.settings_apps_add),
+                onClick = { pickingApp = true },
+                icon = R.drawable.ic_plus,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
             )
-            Hint(stringResource(R.string.settings_interval_hint))
-
-            Text(
-                text = stringResource(R.string.settings_level2_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 16.dp),
+            Hint(stringResource(R.string.settings_apps_hint), modifier = Modifier.padding(bottom = 4.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            // Task N22: how often the reminder repeats, under the apps it is about.
+            ValueRow(
+                title = stringResource(R.string.repeat_title),
+                value = durationText(settings.repeatSeconds),
+                onClick = { editingRepeat = true },
             )
-            SegmentedChoice(
-                options = Config.LEVEL2_DELAY_OPTIONS_SECONDS,
-                selected = settings.level2AfterSec,
-                label = { seconds -> durationText(seconds) },
-                onSelect = { seconds -> SettingsStore.update { it.copy(level2AfterSec = seconds) } },
-            )
-            Hint(stringResource(R.string.settings_level2_hint))
+            Hint(stringResource(R.string.settings_repeat_hint), modifier = Modifier.padding(bottom = 4.dp))
         }
 
         SectionLabel(stringResource(R.string.settings_tasks_title))
@@ -151,75 +142,66 @@ fun SettingsScreen(onBack: () -> Unit) {
 
         SectionLabel(stringResource(R.string.settings_section_alarm))
         SectionCard {
-            Text(text = stringResource(R.string.settings_alarm_title), style = MaterialTheme.typography.titleMedium)
-            SegmentedChoice(
-                options = AlarmMode.entries,
-                selected = settings.alarmMode,
-                label = { mode ->
-                    when (mode) {
-                        AlarmMode.UNTIL_DISMISSED -> stringResource(R.string.alarm_until_dismissed)
-                        AlarmMode.TIMED -> stringResource(R.string.alarm_timed, Config.ALARM_TIMED_SECONDS)
-                    }
-                },
-                onSelect = { mode -> SettingsStore.update { it.copy(alarmMode = mode) } },
-            )
-            Hint(stringResource(R.string.settings_alarm_hint))
+            Hint(stringResource(R.string.settings_alarm_hint, Config.ALARM_SECONDS))
             SwitchRow(
                 title = stringResource(R.string.settings_sound),
                 checked = settings.sound,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(sound = on) } },
-                modifier = Modifier.padding(top = 4.dp),
             )
             SwitchRow(
                 title = stringResource(R.string.settings_vibration),
                 checked = settings.vibration,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(vibration = on) } },
             )
-            SecondaryButton(
-                text = stringResource(R.string.settings_test_alarm),
-                onClick = { alarm.test(sound = settings.sound, vibration = settings.vibration) },
-                icon = R.drawable.ic_bell,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 4.dp),
-            )
-        }
-
-        SectionLabel(stringResource(R.string.settings_apps_title))
-        SectionCard {
-            for (app in settings.apps) {
-                AppRow(
-                    app = app,
-                    usedSeconds = usage.usage(app.packageName).usedSeconds,
-                    onEdit = { editingApp = app },
-                    onRemove = { SettingsStore.update { it.removeApp(app.packageName) } },
+            if (settings.sound) {
+                Text(
+                    text = stringResource(R.string.settings_sound_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             }
-            if (settings.apps.isEmpty()) Hint(stringResource(R.string.home_no_apps))
-            SecondaryButton(
-                text = stringResource(R.string.settings_apps_add),
-                onClick = { pickingApp = true },
-                icon = R.drawable.ic_plus,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
+            SoundChoice(
+                selected = settings.alarmSound,
+                onSelect = { sound -> SettingsStore.update { it.copy(alarmSound = sound) } },
+                soundOn = settings.sound,
+                vibrationOn = settings.vibration,
             )
-            Hint(stringResource(R.string.settings_apps_hint), modifier = Modifier.padding(bottom = 4.dp))
         }
 
         SectionLabel(stringResource(R.string.settings_section_demo))
         SectionCard {
             SwitchRow(
                 title = stringResource(R.string.settings_demo),
-                hint = stringResource(
-                    R.string.settings_demo_hint,
-                    Config.DEMO_ALLOWANCE_SECONDS,
-                    Config.DEMO_LEVEL2_DELAY_SECONDS,
-                    Config.DEMO_INTERVAL_SECONDS,
-                ),
+                hint = stringResource(R.string.settings_demo_hint),
                 checked = settings.demoMode,
                 onCheckedChange = { on -> SettingsStore.update { it.copy(demoMode = on) } },
             )
+            if (settings.demoMode) {
+                Text(text = stringResource(R.string.demo_allowance_title), style = MaterialTheme.typography.titleMedium)
+                DemoAllowanceChoice(
+                    selected = settings.demoAllowanceSec,
+                    onSelect = { seconds -> SettingsStore.update { it.copy(demoAllowanceSec = seconds) } },
+                )
+            }
+            SecondaryButton(
+                text = stringResource(R.string.settings_new_demo),
+                onClick = onNewDemo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+            )
+            Hint(stringResource(R.string.settings_new_demo_hint), modifier = Modifier.padding(bottom = 4.dp))
+        }
+
+        // Task N22: the permission steps live here, so they do not show on the home screen during a demo.
+        SectionLabel(stringResource(R.string.home_setup_title))
+        SectionCard {
+            ValueRow(
+                title = stringResource(R.string.settings_permissions),
+                value = stringResource(R.string.settings_permissions_open),
+                onClick = onOpenPermissions,
+            )
+            Hint(stringResource(R.string.settings_permissions_hint), modifier = Modifier.padding(bottom = 4.dp))
         }
     }
 
@@ -245,6 +227,27 @@ fun SettingsScreen(onBack: () -> Unit) {
             onDismiss = { editingApp = null },
         )
     }
+    if (editingRepeat) {
+        RepeatDialog(
+            seconds = settings.repeatSeconds,
+            onSave = { seconds ->
+                SettingsStore.update { it.copy(repeatSeconds = seconds) }
+                editingRepeat = false
+            },
+            onDismiss = { editingRepeat = false },
+        )
+    }
+}
+
+/** The demo mode's daily time: 10 s, 15 s, 30 s or 1 min. */
+@Composable
+fun DemoAllowanceChoice(selected: Int, onSelect: (Int) -> Unit) {
+    SegmentedChoice(
+        options = Config.DEMO_ALLOWANCE_OPTIONS_SECONDS,
+        selected = selected,
+        label = { seconds -> durationText(seconds) },
+        onSelect = onSelect,
+    )
 }
 
 /**
@@ -284,6 +287,24 @@ private fun AppRow(app: WatchedApp, usedSeconds: Int, onEdit: () -> Unit, onRemo
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+/** A setting that opens a dialog or a screen: its name on the left, the current value on the right. */
+@Composable
+private fun ValueRow(title: String, value: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(text = title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+        Text(text = value, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
     }
 }
 

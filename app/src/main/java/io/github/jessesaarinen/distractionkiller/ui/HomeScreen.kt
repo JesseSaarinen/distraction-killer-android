@@ -51,15 +51,14 @@ import io.github.jessesaarinen.distractionkiller.ui.components.SunMark
 import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
 
 // Home screen (task N12): a status card that says whether the watcher is on,
-// a setup guide until everything works, and the way to settings and stats.
+// and the way to settings and stats. Task N22 moved the permission steps
+// behind Asetukset → Käyttöönotto, so they do not show during a demo.
 @Composable
 fun HomeScreen(
     usageAccess: Boolean,
     overlayAllowed: Boolean,
-    batteryUnrestricted: Boolean,
-    onOpenUsageAccess: () -> Unit,
-    onOpenOverlay: () -> Unit,
-    onOpenAppInfo: () -> Unit,
+    onOpenPermissions: () -> Unit,
+    onNewDemo: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
     onOpenInspector: () -> Unit,
@@ -67,10 +66,7 @@ fun HomeScreen(
     val settings by SettingsStore.settings.collectAsState()
     val events by EventLog.events.collectAsState()
     val interruptions = events.count { it.type == "level1" }
-    // The whole chain works once the first interruption has happened.
-    val firstInterruptionSeen = interruptions > 0
     val watching = usageAccess && overlayAllowed
-    val setupDone = watching && batteryUnrestricted && firstInterruptionSeen
 
     Scaffold { innerPadding ->
         Column(
@@ -103,20 +99,17 @@ fun HomeScreen(
             )
 
             when {
-                !watching -> OffCard()
+                !watching -> OffCard(onOpenPermissions)
                 !settings.interruptionsOn -> PausedCard()
                 else -> OnCard(settings)
             }
 
-            if (!setupDone) {
-                SetupCard(
-                    usageAccess = usageAccess,
-                    overlayAllowed = overlayAllowed,
-                    batteryUnrestricted = batteryUnrestricted,
-                    firstInterruptionSeen = firstInterruptionSeen,
-                    onOpenUsageAccess = onOpenUsageAccess,
-                    onOpenOverlay = onOpenOverlay,
-                    onOpenAppInfo = onOpenAppInfo,
+            if (settings.demoMode) {
+                // At the fair: the next visitor starts from the setup steps.
+                SecondaryButton(
+                    text = stringResource(R.string.settings_new_demo),
+                    onClick = onNewDemo,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
@@ -225,8 +218,13 @@ private fun OnCard(settings: Settings) {
                         stringResource(R.string.home_no_apps)
                     } else {
                         // No-break spaces, so "YouTube 30 min" never splits across lines.
+                        // Demo mode shows its daily time in seconds.
+                        val demoTime = durationText(settings.demoAllowanceSec)
                         settings.apps
-                            .map { "${it.label} ${allowanceText(it.allowanceMin)}".replace(' ', '\u00A0') }
+                            .map { app ->
+                                val time = if (settings.demoMode) demoTime else allowanceText(app.allowanceMin)
+                                "${app.label} $time".replace(' ', '\u00A0')
+                            }
                             .joinToString("  ·  ")
                     },
                     style = MaterialTheme.typography.bodyMedium,
@@ -291,9 +289,9 @@ private fun PausedCard() {
     }
 }
 
-/** Status: a permission is still missing. The setup guide follows. */
+/** Status: a permission is still missing. The button opens the permission steps. */
 @Composable
-private fun OffCard() {
+private fun OffCard(onOpenPermissions: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -313,6 +311,13 @@ private fun OffCard() {
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            PrimaryButton(
+                text = stringResource(R.string.home_open_permissions),
+                onClick = onOpenPermissions,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+            )
         }
     }
 }
@@ -330,146 +335,6 @@ private fun StatusLabel(
     ) {
         symbol()
         Text(text = text.uppercase(), style = MaterialTheme.typography.labelMedium, color = color)
-    }
-}
-
-@Composable
-private fun SetupCard(
-    usageAccess: Boolean,
-    overlayAllowed: Boolean,
-    batteryUnrestricted: Boolean,
-    firstInterruptionSeen: Boolean,
-    onOpenUsageAccess: () -> Unit,
-    onOpenOverlay: () -> Unit,
-    onOpenAppInfo: () -> Unit,
-) {
-    val steps = listOf(usageAccess, overlayAllowed, batteryUnrestricted, firstInterruptionSeen)
-    SectionCard {
-        // FlowRow moves "0/4 valmis" under the title when the font is large.
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = stringResource(R.string.home_setup_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .semantics { heading() },
-            )
-            Text(
-                text = stringResource(R.string.home_setup_progress, steps.count { it }, steps.size),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.CenterVertically),
-            )
-        }
-        ProgressBar(fraction = steps.count { it } / steps.size.toFloat(), modifier = Modifier.padding(bottom = 8.dp))
-
-        SetupStep(
-            number = 1,
-            done = usageAccess,
-            title = stringResource(R.string.setup_usage_title),
-            text = stringResource(R.string.setup_usage_text),
-        ) {
-            PrimaryButton(
-                text = stringResource(R.string.home_open_usage_access),
-                onClick = onOpenUsageAccess,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        SetupStep(
-            number = 2,
-            done = overlayAllowed,
-            title = stringResource(R.string.setup_overlay_title),
-            text = stringResource(R.string.setup_overlay_text),
-        ) {
-            PrimaryButton(
-                text = stringResource(R.string.home_open_overlay),
-                onClick = onOpenOverlay,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            // Some phones block these switches for apps installed from an APK file.
-            Hint(stringResource(R.string.setup_restricted_text), modifier = Modifier.padding(top = 4.dp))
-            SecondaryButton(
-                text = stringResource(R.string.home_open_app_info),
-                onClick = onOpenAppInfo,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        SetupStep(
-            number = 3,
-            done = batteryUnrestricted,
-            title = stringResource(R.string.setup_battery_title),
-            text = stringResource(R.string.setup_battery_text),
-        ) {
-            SecondaryButton(
-                text = stringResource(R.string.home_open_app_info),
-                onClick = onOpenAppInfo,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        SetupStep(
-            number = 4,
-            done = firstInterruptionSeen,
-            title = stringResource(R.string.setup_try_title),
-            text = stringResource(R.string.setup_try_text, Config.DEMO_ALLOWANCE_SECONDS),
-        )
-    }
-}
-
-/** One setup step: a number, or a check mark once done. A done step shows only its title. */
-@Composable
-private fun SetupStep(
-    number: Int,
-    done: Boolean,
-    title: String,
-    text: String,
-    actions: @Composable () -> Unit = {},
-) {
-    Row(
-        modifier = Modifier.padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .background(
-                    color = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (done) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(16.dp),
-                )
-            } else {
-                Text(text = number.toString(), style = MaterialTheme.typography.titleSmall)
-            }
-        }
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 3.dp),
-            )
-            if (!done) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                actions()
-            }
-        }
     }
 }
 
@@ -509,10 +374,8 @@ private fun HomeScreenPreview() {
         HomeScreen(
             usageAccess = false,
             overlayAllowed = false,
-            batteryUnrestricted = false,
-            onOpenUsageAccess = {},
-            onOpenOverlay = {},
-            onOpenAppInfo = {},
+            onOpenPermissions = {},
+            onNewDemo = {},
             onOpenSettings = {},
             onOpenStats = {},
             onOpenInspector = {},
@@ -527,10 +390,8 @@ private fun HomeScreenOnPreview() {
         HomeScreen(
             usageAccess = true,
             overlayAllowed = true,
-            batteryUnrestricted = true,
-            onOpenUsageAccess = {},
-            onOpenOverlay = {},
-            onOpenAppInfo = {},
+            onOpenPermissions = {},
+            onNewDemo = {},
             onOpenSettings = {},
             onOpenStats = {},
             onOpenInspector = {},

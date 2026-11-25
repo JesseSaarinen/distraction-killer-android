@@ -2,35 +2,53 @@ package io.github.jessesaarinen.distractionkiller.data
 
 import io.github.jessesaarinen.distractionkiller.Config
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The times the timer uses, from the choices on the settings screen (tasks N10 and N21). */
+/** The times the timer uses, from the choices on the settings screen (tasks N10, N21 and N22). */
 class SettingsTest {
 
     @Test
-    fun defaultsAreFiveMinutesAndThirtySeconds() {
+    fun defaultsAreOneMinuteRepeatAndSetupNotDone() {
         val settings = Settings()
-        assertEquals(300, settings.intervalSeconds)
-        assertEquals(30, settings.level2DelaySeconds)
+        assertEquals(60, settings.repeatSeconds)
         assertTrue(settings.interruptionsOn)
+        assertFalse(settings.setupDone)
     }
 
     @Test
-    fun chosenTimesAreUsed() {
-        val settings = Settings(intervalMin = 10, level2AfterSec = 120)
-        assertEquals(600, settings.intervalSeconds)
-        assertEquals(120, settings.level2DelaySeconds)
+    fun chosenDailyTimeIsUsed() {
+        val settings = Settings()
         assertEquals(45 * 60, settings.allowanceSeconds(READER.copy(allowanceMin = 45)))
     }
 
     @Test
-    fun demoModeUsesItsOwnShortTimes() {
-        val settings = Settings(intervalMin = 15, level2AfterSec = 120, demoMode = true)
-        assertEquals(Config.DEMO_INTERVAL_SECONDS, settings.intervalSeconds)
-        assertEquals(Config.DEMO_LEVEL2_DELAY_SECONDS, settings.level2DelaySeconds)
-        assertEquals(Config.DEMO_ALLOWANCE_SECONDS, settings.allowanceSeconds(READER))
+    fun demoModeUsesTheDemoSecondsForEveryApp() {
+        val settings = Settings(demoMode = true, demoAllowanceSec = 30)
+        assertEquals(30, settings.allowanceSeconds(READER))
+        assertEquals(30, settings.allowanceSeconds(READER.copy(allowanceMin = 120)))
+    }
+
+    @Test
+    fun repeatTimeStaysWithinThePicker() {
+        assertEquals(Config.REPEAT_MIN_SECONDS, Settings.clampRepeat(0))
+        assertEquals(90, Settings.clampRepeat(90))
+        assertEquals(Config.REPEAT_MAX_MINUTES * 60 + 55, Settings.clampRepeat(10_000))
+    }
+
+    @Test
+    fun newDemoStartsTheSetupAgainWithShortTimes() {
+        val used = Settings(apps = listOf(READER), repeatSeconds = 600, setupDone = true, tester = 3, interruptionsOn = false)
+        val demo = used.newDemo()
+        assertTrue(demo.demoMode)
+        assertFalse(demo.setupDone)
+        assertTrue(demo.interruptionsOn)
+        assertEquals(0, demo.tester)
+        assertEquals(Config.DEMO_REPEAT_SECONDS, demo.repeatSeconds)
+        assertEquals(Config.DEFAULT_DEMO_ALLOWANCE_SECONDS, demo.demoAllowanceSec)
+        assertEquals(listOf("Instagram", "TikTok", "YouTube"), demo.watchedLabels)
     }
 
     @Test
@@ -72,8 +90,9 @@ class SettingsTest {
     @Test
     fun defaultsAreAmongTheChoices() {
         val settings = Settings()
-        assertTrue(settings.intervalMin in Config.INTERVAL_OPTIONS_MIN)
-        assertTrue(settings.level2AfterSec in Config.LEVEL2_DELAY_OPTIONS_SECONDS)
+        assertEquals(settings.repeatSeconds, Settings.clampRepeat(settings.repeatSeconds))
+        assertEquals(0, settings.repeatSeconds % Config.REPEAT_STEP_SECONDS)
+        assertTrue(settings.demoAllowanceSec in Config.DEMO_ALLOWANCE_OPTIONS_SECONDS)
         assertEquals(0, Config.DEFAULT_ALLOWANCE_MIN % Config.ALLOWANCE_STEP_MIN)
     }
 

@@ -10,9 +10,9 @@ Natiivi Android-sovellus, joka laskee, kuinka kauan käyttäjä käyttää valit
 
 1. **Käyttötiedot** (`UsageStatsManager`, oikeus "Salli käyttötietojen käyttö"). `detection/UsageWatcherService.kt` on etualapalvelu (foreground service, tyyppi `specialUse`). Se lukee kerran sekunnissa Androidin käyttötapahtumat (sovellus tuli eteen / poistui edestä, näyttö pois) ja tietää niistä, mikä sovellus on edessä. Se ei näe, mitä ruudulla on. Palvelu laskee vain, kun näyttö on päällä ja lukitus auki. Etualapalvelun takia puhelimessa näkyy ilmoitus "Ajanseuranta on päällä". Palvelu käynnistyy sovellusta avattaessa, puhelimen käynnistyessä ja sovelluksen päivittyessä (`detection/StartReceiver.kt`).
 2. **Päivän aika** (`detection/UsageTimer.kt`, yksikkötestit). Jokainen sekunti, jonka valvottu sovellus on edessä, kasvattaa sen päivän aikaa. Sovelluksilla on omat ajat (oletus 30 min, asetuksissa 0 h – 12 h 5 minuutin välein). Keskiyöllä kaikki alkaa alusta. Kun palvelu käynnistyy kesken päivän, päivän aika luetaan Androidin käyttötapahtumista keskiyöstä alkaen (`detection/Foreground.kt`, `secondsInFront`), joten uudelleenkäynnistys ei nollaa sitä.
-3. **Taso 1** heti, kun sovelluksen päivän aika täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys (ääni ja värinä 1,5 s välein, kunnes kuitataan tai 15 s). Päivän aika 0 = muistutus heti sovelluksen avautuessa.
-4. **Taso 2**, jos käyttö jatkuu bannerin jälkeen 30 s (asetuksista 15 s – 2 min, demotila 10 s): koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike), *Ohita* 5 s jälkeen.
-5. **Seuraava muistutus**: tason 2 jälkeen, tai kun käyttäjä valitsee tasolla 1 *Lopeta tähän*, taso 1 tulee uudelleen Ajoitus-asetuksen välein (1–15 min käyttöä, demotilassa 30 s). Aika lasketaan vain, kun sovellus on edessä.
+3. **Taso 1** heti, kun sovelluksen päivän aika täyttyy: banneri sovelluksen päällä (*Lopeta tähän* / *Jatka*) + hälytys 5 s (N22). Hälytyksen ääni valitaan asetuksista: kello, piippaus tai puhe (puhelimen oma suomenkielinen puhesynteesi sanoo yhden neutraalin kehotuksen; ilman suomenkielistä ääntä kuuluu kello). Banneri pysyy, kunnes käyttäjä valitsee. Päivän aika 0 = muistutus heti sovelluksen avautuessa.
+4. **Taso 2** (N22): muistutus toistuu yhden asetuksen välein (`repeatSeconds`, 5 s – 30 min 55 s, karuselli minuutit + sekunnit), ja joka toinen muistutus on taso 2: koko näytön rauhallinen tehtävä (hengitys, kysymys tai liike) samalla 5 s hälytyksellä, *Ohita* 5 s jälkeen.
+5. **Seuraava muistutus**: tason 2 jälkeen taso 1 tulee taas saman välin päästä. Jos käyttäjä valitsee tasolla 1 *Lopeta tähän*, seuraava on taas taso 1. Aika lasketaan vain, kun sovellus on edessä.
 6. **Lopetus** (tasolla 1 tai 2) avaa kiitosnäkymän, ja *Sulje* vie puhelimen aloitusnäyttöön.
 7. **Loki** tallentuu puhelimeen. Tilastot ja JSON-vienti jakovalikon kautta.
 
@@ -22,7 +22,7 @@ Banneri ja taso 2 tarvitsevat oikeuden "Näytä muiden sovellusten päällä" (`
 
 ## Asetukset ja tapahtumat
 
-- Asetukset: `{ intervalMin, level2AfterSec, tasks, alarmMode: "untilDismissed"|"timed", sound, vibration, demoMode, apps, interruptionsOn, tester }`. `apps` on valvotut sovellukset: paketin nimi, nimi ja päivän aika minuutteina (tallennettuna `paketti<TAB>minuutit<TAB>nimi`). `intervalMin` on muistutusten väli päivän ajan täytyttyä (1, 3, 5, 10 tai 15 min). `level2AfterSec` on aika tasolta 1 tasolle 2 (15, 30, 60 tai 120 s). Demotilassa jokaisen sovelluksen päivän aika on 15 s, taso 2 tulee 10 s myöhemmin ja muistutus toistuu 30 s välein. `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä. `tester` on käynnissä olevan RT8-testin testaajan numero (N19), 0 = testi ei ole käynnissä. Tallennus: `data/SettingsStore.kt` (SharedPreferences). Ennen N21:tä tallennetut `watchedApps` ja `customApps` jätetään lukematta, ja tilalle tulevat oletussovellukset.
+- Asetukset (N22): `{ repeatSeconds, tasks, alarmSound: "chime"|"beep"|"speech", sound, vibration, demoMode, demoAllowanceSec, apps, interruptionsOn, setupDone, tester }`. `apps` on valvotut sovellukset: paketin nimi, nimi ja päivän aika minuutteina (tallennettuna `paketti<TAB>minuutit<TAB>nimi`). `repeatSeconds` on muistutusten väli päivän ajan täytyttyä (oletus 60 s), ja joka toinen muistutus on taso 2. Demotilassa jokaisen sovelluksen päivän aika on `demoAllowanceSec` (10, 15, 30 tai 60 s). `setupDone = false` näyttää ohjatun käyttöönoton (`ui/SetupWizard.kt`) sovellusta avattaessa: ensimmäinen käynnistys ja *Aloita uusi demo*, joka myös nollaa päivän ajat ja palauttaa oletussovellukset (tilastot säilyvät). Ennen N22:ta tallennetut `intervalMin`, `level2AfterSec` ja `alarmMode` jätetään lukematta. `interruptionsOn = false` on tauko: mitään ei lasketa eikä keskeytetä. `tester` on käynnissä olevan RT8-testin testaajan numero (N19), 0 = testi ei ole käynnissä. Tallennus: `data/SettingsStore.kt` (SharedPreferences). Ennen N21:tä tallennetut `watchedApps` ja `customApps` jätetään lukematta, ja tilalle tulevat oletussovellukset.
 - Tapahtuma: `{ ts, app, type: "level1"|"level2"|"outcome", level?, task, outcome: "stopped"|"continued"|"skipped"|"dismissed"|null, scrollSeconds, answer, tester }`. `ts` on millisekunteina. `scrollSeconds` on N21:stä alkaen sovelluksen päivän aika sekunteina tapahtumahetkellä (nimi on säilytetty, jotta vanhat ja uudet lokit luetaan samalla tavalla). `dismissed` = käyttäjä poistui sovelluksesta keskeytyksen aikana (Koti, sovelluksen vaihto, näyttö pois). `tester` = testaajan numero asetuksista (N19). Vanhoissa riveissä sitä ei ole, ja ne luetaan nollana. Tallennus: `data/EventLog.kt` (`events.jsonl` sovelluksen omassa tallennustilassa).
 
 ## Tiedostorakenne (kasvaa tehtävien mukana)
@@ -32,7 +32,11 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   DistractionKillerApp.kt  # N11: lataa asetukset ja lokin ennen muuta
   MainActivity.kt          # käynnistys, näkymien vaihto, oikeuksien tarkistus, palvelun käynnistys
   Config.kt                # kaikki ajat, vaihtoehdot ja oletussovellukset (vrt. web-demon config.js)
-  ui/HomeScreen.kt         # kotinäkymä: ajanseurannan tila ja käyttöönotto-opas (N12, N21)
+  ui/HomeScreen.kt         # kotinäkymä: ajanseurannan tila, demotilassa Aloita uusi demo (N12, N21, N22)
+  ui/PermissionsScreen.kt  # N22: lupien vaiheet (ennen kotinäkymässä), Asetukset → Käyttöönotto
+  ui/SetupWizard.kt        # N22: ohjattu käyttöönotto: sovellukset, päivän aika, toistoväli, ääni
+  ui/RepeatPicker.kt       # N22: toistovälin valinta (minuutit ja sekunnit)
+  ui/SoundPicker.kt        # N22: hälytysäänen valinta ja Kokeile hälytystä
   ui/InspectorScreen.kt    # N4/N21: tarkastelunäkymä kehittäjille (sovellus edessä, päivän ajat, loki)
   ui/SettingsScreen.kt     # N10: asetusnäkymä
   ui/AppPicker.kt          # N20: sovelluksen valinta valvottavaksi (vain nimet)
@@ -52,7 +56,8 @@ app/src/main/java/io/github/jessesaarinen/distractionkiller/
   interrupt/InterruptController.kt # N7: näyttää keskeytykset ja toimii valinnan mukaan
   interrupt/OverlayWindow.kt       # N7: Compose-ikkuna muiden sovellusten päälle
   interrupt/Level1Banner.kt        # N7: tason 1 banneri
-  interrupt/Alarm.kt, Chime.kt     # N7: hälytys (värinä + koodissa tehty ääni)
+  interrupt/Alarm.kt, Chime.kt     # N7/N22: 5 s hälytys (värinä + koodissa tehty kello tai piippaus)
+  interrupt/Speaker.kt             # N22: puhemuistutus puhelimen puhesynteesillä (suomi, Googlen moottori ensisijaisesti)
   interrupt/CalmActivity.kt        # N9: tason 2 tauko ja kiitosnäkymä omana Activitynä
   interrupt/Level2Screen.kt        # N9: tason 2 näkymä, Ohita 5 s jälkeen
   interrupt/DoneScreen.kt          # N9: kiitosnäkymä lopettamisen jälkeen
@@ -104,8 +109,9 @@ Tila: ☐ ei aloitettu · ◐ kesken · ☑ valmis
 - ☐ N13 Tagi `rt8`, sovellusten automaattipäivitykset pois testipuhelimesta (lista `TESTING.md`:n lopussa)
 
 **Messuversio (13.–25.11.)**
-- ☐ N14 RT8-palautteen perusteella tehtävät muutokset
-- ☐ N15 Messutila: automaattinen nollaus, nopea vaihto demoaikoihin
+- ◐ N14 RT8-palautteen perusteella tehtävät muutokset. N22:ssa puheääni ja valittava hälytysääni (RT8:n testaaja piti puhetta tehokkaimpana)
+- ◐ N15 Messutila: automaattinen nollaus, nopea vaihto demoaikoihin. N22:ssa *Aloita uusi demo* ja demon päivän aika sekunteina
+- ◐ N22 Aleksin muutokset messuihin (21.11.): käyttöönotto asetusten taakse, ajoitus yhdeksi toistoväliksi valvottujen sovellusten alle (joka toinen muistutus tehtävällä), hälytys aina 5 s, hälytysäänen valinta (kello, piippaus, puhe), ohjattu käyttöönotto ensimmäisellä avauksella ja *Aloita uusi demo* -napista. Yksikkötestit päivitetty. Emulaattorilla (API 37) 25.11. tarkistettu: ohjattu käyttöönotto normaali- ja demotilassa, asetusnäkymä, Luvat-näkymä, YouTubessa demotilassa banneri 10 s ja tehtävä 15 s myöhemmin, puhe kuului suomeksi molemmilla kerroilla. S21:llä tarkistamatta, erityisesti: onko Googlen puhemoottorissa suomi (muuten kuuluu kello) ja kuuluuko puhe videon päältä
 - ☐ N16 Viimeistely, saavutettavuus, tilastojen visualisointi
 - ☐ N17 Tagi `demo` 25.11.
 - ☑ N20 Omat valvotut sovellukset: *Lisää sovellus* asetuksissa (lista puhelimen sovelluksista nimillä, haku, poisto). Yhdistetty N21:een, jossa lisätyt sovellukset lasketaan samoin kuin oletussovellukset

@@ -2,16 +2,18 @@ package io.github.jessesaarinen.distractionkiller
 
 import io.github.jessesaarinen.distractionkiller.data.WatchedApp
 
-/** How long the level 1 alarm rings. The id is what the settings store, same as in the web demo. */
-enum class AlarmMode(val id: String) {
-    /** "Kunnes sammutan": until the user taps a banner button. */
-    UNTIL_DISMISSED("untilDismissed"),
-
-    /** "15 sekuntia": stops by itself after Config.ALARM_TIMED_SECONDS. */
-    TIMED("timed");
+/**
+ * What the reminder sounds like (task N22). The id is what the settings store.
+ * SPEECH says one of the spoken reminders (strings.xml, speech_lines) with the
+ * phone's text-to-speech. If the phone has no Finnish voice, the chime plays instead.
+ */
+enum class AlarmSound(val id: String) {
+    CHIME("chime"),
+    BEEP("beep"),
+    SPEECH("speech");
 
     companion object {
-        fun fromId(id: String?): AlarmMode = entries.firstOrNull { it.id == id } ?: Config.DEFAULT_ALARM_MODE
+        fun fromId(id: String?): AlarmSound = entries.firstOrNull { it.id == id } ?: Config.DEFAULT_ALARM_SOUND
     }
 }
 
@@ -42,29 +44,29 @@ object Config {
     const val ALLOWANCE_MAX_HOURS = 12
     const val ALLOWANCE_STEP_MIN = 5
 
-    /** After the daily time is used up: how often level 1 comes again, in minutes. */
-    val INTERVAL_OPTIONS_MIN = listOf(1, 3, 5, 10, 15)
-    const val DEFAULT_INTERVAL_MIN = 5
+    /**
+     * After the daily time is used up, the reminder repeats every this many
+     * seconds of use (task N22). Every other reminder brings a level 2 task.
+     * The picker: 0 to REPEAT_MAX_MINUTES minutes, seconds in steps of REPEAT_STEP_SECONDS.
+     */
+    const val DEFAULT_REPEAT_SECONDS = 60
+    const val REPEAT_MIN_SECONDS = 5
+    const val REPEAT_MAX_MINUTES = 30
+    const val REPEAT_STEP_SECONDS = 5
 
-    /** Choices for how many more seconds in the app after level 1 bring level 2. */
-    val LEVEL2_DELAY_OPTIONS_SECONDS = listOf(15, 30, 60, 120)
-    const val DEFAULT_LEVEL2_DELAY_SECONDS = 30
+    // Demo mode: the daily time is seconds, so the reminder comes fast at the fair.
+    val DEMO_ALLOWANCE_OPTIONS_SECONDS = listOf(10, 15, 30, 60)
+    const val DEFAULT_DEMO_ALLOWANCE_SECONDS = 15
 
-    // Demo mode: fast timings for showing the app at the fair.
-    const val DEMO_ALLOWANCE_SECONDS = 15
-    const val DEMO_LEVEL2_DELAY_SECONDS = 10
-    const val DEMO_INTERVAL_SECONDS = 30
+    /** "Aloita uusi demo" sets this repeat time. The visitor can change it in the setup. */
+    const val DEMO_REPEAT_SECONDS = 15
 
-    /** Level 1 alarm: a chime and a short vibration every ALARM_BEAT_MS. */
+    /** The alarm rings this long, then stops by itself (task N22). The banner stays until a tap. */
+    const val ALARM_SECONDS = 5
+
+    /** Chime and beep: one sound and a short vibration every ALARM_BEAT_MS while the alarm rings. */
     const val ALARM_BEAT_MS = 1_500L
     const val ALARM_VIBRATION_MS = 200L
-    const val ALARM_TIMED_SECONDS = 15
-
-    /** The test button on the settings screen rings this long. */
-    const val ALARM_TEST_MS = 3_000L
-
-    /** Level 2 starts with one chime and this vibration pattern (pause, buzz, pause, buzz). */
-    val LEVEL2_VIBRATION_PATTERN = longArrayOf(0, 300, 150, 300)
 
     /** The Ohita button appears after this long. */
     const val SKIP_DELAY_SECONDS = 5
@@ -78,7 +80,8 @@ object Config {
     const val ANSWER_MAX_LENGTH = 120
 
     // Default settings, like DEFAULT_SETTINGS in the web demo.
-    val DEFAULT_ALARM_MODE = AlarmMode.UNTIL_DISMISSED
+    // Speech, because the RT8 tester found a spoken reminder the most effective.
+    val DEFAULT_ALARM_SOUND = AlarmSound.SPEECH
     const val DEFAULT_SOUND = true
     const val DEFAULT_VIBRATION = true
     const val DEFAULT_DEMO_MODE = false
