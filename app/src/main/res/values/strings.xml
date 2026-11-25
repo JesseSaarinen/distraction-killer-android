@@ -17,11 +17,13 @@
     <string name="home_resume">Laita keskeytykset päälle</string>
     <string name="home_off_label">Ei vielä päällä</string>
     <string name="home_off_title">Ota ajanseuranta käyttöön</string>
-    <string name="home_service_off">Tee alla olevat vaiheet, niin sovellus näkee, kuinka kauan käytät valittuja sovelluksia.</string>
+    <string name="home_service_off">Anna sovellukselle tarvittavat luvat, niin se näkee, kuinka kauan käytät valittuja sovelluksia.</string>
+    <string name="home_open_permissions">Avaa käyttöönotto</string>
     <string name="home_open_app_info">Avaa sovelluksen tiedot</string>
     <string name="home_open_usage_access">Avaa käyttötietojen asetukset</string>
     <string name="home_open_overlay">Avaa näyttö muiden päällä -asetus</string>
     <string name="home_setup_title">Käyttöönotto</string>
+    <string name="permissions_steps_title">Luvat</string>
     <string name="home_setup_progress">%1$d/%2$d valmis</string>
     <string name="setup_usage_title">Salli käyttötietojen käyttö</string>
     <string name="setup_usage_text">Valitse listasta Distraction Killer ja laita Salli käyttötietojen käyttö päälle. Näin sovellus näkee, mikä sovellus on auki.</string>
@@ -31,7 +33,7 @@
     <string name="setup_battery_title">Salli toiminta taustalla</string>
     <string name="setup_battery_text">Avaa sovelluksen tiedot ja valitse Akku → Rajoittamaton, ettei puhelin pysäytä ajanseurantaa.</string>
     <string name="setup_try_title">Kokeile</string>
-    <string name="setup_try_text">Laita asetuksista demotila päälle ja avaa jokin valituista sovelluksista. Ensimmäinen muistutus tulee jo %1$d sekunnin päästä.</string>
+    <string name="setup_try_text">Laita asetuksista demotila päälle ja avaa jokin valituista sovelluksista. Ensimmäinen muistutus tulee muutaman sekunnin päästä.</string>
     <string name="home_privacy">Sovellus näkee vain, mikä sovellus on auki ja kuinka kauan. Se ei näe, mitä ruudulla on, eikä mikään tieto lähde puhelimesta.</string>
     <string name="home_open_settings">Asetukset</string>
     <string name="home_open_stats">Tilastot</string>
@@ -43,12 +45,10 @@
     <string name="settings_title">Asetukset</string>
     <string name="settings_interruptions_on">Keskeytykset päällä</string>
     <string name="settings_interruptions_hint">Pois päältä käyttöaikaa ei lasketa eikä muistutuksia tule.</string>
-    <string name="settings_demo_active">Demotila on päällä: jokaisen sovelluksen päivän aika on %1$d s, koko näytön tauko tulee %2$d s myöhemmin ja muistutus toistuu %3$d s välein. Alla valitut ajat ovat käytössä, kun demotila on pois päältä.</string>
-    <string name="settings_section_timing">Ajoitus</string>
-    <string name="settings_interval_title">Kuinka usein muistutetaan, kun aika on täynnä?</string>
-    <string name="settings_interval_hint">Kun sovelluksen päivän aika on käytetty, muistutus tulee heti ja sen jälkeen tämän välein. Aika lasketaan vain, kun sovellus on auki.</string>
-    <string name="settings_level2_title">Kuinka pian koko näytön tauko tulee?</string>
-    <string name="settings_level2_hint">Jos jatkat muistutuksen jälkeen, koko näytön tauko tulee, kun olet käyttänyt sovellusta vielä tämän verran.</string>
+    <string name="settings_demo_active">Demotila on päällä: jokaisen sovelluksen päivän aika on %1$d s. Alla näkyvät sovellusten omat ajat ovat käytössä, kun demotila on pois päältä.</string>
+    <string name="repeat_title">Kuinka usein muistutus toistuu?</string>
+    <string name="repeat_hint">Vähintään %1$d s. Aika lasketaan vain, kun sovellus on auki.</string>
+    <string name="settings_repeat_hint">Kun sovelluksen päivän aika on käytetty, muistutus tulee heti ja toistuu sen jälkeen tämän välein. Joka toisella kerralla mukana on lyhyt tehtävä.</string>
     <string name="settings_tasks_title">Keskeytyksen tehtävät</string>
     <string name="task_breathing">Hengitysharjoitus</string>
     <string name="task_question">Mitä olit tekemässä?</string>
@@ -59,10 +59,14 @@
     <string name="settings_tasks_hint">Keskeytyksessä arvotaan jokin valituista.</string>
     <string name="settings_tasks_min_one">Valitse vähintään yksi tehtävä.</string>
     <string name="settings_section_alarm">Hälytys</string>
-    <string name="settings_alarm_title">Kuinka kauan hälytys soi?</string>
-    <string name="alarm_until_dismissed">Kunnes sammutan</string>
-    <string name="alarm_timed">%1$d sekuntia</string>
-    <string name="settings_alarm_hint">Kun muistutus tulee, puhelin hälyttää ja sovelluksen päälle tulee banneri. Hälytys sammuu bannerin napista.</string>
+    <string name="settings_alarm_hint">Muistutuksen tullessa puhelin hälyttää %1$d sekuntia. Banneri pysyy, kunnes valitset jatkatko vai lopetatko.</string>
+    <string name="settings_sound_title">Mikä ääni?</string>
+    <string name="sound_chime">Kello</string>
+    <string name="sound_beep">Piippaus</string>
+    <string name="sound_speech">Puhe</string>
+    <string name="sound_chime_hint">Pehmeä kaksisävelinen kilahdus.</string>
+    <string name="sound_beep_hint">Kolme lyhyttä, terävää piippausta.</string>
+    <string name="sound_speech_hint">Puhelin sanoo yhden lyhyen kehotuksen, esimerkiksi ”Laita puhelin pois”. Jos puhelimessa ei ole suomenkielistä puheääntä, kuuluu kello.</string>
     <string name="settings_apps_title">Valvotut sovellukset</string>
     <string name="settings_apps_hint">Jokaisella sovelluksella on oma päivän aika. Napauta sovellusta muuttaaksesi sitä. Ajat alkavat alusta keskiyöllä.</string>
     <string name="settings_apps_add">Lisää sovellus</string>
@@ -81,7 +85,34 @@
     <string name="settings_vibration">Värinä</string>
     <string name="settings_section_demo">Esittely</string>
     <string name="settings_demo">Demotila</string>
-    <string name="settings_demo_hint">Päivän aika %1$d s, koko näytön tauko %2$d s myöhemmin, muistutus %3$d s välein</string>
+    <string name="settings_demo_hint">Jokaisen sovelluksen päivän aika on sekunteja, jotta muistutus tulee heti esittelyssä.</string>
+    <string name="demo_allowance_title">Päivän aika demotilassa</string>
+    <string name="settings_new_demo">Aloita uusi demo</string>
+    <string name="settings_new_demo_hint">Nollaa tämän päivän ajat ja avaa käyttöönoton vaiheet seuraavalle kokeilijalle. Tilastot säilyvät.</string>
+    <string name="settings_permissions">Luvat ja käyttöönotto</string>
+    <string name="settings_permissions_open">Avaa</string>
+    <string name="settings_permissions_hint">Käyttötietojen ja muiden sovellusten päällä näyttämisen luvat. Tarvitaan vain kerran uudessa puhelimessa.</string>
+
+    <string name="wizard_step">Vaihe %1$d/%2$d</string>
+    <string name="wizard_next">Seuraava</string>
+    <string name="wizard_done">Valmis</string>
+    <string name="wizard_apps_title">Mitä sovelluksia seurataan?</string>
+    <string name="wizard_apps_text">Valitse sovellukset, joiden käyttöaikaa Distraction Killer laskee.</string>
+    <string name="wizard_apps_min_one">Valitse vähintään yksi sovellus.</string>
+    <string name="wizard_time_title">Kuinka pitkän käytön jälkeen muistutetaan?</string>
+    <string name="wizard_time_text">Kun valittua sovellusta on käytetty tänään tämän verran, tulee ensimmäinen muistutus. Ajan voi myöhemmin muuttaa asetuksista sovelluskohtaisesti.</string>
+    <string name="wizard_time_demo_hint">Demotilassa aika on sekunteja, jotta muistutus tulee heti.</string>
+    <string name="wizard_repeat_text">Jos jatkat käyttöä muistutuksen jälkeen, se toistuu tämän välein. Joka toisella kerralla mukana on lyhyt tehtävä.</string>
+    <string name="wizard_sound_title">Millä äänellä muistutetaan?</string>
+    <string name="wizard_sound_text">Napauta ääntä kuullaksesi sen.</string>
+
+    <!-- Spoken reminders (N22): one is said at random. Neutral wording, from the RT8 test. -->
+    <string-array name="speech_lines">
+        <item>Nyt olisi aika lopettaa puhelimen käyttö.</item>
+        <item>Laita puhelin pois.</item>
+        <item>Nyt olisi aika keskittyä johonkin muuhun.</item>
+        <item>Lopeta puhelimen selaaminen.</item>
+    </string-array>
     <string name="settings_test_alarm">Kokeile hälytystä</string>
 
     <string name="stats_title">Tilastot</string>

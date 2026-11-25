@@ -49,7 +49,7 @@ class InterruptController(private val service: Context) {
         // either. Level 2 still comes if the scrolling goes on.
         if (!shown) return
         bannerApp = packageName
-        alarm.start(sound = settings.sound, vibration = settings.vibration, mode = settings.alarmMode)
+        ring()
     }
 
     /** Hides the banner without a choice: the user left the app. */
@@ -63,7 +63,6 @@ class InterruptController(private val service: Context) {
      */
     fun showLevel2(packageName: String, usedSeconds: Int) {
         val settings = SettingsStore.settings.value
-        alarm.notifyLevel2(sound = settings.sound, vibration = settings.vibration)
         // Like pickTask() in the web demo: one of the chosen tasks at random.
         val task = settings.tasks.ifEmpty { Config.DEFAULT_TASKS }.random()
         EventLog.add(
@@ -77,6 +76,14 @@ class InterruptController(private val service: Context) {
         )
         openCalmScreen(CalmActivity.level2Intent(service, packageName, task, usedSeconds))
         hideBanner()
+        // Task N22: level 2 is every other reminder, and it rings like level 1.
+        ring()
+    }
+
+    /** The alarm with the chosen sound, for Config.ALARM_SECONDS. */
+    private fun ring() {
+        val settings = SettingsStore.settings.value
+        alarm.start(sound = if (settings.sound) settings.alarmSound else null, vibration = settings.vibration)
     }
 
     fun release() {

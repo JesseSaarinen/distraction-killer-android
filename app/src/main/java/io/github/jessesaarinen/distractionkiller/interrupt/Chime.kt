@@ -9,14 +9,18 @@ import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.sin
 
+/** SOFT: the two-note "ding". BEEP: three short, sharper beeps (task N22). */
+enum class ChimeStyle { SOFT, BEEP }
+
 /**
- * A soft two-note "ding" made in code, like playChime() in the web demo:
- * 660 Hz, then 880 Hz 0.18 s later. No audio files.
+ * A sound made in code, no audio files. SOFT is the two-note "ding" like
+ * playChime() in the web demo: 660 Hz, then 880 Hz 0.18 s later. BEEP is
+ * three 1 kHz beeps with an overtone, closer to an alarm clock.
  *
  * Plays on the alarm volume, so it is heard over the video. If the phone gives
  * no audio track, the chime stays silent and the alarm only vibrates.
  */
-class Chime {
+class Chime(private val style: ChimeStyle = ChimeStyle.SOFT) {
     private val track: AudioTrack? = try {
         createTrack()
     } catch (e: RuntimeException) {
@@ -64,21 +68,36 @@ class Chime {
 
     private fun generate(): ShortArray {
         val buffer = FloatArray((SAMPLE_RATE * 0.8).toInt())
-        addTone(buffer, frequency = 660.0, startSeconds = 0.0, durationSeconds = 0.4)
-        addTone(buffer, frequency = 880.0, startSeconds = 0.18, durationSeconds = 0.6)
+        when (style) {
+            ChimeStyle.SOFT -> {
+                addTone(buffer, frequency = 660.0, startSeconds = 0.0, durationSeconds = 0.4)
+                addTone(buffer, frequency = 880.0, startSeconds = 0.18, durationSeconds = 0.6)
+            }
+            ChimeStyle.BEEP -> for (i in 0 until 3) {
+                val start = i * 0.2
+                addTone(buffer, frequency = 1000.0, startSeconds = start, durationSeconds = 0.12)
+                addTone(buffer, frequency = 3000.0, startSeconds = start, durationSeconds = 0.12, peak = PEAK / 3)
+            }
+        }
         return ShortArray(buffer.size) { i -> (buffer[i].coerceIn(-1f, 1f) * Short.MAX_VALUE).toInt().toShort() }
     }
 
     /** A sine tone with a quick fade-in and an exponential fade-out, like the web demo's gain ramps. */
-    private fun addTone(buffer: FloatArray, frequency: Double, startSeconds: Double, durationSeconds: Double) {
+    private fun addTone(
+        buffer: FloatArray,
+        frequency: Double,
+        startSeconds: Double,
+        durationSeconds: Double,
+        peak: Double = PEAK,
+    ) {
         val start = (startSeconds * SAMPLE_RATE).toInt()
         val length = (durationSeconds * SAMPLE_RATE).toInt()
         val attack = (0.02 * SAMPLE_RATE).toInt()
-        val decayRate = ln(0.001 / PEAK) / (length - attack)
+        val decayRate = ln(0.001 / peak) / (length - attack)
         for (n in 0 until length) {
             val i = start + n
             if (i >= buffer.size) break
-            val envelope = if (n < attack) PEAK * n / attack else PEAK * exp(decayRate * (n - attack))
+            val envelope = if (n < attack) peak * n / attack else peak * exp(decayRate * (n - attack))
             buffer[i] += (envelope * sin(2 * PI * frequency * n / SAMPLE_RATE)).toFloat()
         }
     }

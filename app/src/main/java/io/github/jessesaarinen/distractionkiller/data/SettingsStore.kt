@@ -2,7 +2,7 @@ package io.github.jessesaarinen.distractionkiller.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import io.github.jessesaarinen.distractionkiller.AlarmMode
+import io.github.jessesaarinen.distractionkiller.AlarmSound
 import io.github.jessesaarinen.distractionkiller.Config
 import io.github.jessesaarinen.distractionkiller.TaskType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,17 +16,20 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 object SettingsStore {
     private const val FILE_NAME = "settings"
-    private const val KEY_INTERVAL_MIN = "intervalMin"
-    private const val KEY_LEVEL2_AFTER_SEC = "level2AfterSec"
+    // "intervalMin", "level2AfterSec" and "alarmMode" held the timing and the alarm
+    // length before task N22. They are not read anymore.
+    private const val KEY_REPEAT_SECONDS = "repeatSeconds"
     private const val KEY_TASKS = "tasks"
-    private const val KEY_ALARM_MODE = "alarmMode"
+    private const val KEY_ALARM_SOUND = "alarmSound"
     private const val KEY_SOUND = "sound"
     private const val KEY_VIBRATION = "vibration"
     private const val KEY_DEMO_MODE = "demoMode"
+    private const val KEY_DEMO_ALLOWANCE_SEC = "demoAllowanceSec"
     // "watchedApps" and "customApps" held the apps before the daily times (N21). They are not read anymore.
     private const val KEY_APPS = "apps"
     private const val SEPARATOR = "\t"
     private const val KEY_INTERRUPTIONS_ON = "interruptionsOn"
+    private const val KEY_SETUP_DONE = "setupDone"
     private const val KEY_TESTER = "tester"
 
     private var prefs: SharedPreferences? = null
@@ -47,15 +50,16 @@ object SettingsStore {
         _settings.value = new
         val p = prefs ?: return
         p.edit()
-            .putInt(KEY_INTERVAL_MIN, new.intervalMin)
-            .putInt(KEY_LEVEL2_AFTER_SEC, new.level2AfterSec)
+            .putInt(KEY_REPEAT_SECONDS, new.repeatSeconds)
             .putStringSet(KEY_TASKS, new.tasks.map { it.id }.toSet())
-            .putString(KEY_ALARM_MODE, new.alarmMode.id)
+            .putString(KEY_ALARM_SOUND, new.alarmSound.id)
             .putBoolean(KEY_SOUND, new.sound)
             .putBoolean(KEY_VIBRATION, new.vibration)
             .putBoolean(KEY_DEMO_MODE, new.demoMode)
+            .putInt(KEY_DEMO_ALLOWANCE_SEC, new.demoAllowanceSec)
             .putStringSet(KEY_APPS, new.apps.map { it.packageName + SEPARATOR + it.allowanceMin + SEPARATOR + it.label }.toSet())
             .putBoolean(KEY_INTERRUPTIONS_ON, new.interruptionsOn)
+            .putBoolean(KEY_SETUP_DONE, new.setupDone)
             .putInt(KEY_TESTER, new.tester)
             .apply()
     }
@@ -64,20 +68,20 @@ object SettingsStore {
     // an older version never break the app.
     private fun read(p: SharedPreferences): Settings {
         val defaults = Settings()
-        val interval = p.getInt(KEY_INTERVAL_MIN, defaults.intervalMin)
-        val level2After = p.getInt(KEY_LEVEL2_AFTER_SEC, defaults.level2AfterSec)
         val taskIds = p.getStringSet(KEY_TASKS, null).orEmpty()
         val tasks = TaskType.entries.filter { it.id in taskIds }.toSet()
+        val demoAllowance = p.getInt(KEY_DEMO_ALLOWANCE_SEC, defaults.demoAllowanceSec)
         return Settings(
-            intervalMin = if (interval in Config.INTERVAL_OPTIONS_MIN) interval else defaults.intervalMin,
-            level2AfterSec = if (level2After in Config.LEVEL2_DELAY_OPTIONS_SECONDS) level2After else defaults.level2AfterSec,
+            repeatSeconds = Settings.clampRepeat(p.getInt(KEY_REPEAT_SECONDS, defaults.repeatSeconds)),
             tasks = tasks.ifEmpty { defaults.tasks },
-            alarmMode = AlarmMode.fromId(p.getString(KEY_ALARM_MODE, null)),
+            alarmSound = AlarmSound.fromId(p.getString(KEY_ALARM_SOUND, null)),
             sound = p.getBoolean(KEY_SOUND, defaults.sound),
             vibration = p.getBoolean(KEY_VIBRATION, defaults.vibration),
             demoMode = p.getBoolean(KEY_DEMO_MODE, defaults.demoMode),
+            demoAllowanceSec = if (demoAllowance in Config.DEMO_ALLOWANCE_OPTIONS_SECONDS) demoAllowance else defaults.demoAllowanceSec,
             apps = readApps(p) ?: defaults.apps,
             interruptionsOn = p.getBoolean(KEY_INTERRUPTIONS_ON, defaults.interruptionsOn),
+            setupDone = p.getBoolean(KEY_SETUP_DONE, defaults.setupDone),
             tester = p.getInt(KEY_TESTER, defaults.tester).coerceAtLeast(0),
         )
     }

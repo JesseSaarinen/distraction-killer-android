@@ -31,6 +31,11 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- The spoken reminder (N22) uses the phone's text-to-speech engine.
+             Android 11+ needs this to see the engine. No permission. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
 
     <application

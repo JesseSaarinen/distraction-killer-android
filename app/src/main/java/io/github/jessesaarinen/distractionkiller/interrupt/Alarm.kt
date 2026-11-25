@@ -9,14 +9,16 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import io.github.jessesaarinen.distractionkiller.AlarmMode
+import io.github.jessesaarinen.distractionkiller.AlarmSound
 import io.github.jessesaarinen.distractionkiller.Config
+import io.github.jessesaarinen.distractionkiller.R
 
 /**
- * The level 1 alarm, like startAlarm()/stopAlarm() in the web demo: a chime and
- * a short vibration every Config.ALARM_BEAT_MS until stop(), or for
- * Config.ALARM_TIMED_SECONDS in timed mode. Level 2 gets a single
- * notifyLevel2(), like notify(2).
+ * The reminder alarm on levels 1 and 2 (task N22). It rings for
+ * Config.ALARM_SECONDS and then stops by itself; the banner stays until the
+ * user taps it. The chime and the beep repeat with a short vibration every
+ * Config.ALARM_BEAT_MS. Speech says one random spoken reminder once, and the
+ * vibration repeats the same way. stop() ends it early.
  */
 class Alarm(context: Context) {
     private val handler = Handler(Looper.getMainLooper())
@@ -26,57 +28,61 @@ class Alarm(context: Context) {
         } else {
             context.getSystemService(Vibrator::class.java)
         }
-    private var chime: Chime? = null
-    private var sound = false
+    private val speechLines: List<String> = context.resources.getStringArray(R.array.speech_lines).toList()
+
+    // Made right away, so the voice is ready when the first reminder comes.
+    private val speaker = Speaker(context)
+    private val chimes = mutableMapOf<ChimeStyle, Chime>()
+
+    /** The sound repeated on every beat, or null when the beat only vibrates. */
+    private var beatChime: Chime? = null
     private var vibration = false
 
     private val beat = object : Runnable {
         override fun run() {
             if (vibration) vibrateOnce()
-            if (sound) chime?.play()
+            beatChime?.play()
             handler.postDelayed(this, Config.ALARM_BEAT_MS)
         }
     }
-    private val timeout = Runnable { stop() }
 
-    fun start(sound: Boolean, vibration: Boolean, mode: AlarmMode) {
+    // Stops the beats, but lets a spoken reminder finish its sentence.
+    private val timeout = Runnable { stopBeats() }
+
+    /** sound = null: vibration only. Nothing at all if both are off. */
+    fun start(sound: AlarmSound?, vibration: Boolean) {
         stop()
-        if (!sound && !vibration) return
-        this.sound = sound
         this.vibration = vibration
-        if (sound && chime == null) chime = Chime()
+        beatChime = when (sound) {
+            null -> null
+            AlarmSound.CHIME -> chime(ChimeStyle.SOFT)
+            AlarmSound.BEEP -> chime(ChimeStyle.BEEP)
+            // No Finnish voice (or not ready yet): the chime instead, so the reminder is never silent.
+            AlarmSound.SPEECH -> if (speaker.speak(speechLines.random())) null else chime(ChimeStyle.SOFT)
+        }
+        if (beatChime == null && !vibration) return
         beat.run()
-        if (mode == AlarmMode.TIMED) {
-            handler.postDelayed(timeout, Config.ALARM_TIMED_SECONDS * 1000L)
-        }
-    }
-
-    /** The test button on the settings screen: the alarm for a few seconds. */
-    fun test(sound: Boolean, vibration: Boolean) {
-        start(sound, vibration, AlarmMode.UNTIL_DISMISSED)
-        handler.postDelayed(timeout, Config.ALARM_TEST_MS)
-    }
-
-    /** One chime and a stronger double buzz when level 2 starts. */
-    fun notifyLevel2(sound: Boolean, vibration: Boolean) {
-        stop()
-        if (vibration) vibrate(VibrationEffect.createWaveform(Config.LEVEL2_VIBRATION_PATTERN, -1))
-        if (sound) {
-            if (chime == null) chime = Chime()
-            chime?.play()
-        }
+        handler.postDelayed(timeout, Config.ALARM_SECONDS * 1000L)
     }
 
     fun stop() {
-        handler.removeCallbacks(beat)
-        handler.removeCallbacks(timeout)
+        stopBeats()
+        speaker.stop()
     }
 
     fun release() {
         stop()
-        chime?.release()
-        chime = null
+        chimes.values.forEach { it.release() }
+        chimes.clear()
+        speaker.release()
     }
+
+    private fun stopBeats() {
+        handler.removeCallbacks(beat)
+        handler.removeCallbacks(timeout)
+    }
+
+    private fun chime(style: ChimeStyle): Chime = chimes.getOrPut(style) { Chime(style) }
 
     private fun vibrateOnce() {
         vibrate(VibrationEffect.createOneShot(Config.ALARM_VIBRATION_MS, VibrationEffect.DEFAULT_AMPLITUDE))

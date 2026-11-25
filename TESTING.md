@@ -35,11 +35,14 @@ Avaa *Tarkastelu (kehittäjille)* ja paina *Tyhjennä*. Yläosassa pitää lukea
 
 ## 4. Keskeytykset (demotila)
 
-Asetukset → *Demotila* päälle. Jokaisen sovelluksen päivän aika on silloin 15 s, koko näytön tauko tulee 10 s myöhemmin ja muistutus toistuu 30 s välein. Tarkastelun *Nollaa tämän päivän ajat* aloittaa alusta.
+Asetukset → *Aloita uusi demo*. Ohjattu käyttöönotto aukeaa: valitse sovellukset, päivän aika 15 s, toistoväli 15 s ja ääni *Puhe*. Jokaisen sovelluksen päivän aika on silloin 15 s, ja muistutus toistuu 15 s välein niin, että joka toinen on koko näytön tauko.
 
-- [ ] TikTok: 15 s → banneri ja hälytys (ääni ja värinä). *Jatka* → hälytys loppuu.
-- [ ] 10 s lisää → koko näytön tauko, video pysähtyy taustalla. *Ohita* tulee 5 s jälkeen. Tarkastelussa on `NOTE level 2 screen opened`.
-- [ ] Takaisin TikTokiin: 30 s → banneri uudelleen. *Lopeta tähän* → kiitosnäkymä → *Sulje* vie aloitusnäyttöön.
+- [ ] Kotinäkymässä ei näy lupien vaiheita, ja niihin pääsee Asetukset → Käyttöönotto → *Avaa*.
+- [ ] Ohjatun käyttöönoton äänivaiheessa *Puhe* sanoo suomeksi yhden kehotuksen. Jos kuuluu kello, puhelimessa ei ole suomenkielistä puheääntä: Asetukset → Yleinen hallinta → Tekstistä puheeksi → valitse Googlen puhepalvelut ja lataa suomi. Tarkastelussa näkyy silloin `speech: no Finnish voice`.
+- [ ] TikTok: 15 s → banneri ja hälytys (puhe ja värinä). Hälytys loppuu itsestään 5 s jälkeen, banneri jää. *Jatka* → banneri pois.
+- [ ] 15 s lisää → koko näytön tauko ja sama hälytys, video pysähtyy taustalla. *Ohita* tulee 5 s jälkeen. Tarkastelussa on `NOTE level 2 screen opened`.
+- [ ] Puhe kuuluu videon äänen päältä (hälytysäänenvoimakkuus), myös kun median ääni on pienellä.
+- [ ] Takaisin TikTokiin: 15 s → banneri uudelleen. *Lopeta tähän* → kiitosnäkymä → *Sulje* vie aloitusnäyttöön.
 - [ ] Uusi kierros: tauko → tehtävä loppuun → *Lopetan tältä erää* → kiitosnäkymä. Kysymystehtävässä näppäimistö toimii.
 - [ ] Banneri näkyvissä → paina Koti → banneri ja hälytys loppuvat.
 - [ ] Sama Instagramissa ja YouTubessa. Kummankin aika lasketaan erikseen.
@@ -49,7 +52,9 @@ Asetukset → *Demotila* päälle. Jokaisen sovelluksen päivän aika on silloin
 
 - [ ] *Keskeytykset päällä* pois → kotinäkymä kertoo tauosta, eikä mitään keskeydy. Kotinäkymän nappi laittaa ne takaisin päälle.
 - [ ] Demotila pois. Valvotut sovellukset → TikTok → karuselleista 0 h 0 min → *Tallenna*. Avaa TikTok: banneri tulee heti.
-- [ ] Sama TikTok 0 h 5 min: banneri tulee viiden minuutin käytön jälkeen, ja sen jälkeen Ajoitus-asetuksen välein.
+- [ ] Sama TikTok 0 h 5 min: banneri tulee viiden minuutin käytön jälkeen, ja sen jälkeen *Kuinka usein muistutus toistuu?* -asetuksen välein.
+- [ ] *Kuinka usein muistutus toistuu?* → 0 min 0 s → *Tallenna*: arvoksi tulee 5 s.
+- [ ] Hälytys → *Kello*, *Piippaus* ja *Puhe* soivat valittaessa, ja *Kokeile hälytystä* soittaa valitun äänen 5 s.
 - [ ] Karuselleja voi vierittää ja napauttaa, ja valinta pysähtyy keskelle. Fonttikoko suurimmaksi: numerot mahtuvat.
 - [ ] Ääni pois ja värinä pois → *Kokeile hälytystä* noudattaa valintoja.
 - [ ] Ruksi poistaa YouTuben → Shorts ei keskeydy. *Lisää sovellus* → YouTube takaisin.

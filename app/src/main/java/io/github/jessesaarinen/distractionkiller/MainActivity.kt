@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,15 +17,18 @@ import io.github.jessesaarinen.distractionkiller.data.EventLog
 import io.github.jessesaarinen.distractionkiller.data.SettingsStore
 import io.github.jessesaarinen.distractionkiller.detection.InspectorLog
 import io.github.jessesaarinen.distractionkiller.detection.Permissions
+import io.github.jessesaarinen.distractionkiller.detection.UsageTimer
 import io.github.jessesaarinen.distractionkiller.detection.UsageWatcherService
 import io.github.jessesaarinen.distractionkiller.ui.HomeScreen
 import io.github.jessesaarinen.distractionkiller.ui.InspectorScreen
+import io.github.jessesaarinen.distractionkiller.ui.PermissionsScreen
 import io.github.jessesaarinen.distractionkiller.ui.SettingsScreen
+import io.github.jessesaarinen.distractionkiller.ui.SetupWizard
 import io.github.jessesaarinen.distractionkiller.ui.StatsScreen
 import io.github.jessesaarinen.distractionkiller.ui.theme.DistractionKillerTheme
 
 /** The app's screens. Switching is done here, no navigation library. */
-enum class Screen { HOME, SETTINGS, STATS, INSPECTOR }
+enum class Screen { HOME, SETTINGS, STATS, INSPECTOR, PERMISSIONS }
 
 class MainActivity : ComponentActivity() {
 
@@ -38,22 +42,50 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DistractionKillerTheme {
+                val settings by SettingsStore.settings.collectAsState()
                 var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
-                when (screen) {
+                // Where the permission steps return to: home or settings.
+                var permissionsBack by rememberSaveable { mutableStateOf(Screen.HOME) }
+                val openPermissions = { from: Screen ->
+                    permissionsBack = from
+                    screen = Screen.PERMISSIONS
+                }
+                val newDemo = {
+                    startNewDemo()
+                    screen = Screen.HOME
+                }
+                // Task N22: the setup steps on the first start and after "Aloita uusi demo".
+                if (!settings.setupDone) {
+                    SetupWizard(onDone = { screen = Screen.HOME })
+                } else when (screen) {
                     Screen.HOME -> HomeScreen(
                         usageAccess = usageAccess,
                         overlayAllowed = overlayAllowed,
-                        batteryUnrestricted = batteryUnrestricted,
-                        onOpenUsageAccess = ::openUsageAccessSettings,
-                        onOpenOverlay = ::openOverlaySettings,
-                        onOpenAppInfo = ::openAppInfo,
+                        onOpenPermissions = { openPermissions(Screen.HOME) },
+                        onNewDemo = newDemo,
                         onOpenSettings = { screen = Screen.SETTINGS },
                         onOpenStats = { screen = Screen.STATS },
                         onOpenInspector = { screen = Screen.INSPECTOR },
                     )
                     Screen.SETTINGS -> {
                         BackHandler { screen = Screen.HOME }
-                        SettingsScreen(onBack = { screen = Screen.HOME })
+                        SettingsScreen(
+                            onBack = { screen = Screen.HOME },
+                            onOpenPermissions = { openPermissions(Screen.SETTINGS) },
+                            onNewDemo = newDemo,
+                        )
+                    }
+                    Screen.PERMISSIONS -> {
+                        BackHandler { screen = permissionsBack }
+                        PermissionsScreen(
+                            usageAccess = usageAccess,
+                            overlayAllowed = overlayAllowed,
+                            batteryUnrestricted = batteryUnrestricted,
+                            onOpenUsageAccess = ::openUsageAccessSettings,
+                            onOpenOverlay = ::openOverlaySettings,
+                            onOpenAppInfo = ::openAppInfo,
+                            onBack = { screen = permissionsBack },
+                        )
                     }
                     Screen.STATS -> {
                         BackHandler { screen = Screen.HOME }
@@ -79,6 +111,15 @@ class MainActivity : ComponentActivity() {
         batteryUnrestricted = Permissions.isBatteryUnrestricted(this)
         // Starts the watcher once usage access is granted. Does nothing while it already runs.
         UsageWatcherService.start(this)
+    }
+
+    /**
+     * "Aloita uusi demo" (task N22): today's times back to zero and the setup
+     * steps again, so the next visitor at the fair starts from the beginning.
+     */
+    private fun startNewDemo() {
+        UsageTimer.reset(System.currentTimeMillis())
+        SettingsStore.update { it.newDemo() }
     }
 
     private fun openUsageAccessSettings() {
